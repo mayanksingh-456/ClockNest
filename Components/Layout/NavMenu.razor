@@ -1,0 +1,462 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Nav
+<style>
+    .sidebar {
+        width: 190px;
+        height: 100vh;
+        background: #c9b8ff12;
+        border-right: 1px solid #e5e5e5;
+        padding: 20px 5px;
+        display: flex;
+        flex-direction: column;
+        font-weight: 500 !important;
+    }
+
+    .menu-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .bottom-menu {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-logo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+        .sidebar-logo .logo {
+            height: 30px;
+            margin-left: -4px;
+        }
+
+    .logo-text {
+        font-size: 20px;
+        font-weight: bold;
+        color: #0F3D91;
+    }
+
+    nav .side-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 15px;
+        color: #333;
+        text-decoration: none;
+        border-radius: 6px;
+        margin-bottom: 2px;
+        
+    }
+
+        nav .side-item:hover {
+            background: #e6f0ff;
+            color: #0F3D91;
+            cursor: pointer;
+        }
+
+        nav .side-item.active {
+            color: #0F3D91;
+        }
+
+    .bottom-menu .side-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 15px;
+        color: #333;
+        text-decoration: none;
+        border-radius: 6px;
+        margin-bottom: 2px;
+    }
+
+        .bottom-menu .side-item:hover,
+        .bottom-menu .side-item.active {
+            background: #e6f0ff;
+            color: #0F3D91;
+        }
+
+    .logout {
+        margin-top: auto;
+        margin-bottom: -12px !important;
+        color: #C62828 !important;
+    }
+
+    .separator {
+        height: 1px;
+        background: #dcdcdc;
+        margin: 10px 0;
+    }
+
+    .sidebar i {
+        font-size: 13px;
+        margin-left: -13px;
+    }
+
+    .bottom-menu .side-item-back {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 3px 8px;
+        color: #333;
+        text-decoration: none;
+        border-radius: 6px;
+        margin-bottom: -20px;
+        margin-left: 97px;
+        cursor: pointer;
+    }
+
+    .toggle-button{
+        color:cornflowerblue,
+        margin-left: 76px;
+        margin-bottom: -13px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+   
+</style>
+<style>
+    .submenu {
+        display: flex;
+        flex-direction: column;
+        margin-left: 26px;
+        margin-top: 1px;
+    }
+
+        .submenu .sub {
+            padding: 2px 7px;
+            
+            font-size: 14px;
+        }
+
+        .submenu .side-item:hover {
+            background: none !important;
+            color: #0F3D91;
+        }
+
+</style>
+<style>
+    .menu-scroll::-webkit-scrollbar {
+        width: 5px !important;
+    }
+    .menu-scroll::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    .menu-scroll::-webkit-scrollbar-thumb {
+        background: #b1b1b1 !important;
+        /*  border-radius: 5px !important; */
+    }
+        .menu-scroll::-webkit-scrollbar-thumb:hover {
+            background: #8a8a8a !important;
+        }
+</style>
+<div class="sidebar">
+
+    <div class="sidebar-logo">
+        <img src="/images/hd-name.png" class="logo" />
+
+    </div>
+
+    @if (!isSettingsOpen)
+    {
+        <nav class="menu-scroll">
+
+            <div class="side-item @(activeMenu == "home" ? "active" : "")"
+            @onclick="@(() => ToggleMenu("home"))">
+                <i class="fa fa-home"></i> Home
+            </div>
+            @if (activeMenu == "home")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/dashboard">Dashboard</NavLink>
+                    <NavLink class="side-item sub" href="/liveactivity">Live Activity Dashboard</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "view" ? "active" : "")"
+            @onclick="@(() => ToggleMenu("view"))">
+                <i class="fa fa-eye"></i> View
+            </div>
+
+            @if (activeMenu == "view")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented">Timesheet</NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented">Calendar</NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented">Attendance</NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented">Pegboard</NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented">Audit</NavLink>
+                </div>
+            }
+
+            <NavLink class="side-item" href="/liveactivity">
+                <i class="fa-solid fa-bars-progress"></i> Manage
+            </NavLink>
+
+            <NavLink class="side-item" href="/manage">
+                <i class="fa-solid fa-users"></i> HR
+            </NavLink>
+            <NavLink class="side-item" href="/manage">
+                <i class="fa-solid fa-universal-access"></i>Access
+            </NavLink>
+
+            <NavLink class="side-item" href="/reports">
+                <i class="fa-solid fa-bug"></i> Reports
+            </NavLink>
+            <NavLink class="side-item" href="/ToolBox">
+                <i class="fa-solid fa-wrench"></i>Toolbox
+            </NavLink>
+            <NavLink class="side-item" href="/selfservice">
+                <i class="fa-solid fa-fingerprint"></i> SelfService
+            </NavLink>
+            <NavLink class="side-item" href="/billing">
+                <i class="fa-solid fa-wallet"></i> Billing
+            </NavLink>
+            <NavLink class="side-item" href="/switchCompany">
+                <i class="fa-solid fa-shuffle"></i> Switch Company
+            </NavLink>
+            <NavLink class="side-item" href="/Outloon">
+                <i class="fa-regular fa-envelope"></i>Outlook
+            </NavLink>
+            <NavLink class="side-item" href="/reports">
+                <i class="fa-solid fa-id-card"></i> Licence Details
+            </NavLink>
+            <NavLink class="side-item" href="/reports">
+                <i class="fa-solid fa-atom"></i>Staffology
+            </NavLink>
+            <NavLink class="side-item" href="/reports">
+                <i class="fa-brands fa-mixer"></i>Xero
+            </NavLink>
+            <NavLink class="side-item" href="/reports">
+                <i class="fa-solid fa-download"></i>Import
+            </NavLink>
+        </nav>
+        <div class="separator"></div>
+
+    <div class="bottom-menu">
+        <NavLink class="side-item" href="/settings">
+                <i class="fa-brands fa-connectdevelop"></i>Development rodmap
+        </NavLink>
+        <NavLink class="side-item" href="/settings">
+                <i class="fa-regular fa-user"></i> Employee name
+        </NavLink>
+        <NavLink class="side-item" href="/settings">
+                <i class="fa-regular fa-circle-question"></i> Help/FAQ
+        </NavLink>
+            <NavLink class="side-item" @onclick="OpenSettings">
+            <i class="fa fa-gear"></i> Settings
+        </NavLink>
+            <div class="d-flex flex-row position-relative align-items-center">
+        <NavLink class="side-item logout " href="/login">
+            <i class="fa fa-sign-out-alt"></i> Logout
+        </NavLink>
+                <div class="toggle-button">
+                    <span class="fas fa-angles-left"></span>
+        </div>
+            </div>
+        </div>
+    }
+
+    else
+    {
+        <!--Setting Menu-->
+
+            <nav class="menu-scroll">
+                <div class="side-item @(activeMenu == "organisation" ? "active" : "")"
+                     @onclick="@(() => ToggleMenu("organisation"))">
+                    Organisation
+                </div>
+                @if (activeMenu == "organisation")
+                {
+                    <div class="submenu">
+                        <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                        <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    </div>
+                }
+
+                <div class="side-item @(activeMenu == "contract" ? "active" : "")"
+                     @onclick="@(() => ToggleMenu("contract"))">
+                    Contract
+                </div>
+                @if (activeMenu == "contract")
+                {
+                    <div class="submenu">
+                        <NavLink class="side-item sub" href="/settings/timesheet">Timesheet</NavLink>
+                        <NavLink class="side-item sub" href="/settings/calendar">Calendar</NavLink>
+                    </div>
+            }
+
+            <div class="side-item @(activeMenu == "shiftRoster" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("shiftRoster"))">
+                Shifts and Rosters
+            </div>
+            @if (activeMenu == "shiftRoster")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "overtimerule" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("overtimerule"))">
+                Overtime rules
+            </div>
+            @if (activeMenu == "overtimerule")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "holidaySickness" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("holidaySickness"))">
+                Holiday, Sick and Absence
+            </div>
+            @if (activeMenu == "holidaySickness")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "employees" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("employees"))">
+                Employees
+            </div>
+            @if (activeMenu == "employees")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+             <div class="side-item @(activeMenu == "hrRecords" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("hrRecords"))">
+                HR records
+            </div>
+            @if (activeMenu == "hrRecords")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "flexitime" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("flexitime"))">
+                Flexitime, Annualised and Committed hours
+            </div>
+            @if (activeMenu == "flexitime")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "clockingTerminals" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("clockingTerminals"))">
+                Clocking terminals
+            </div>
+            @if (activeMenu == "clockingTerminals")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            <div class="side-item @(activeMenu == "accessControl" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("accessControl"))">
+                Access control
+            </div>
+            @if (activeMenu == "accessControl")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+            <div class="side-item @(activeMenu == "reportingAndException" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("reportingAndException"))">
+                Reporting and Exceptions
+            </div>
+            @if (activeMenu == "reportingAndException")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
+                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                </div>
+            }
+
+            </nav>
+
+
+            <div class="bottom-menu">
+                <NavLink class="side-item-back" @onclick="CloseSettings">
+                    &larr; Back
+                </NavLink>
+            </div>    
+    }
+</div>
+
+@code {
+        string activeMenu = "";
+        bool isSettingsOpen = false;
+        void OpenSettings()
+        {
+            isSettingsOpen = true;
+            activeMenu = ""; 
+        }
+
+        void CloseSettings()
+        {
+            isSettingsOpen = false;
+            activeMenu = "";
+        }
+
+        // map parent menus to their child routes
+        Dictionary<string, string[]> menuMap = new()
+    {
+        { "home", new[] { "/dashboard", "/liveactivity" } },
+        { "view", new[] { "/notimplemented" } },
+
+        //Setting tabs
+        { "organisation", new[] { "/tags", "/users"} },
+        { "contract", new[] {"/notimplemented"} },
+     
+    };
+
+    protected override void OnInitialized()
+    {
+        SetActiveFromUrl(Nav.Uri);
+
+        Nav.LocationChanged += (s, e) =>
+        {
+            SetActiveFromUrl(e.Location);
+            StateHasChanged();
+        };
+    }
+
+    void ToggleMenu(string menuName)
+        => activeMenu = activeMenu == menuName ? "" : menuName;
+
+    void SetActiveFromUrl(string url)
+    {
+        activeMenu = menuMap
+            .FirstOrDefault(x => x.Value.Any(url.Contains))
+            .Key ?? "";
+    }
+
+}

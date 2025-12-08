@@ -1,0 +1,143 @@
+﻿@page "/login"
+@layout ClockNest.Shared.EmptyLayout
+
+@using ClockNest.ViewModels
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@rendermode InteractiveServer
+@using ClockNest.Services.Auth
+@using ClockNest.Helpers
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject NavigationManager Navigation
+@inject AuthService _AuthService
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm" method="post">
+    <DataAnnotationsValidator />
+
+    <div class="d-flex flex-column justify-content-center align-items-center vh-100">
+
+        <div class="login-container-box">
+
+           
+
+            <div class="login-wrapper">
+                <div class="text-start mb-3">
+                    <img src="images/hd-name.png" class="img-fluid login-logo" alt="Logo" />
+                </div>
+                <div class="login-title">Login to your account</div>
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        Username <span class="text-danger">*</span>
+                    </label>
+                    <InputText class="form-control"
+                               placeholder="name@company.com"
+                               @bind-Value="loginModel.Username" />
+                    <ValidationMessage For="@(() => loginModel.Username)" />
+                </div>
+
+                <!-- Password -->
+                <div class="mb-1">
+                    <label class="form-label">
+                        Password <span class="text-danger">*</span>
+                    </label>
+
+                    <InputText type="password"
+                               class="form-control"
+                               placeholder="Enter password"
+                               @bind-Value="loginModel.Password" />
+
+                    <ValidationMessage For="@(() => loginModel.Password)" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="text-danger mb-2">@errorMessage</div>
+                }
+                <div class="text-end mb-3">
+                    <a href="/forgotpassword" class="forgot-link">Forgot password?</a>
+                </div>
+              @*   <div class="d-grid">
+                    <button type="submit" class="btn btn-primary-modern text-white">
+                        Sign in
+                    </button>
+                </div> *@
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary-modern text-white" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span>Processing...</span>
+                        }
+                        else
+                        {
+                            <span>Sign in</span>
+                        }
+                    </button>
+                </div>
+               
+
+            </div>
+
+            <!-- App Store + Play Store Footer -->
+            <div class="app-footer">
+                <div class="store-buttons">
+                    <img src="/images/AppStore.svg" alt="App Store" class="store-img" />
+                    <img src="/images/PlayStore.png" alt="Google Play" class="store-img" />
+                </div>
+            </div>
+
+        </div>
+        <div class="bottom-text">
+            Don't have an account? <a href="/contact">Contact us</a>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private LoginViewModel loginModel = new();
+    private string errorMessage = "";
+    private bool IsProcessing = false;
+
+
+    private async Task HandleLogin()
+    {
+        errorMessage = "";
+        IsProcessing = true;
+
+        try
+        {
+            // Get return URL if exists
+            string returnUrl = string.Empty;
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+            if (QueryHelpers.ParseQuery(uri.Query)
+                .TryGetValue("returnUrl", out var param))
+            {
+                returnUrl = param;
+            }
+
+            var result = await _AuthService.LoginAsync(loginModel, returnUrl);
+           
+
+            if (result.Success)
+            {
+                Navigation.NavigateTo(result.RedirectAction ?? "/dashboard", true);
+            }
+            else
+            {
+                Navigation.NavigateTo(result.RedirectAction ?? "/dashboard", true);
+               // errorMessage = result.ErrorMessage ?? "The email or password you entered is incorrect.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+}

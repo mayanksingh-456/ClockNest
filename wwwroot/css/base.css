@@ -1,0 +1,130 @@
+﻿body {
+    /*background-color: #f7f7f7 !important;*/
+    margin: 0 !important;
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+
+/* ------------------------------
+   LoginPage
+---------------------------------*/
+.login-container-box {
+    width: 100%;
+    max-width: 650px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e3e9f1;
+    background: #ffffff;
+}
+
+.login-wrapper {
+    padding: 36px 42px;
+    background: #ffffff;
+    border-bottom: 1px solid #e3e9f1;
+}
+
+.login-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a3d6f;
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-size: 14px !important;
+    font-weight: 500;
+    color: #334e6f;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    border-radius: 5px !important;
+    border: 1px solid #c8d7ea !important;
+    padding: 10px !important;
+    font-size: 12px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .form-control:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0px 0px 0px 4px rgba(59, 130, 246, 0.2);
+    }
+
+.btn-primary-modern {
+    background: #3b82f6;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none !important;
+    box-shadow: 0px 3px 10px rgba(59, 130, 246, 0.35);
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+    .btn-primary-modern:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+.forgot-link {
+    font-size: 13px;
+    color: #3b82f6;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+
+/* Footer area attached to card */
+.app-footer {
+    background: #0b0f19;
+    width: 100%;
+    padding: 12px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.store-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.store-img {
+    height: 40px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+    .store-img:hover {
+        transform: scale(1.05);
+    }
+
+.bottom-text {
+    margin-top: 18px;
+    font-size: 15px;
+}
+
+    .bottom-text a {
+        color: #5028db;
+        font-weight: bold;
+    }
+
+.login-logo {
+    width: 17.1rem;
+}
+
+
+/* ------------------------------
+   Typography Styles
+---------------------------------*/
+
+.body-medium {
+    font-family: Montserrat !important;
+    font-size: 14px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: 18px !important;
+}

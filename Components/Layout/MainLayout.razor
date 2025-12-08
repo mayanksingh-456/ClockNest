@@ -1,0 +1,32 @@
+﻿@inherits LayoutComponentBase
+
+<div class="layout-wrapper">
+
+    <!-- LEFT SIDEBAR -->
+    <NavMenu />
+
+    <!-- RIGHT PAGE CONTENT -->
+    <div class="main">
+        <div class="content-body">
+            @Body
+        </div>
+    </div>
+</div>
+
+<style>
+    .layout-wrapper {
+        display: flex; 
+        height: 100vh;
+        width: 100%;
+    }
+
+    .main {
+        flex: 1; 
+        overflow-y: auto;
+        background: #f7f9fc;
+    }
+
+    .content-body {
+        padding: 20px;
+    }
+</style>
