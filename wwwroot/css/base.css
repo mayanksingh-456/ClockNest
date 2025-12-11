@@ -113,7 +113,8 @@
     }
 
 .login-logo {
-    width: 17.1rem;
+    width: 13.1rem;
+    margin-left: -4px;
 }
 
 

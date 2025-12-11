@@ -12,13 +12,15 @@
         padding: 20px 5px;
         display: flex;
         flex-direction: column;
-        font-weight: 500 !important;
+        /*  overflow-x: visible !important; */
     }
 
     .menu-scroll {
         flex: 1;
         overflow-y: auto;
         padding-right: 5px;
+        /*   overflow: visible !important; */
+        /*   overflow-x: visible !important; */
     }
 
     .bottom-menu {
@@ -34,8 +36,13 @@
     }
 
         .sidebar-logo .logo {
-            height: 30px;
-            margin-left: -4px;
+            height: 27px;
+            margin-left: 2px;
+        }
+
+        .sidebar-logo .logo-collapsed {
+            height: 27px;
+            margin-left: 8px;
         }
 
     .logo-text {
@@ -47,29 +54,32 @@
     nav .side-item {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         padding: 5px 15px;
         color: #333;
         text-decoration: none;
         border-radius: 6px;
         margin-bottom: 2px;
-        
     }
 
-        nav .side-item:hover {
-            background: #e6f0ff;
-            color: #0F3D91;
-            cursor: pointer;
-        }
+    .side-item.setting {
+        padding: 7px 15px;
+    }
 
-        nav .side-item.active {
-            color: #0F3D91;
-        }
+    nav .side-item:hover {
+        background: #e6f0ff;
+        color: #486da2;
+        cursor: pointer;
+    }
+
+    nav .side-item.active {
+        color: #486da2;
+    }
 
     .bottom-menu .side-item {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         padding: 5px 15px;
         color: #333;
         text-decoration: none;
@@ -80,13 +90,13 @@
         .bottom-menu .side-item:hover,
         .bottom-menu .side-item.active {
             background: #e6f0ff;
-            color: #0F3D91;
+            color: #486da2;
         }
 
     .logout {
         margin-top: auto;
         margin-bottom: -12px !important;
-        color: #C62828 !important;
+        color: #f87210 !important;
     }
 
     .separator {
@@ -96,15 +106,35 @@
     }
 
     .sidebar i {
-        font-size: 13px;
-        margin-left: -13px;
+        font-size: 12px;
+        margin-left: -7px;
+        margin-top: 0px;
     }
 
+    .sidebar.collapsed i {
+        font-size: 14px !important;
+        margin-left: -2px !important;
+        margin-top: 5px !important;
+    }
+
+    .sidebar.collapsed .arrow-icon i {
+        font-size: 14px;
+        margin-left: -3px !important;
+        margin-top: 18px !important;
+        margin-bottom: -19px !important;
+    }
+
+     .side-item.arrow-icon:hover {
+        background: transparent !important;
+        color: inherit !important;
+        cursor: default !important;
+    }
+   
     .bottom-menu .side-item-back {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 3px 8px;
+        padding: 4px 35px;
         color: #333;
         text-decoration: none;
         border-radius: 6px;
@@ -113,27 +143,87 @@
         cursor: pointer;
     }
 
-    .toggle-button{
-        color:cornflowerblue,
+    .toggle-button {
+       /*  color: cornflowerblue; */
         margin-left: 76px;
-        margin-bottom: -13px;
+        margin-bottom: -14px;
         font-size: 13px;
         cursor: pointer;
     }
-   
+
+    .menu-text {
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 14px;
+        line-height: 18px;
+        letter-spacing: 0.8px;
+    }
+
+    .menu-text-collapsed{
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        line-height: 18px !important;
+        letter-spacing: 0.8px !important;
+    }
 </style>
+<style>
+    .sidebar.collapsed {
+        width: 68px;
+        transition: 0.3s;
+        margin-left: 7px;
+    }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+
+    nav .side-item {
+        position: relative !important;
+    }
+
+
+    .flyout-menu {
+        position: fixed;
+        left: 50px;
+        /* top: 55px; */
+
+        top: var(--flyout-top);
+        background: #fff;
+        min-width: 140px;
+        padding: 3px 3px;
+        border: 1px solid #d0cece;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+    }
+
+    .sidebar.collapsed .side-item:hover .flyout-menu {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .flyout-menu .side-item {
+        padding: 4px 15px;
+        white-space: nowrap;
+    }
+
+</style>
+
 <style>
     .submenu {
         display: flex;
         flex-direction: column;
         margin-left: 26px;
-        margin-top: 1px;
+        margin-top: -2px;
     }
 
         .submenu .sub {
             padding: 2px 7px;
-            
-            font-size: 14px;
         }
 
         .submenu .side-item:hover {
@@ -141,126 +231,449 @@
             color: #0F3D91;
         }
 
+
+    .menu-scroll .setting.active + .submenu {
+        margin-left: 17px !important;
+    }
+
 </style>
 <style>
     .menu-scroll::-webkit-scrollbar {
         width: 5px !important;
     }
+
     .menu-scroll::-webkit-scrollbar-track {
         background: transparent !important;
     }
+
     .menu-scroll::-webkit-scrollbar-thumb {
         background: #b1b1b1 !important;
         /*  border-radius: 5px !important; */
     }
+
         .menu-scroll::-webkit-scrollbar-thumb:hover {
             background: #8a8a8a !important;
         }
 </style>
-<div class="sidebar">
+<div class="sidebar @(isSidebarCollapse ? "collapsed" : "") ">
 
-    <div class="sidebar-logo">
-        <img src="/images/hd-name.png" class="logo" />
-
-    </div>
+    @if (!isSidebarCollapse)
+    {
+        <div class="sidebar-logo">
+            <img src="/images/ClockNext.png" class="logo" />
+        </div>
+    }
+    else
+    {
+        <div class="sidebar-logo">
+            <img src="/ClockNestLogo.png" class="logo-collapsed" />
+        </div>
+    }
 
     @if (!isSettingsOpen)
     {
         <nav class="menu-scroll">
 
             <div class="side-item @(activeMenu == "home" ? "active" : "")"
-            @onclick="@(() => ToggleMenu("home"))">
-                <i class="fa fa-home"></i> Home
+                 @onclick="@(() => { if (!isSidebarCollapse) ToggleMenu("home"); })">
+                <i class="fa fa-home"></i> <span class="menu-text">Home</span>
+
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/dashboard"><span class="menu-text-collapsed">Dashboard</span></NavLink>
+                        <NavLink class="side-item sub" href="/liveactivity"><span class="menu-text-collapsed">Live Activity Dashboard</span></NavLink>
+                    </div>
+                }
             </div>
-            @if (activeMenu == "home")
+            @if (activeMenu == "home" && !isSidebarCollapse)
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/dashboard">Dashboard</NavLink>
-                    <NavLink class="side-item sub" href="/liveactivity">Live Activity Dashboard</NavLink>
+                    <NavLink class="side-item sub" href="/dashboard"><span class="menu-text">Dashboard</span></NavLink>
+                    <NavLink class="side-item sub" href="/liveactivity"><span class="menu-text">Live Activity Dashboard</span></NavLink>
                 </div>
             }
+
 
             <div class="side-item @(activeMenu == "view" ? "active" : "")"
-            @onclick="@(() => ToggleMenu("view"))">
-                <i class="fa fa-eye"></i> View
+                 @onclick="@(() => ToggleMenu("view"))">
+                <i class="fa fa-eye"></i> <span class="menu-text">View</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/tags"><span class="menu-text-collapsed">Timesheet</span></NavLink>
+                        <NavLink class="side-item sub" href="/users"><span class="menu-text-collapsed">Calendar</span></NavLink>
+                        <NavLink class="side-item sub" href="/dashboard"><span class="menu-text-collapsed">Attendance</span></NavLink>
+                        <NavLink class="side-item sub" href="/liveactivity"><span class="menu-text-collapsed">Pegboard</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Audit</span></NavLink>
+                    </div>
+                }
             </div>
-
-            @if (activeMenu == "view")
+            @if (activeMenu == "view" && !isSidebarCollapse)
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/notimplemented">Timesheet</NavLink>
-                    <NavLink class="side-item sub" href="/notimplemented">Calendar</NavLink>
-                    <NavLink class="side-item sub" href="/notimplemented">Attendance</NavLink>
-                    <NavLink class="side-item sub" href="/notimplemented">Pegboard</NavLink>
-                    <NavLink class="side-item sub" href="/notimplemented">Audit</NavLink>
+                    <NavLink class="side-item sub" href="/tags"><span class="menu-text">Timesheet</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"><span class="menu-text">Calendar</span></NavLink>
+                    <NavLink class="side-item sub" href="/dashboard"><span class="menu-text">Attendance</span></NavLink>
+                    <NavLink class="side-item sub" href="/liveactivity"><span class="menu-text">Pegboard</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Audit</span></NavLink>
                 </div>
             }
 
-            <NavLink class="side-item" href="/liveactivity">
-                <i class="fa-solid fa-bars-progress"></i> Manage
-            </NavLink>
 
-            <NavLink class="side-item" href="/manage">
-                <i class="fa-solid fa-users"></i> HR
-            </NavLink>
-            <NavLink class="side-item" href="/manage">
-                <i class="fa-solid fa-universal-access"></i>Access
-            </NavLink>
+            <div class="side-item @(activeMenu == "manage" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("manage"))">
+                <i class="fa-solid fa-bars-progress"></i> <span class="menu-text">Manage</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Exceptions</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Overtime</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Lateness</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Work Record Notes</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Holiday/Absence</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Incidents</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Change requests</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "manage" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Exceptions</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Overtime</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Lateness</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Work Record Notes</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Holiday/Absence</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Incidents</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Change requests</span></NavLink>
+                </div>
+            }
 
-            <NavLink class="side-item" href="/reports">
-                <i class="fa-solid fa-bug"></i> Reports
-            </NavLink>
-            <NavLink class="side-item" href="/ToolBox">
-                <i class="fa-solid fa-wrench"></i>Toolbox
-            </NavLink>
+
+            <div class="side-item @(activeMenu == "hR" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("hR"))">
+                <i class="fa-solid fa-users"></i><span class="menu-text">HR</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">HR Dashboard</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Workflow</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Announcement</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Records</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Questions</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Organisation Chart</span></NavLink>
+                    </div>
+                }
+            </div>
+           @if (activeMenu == "hR" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">HR Dashboard</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Workflow</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Announcement</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Records</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Questions</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Organisation Chart</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "access" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("access"))">
+                <i class="fa-solid fa-universal-access"></i><span class="menu-text">Access</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Movements</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Visitors/Contractore</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "access" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Movements</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Visitors/Contractore</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "reports" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("reports"))">
+                <i class="fa-solid fa-bug"></i> <span class="menu-text">Reports</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Reports</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Favourite reports</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Quick fire report</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Quick fire cost centre report</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Quick TA/Access fire report</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Quick fire roll call report</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Reports</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "reports" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Reports</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Favourite reports</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Quick fire report</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Quick fire cost centre report</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Quick TA/Access fire report</span></NavLink>
+                     <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Quick fire roll call report</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Reports</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "toolbox" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("toolbox"))">
+                <i class="fa-solid fa-wrench"></i><span class="menu-text">Toolbox</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Bulk editor</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Lock/unlock records</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Create flextime periods</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Shift notifications</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Company settings</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "toolbox" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Bulk editor</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Lock/unlock records</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Create flextime periods</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Shift notifications</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Company settings</span></NavLink>
+                </div>
+            }
+
+
+
             <NavLink class="side-item" href="/selfservice">
-                <i class="fa-solid fa-fingerprint"></i> SelfService
+                 <i class="fa-solid fa-fingerprint"></i> <span class="menu-text">Self Service</span>
             </NavLink>
-            <NavLink class="side-item" href="/billing">
-                <i class="fa-solid fa-wallet"></i> Billing
-            </NavLink>
-            <NavLink class="side-item" href="/switchCompany">
-                <i class="fa-solid fa-shuffle"></i> Switch Company
-            </NavLink>
-            <NavLink class="side-item" href="/Outloon">
-                <i class="fa-regular fa-envelope"></i>Outlook
-            </NavLink>
-            <NavLink class="side-item" href="/reports">
-                <i class="fa-solid fa-id-card"></i> Licence Details
-            </NavLink>
-            <NavLink class="side-item" href="/reports">
-                <i class="fa-solid fa-atom"></i>Staffology
-            </NavLink>
-            <NavLink class="side-item" href="/reports">
-                <i class="fa-brands fa-mixer"></i>Xero
-            </NavLink>
-            <NavLink class="side-item" href="/reports">
-                <i class="fa-solid fa-download"></i>Import
-            </NavLink>
+           @*  <div class="side-item @(activeMenu == "selfService" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("selfService"))" href="/selfService">
+                <i class="fa-solid fa-fingerprint"></i> <span class="menu-text">Self Service</span>
+                @if (isSidebarCollapse)
+                {
+                  
+                }
+            </div>
+            @if (activeMenu == "selfService" && !isSidebarCollapse)
+            {
+                
+            } *@
+
+
+            <div class="side-item @(activeMenu == "billing" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("billing"))">
+                <i class="fa-solid fa-wallet"></i> <span class="menu-text">Billing</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Purchase Subscription</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "billing" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Purchase Subscription</span></NavLink>
+                   
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "switchCompany" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("switchCompany"))">
+                <i class="fa-solid fa-shuffle"></i> <span class="menu-text">Switch Company</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented">Timesheet</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Calendar</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Attendance</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Pegboard</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Audit</NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "switchCompany" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Timesheet</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Calendar</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Attendance</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Pegboard</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Audit</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "outlook" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("outlook"))">
+                <i class="fa-regular fa-envelope"></i><span class="menu-text">Outlook</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Disable outlook</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "outlook" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Disable outlook</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "licenceDetail" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("licenceDetail"))">
+                <i class="fa-solid fa-id-card"></i> <span class="menu-text">Licence Detail</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Licence details</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "licenceDetail" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Licence details</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "stafflogy" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("stafflogy"))">
+                <i class="fa-solid fa-atom"></i><span class="menu-text">Stafflogy</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Connected to Test Company</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Employees</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Pay Codes</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">PayRuns</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Payments</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Payslips</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "stafflogy" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Connected to Test Company</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Employees</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Pay Codes</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">PayRuns</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Payments</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Payslips</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "xero" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("xero"))">
+                <i class="fa-brands fa-mixer"></i><span class="menu-text">Xero</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Connection</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Map earnings/rates</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Sync employees</span></NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Payments</span></NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "xero" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">iTrent Employee Import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Custom rate import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Sage SHA import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Employee import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Cost centre import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Cost centre advanced import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Record import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text-collapsed">Employee Tag Import</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item @(activeMenu == "import" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("import"))">
+                <i class="fa-solid fa-download"></i><span class="menu-text">Import</span>
+                @if (isSidebarCollapse)
+                {
+                    <div class="flyout-menu">
+                        <NavLink class="side-item sub" href="/notimplemented">Timesheet</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Calendar</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Attendance</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Pegboard</NavLink>
+                        <NavLink class="side-item sub" href="/notimplemented">Audit</NavLink>
+                    </div>
+                }
+            </div>
+            @if (activeMenu == "import" && !isSidebarCollapse)
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">iTrent Employee Import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Custom rate import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Sage SHA import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Employee import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Cost centre import</span></NavLink>
+                     <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Cost centre advanced import</span></NavLink>
+                      <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Record import</span></NavLink>
+                    <NavLink class="side-item sub" href="/notimplemented"><span class="menu-text">Employee Tag Import</span></NavLink>
+                </div>
+            }
+       
         </nav>
+
         <div class="separator"></div>
 
-    <div class="bottom-menu">
-        <NavLink class="side-item" href="/settings">
-                <i class="fa-brands fa-connectdevelop"></i>Development rodmap
-        </NavLink>
-        <NavLink class="side-item" href="/settings">
-                <i class="fa-regular fa-user"></i> Employee name
-        </NavLink>
-        <NavLink class="side-item" href="/settings">
-                <i class="fa-regular fa-circle-question"></i> Help/FAQ
-        </NavLink>
+        <div class="bottom-menu">
+            <NavLink class="side-item" href="/settings">
+                <i class="fa-brands fa-connectdevelop"></i><span class="menu-text">Development rodmap</span>
+            </NavLink>
+            <NavLink class="side-item" href="/settings">
+                <i class="fa-regular fa-user"></i> <span class="menu-text">Employee name</span>
+            </NavLink>
+            <NavLink class="side-item" href="/settings">
+                <i class="fa-regular fa-circle-question"></i> <span class="menu-text">Help/FAQ</span>
+            </NavLink>
             <NavLink class="side-item" @onclick="OpenSettings">
-            <i class="fa fa-gear"></i> Settings
-        </NavLink>
+                <i class="fa fa-gear"></i> <span class="menu-text">Settings</span>
+            </NavLink>
             <div class="d-flex flex-row position-relative align-items-center">
-        <NavLink class="side-item logout " href="/login">
-            <i class="fa fa-sign-out-alt"></i> Logout
-        </NavLink>
-                <div class="toggle-button">
-                    <span class="fas fa-angles-left"></span>
-        </div>
+                <NavLink class="side-item logout " href="/login">
+                    <i class="fa fa-sign-out-alt"></i><span class="menu-text">Logout</span>
+                </NavLink>
+                @if (!isSidebarCollapse)
+                {
+                    <div class="toggle-button ">
+                        <span class="fas fa-angles-left" @onclick="SidebarCollapse"></span>
+                    </div>
+                }
             </div>
+
+            @if (isSidebarCollapse)
+            {
+            <NavLink class="side-item arrow-icon">
+               
+                    <i class="fas fa-angles-right" @onclick="SidebarCollapse"></i>            
+            </NavLink>
+            }
         </div>
     }
 
@@ -268,174 +681,198 @@
     {
         <!--Setting Menu-->
 
-            <nav class="menu-scroll">
-                <div class="side-item @(activeMenu == "organisation" ? "active" : "")"
-                     @onclick="@(() => ToggleMenu("organisation"))">
-                    Organisation
+        <nav class="menu-scroll">
+            <div class="side-item setting @(activeMenu == "organisation" ? "active" : "")"
+                 @onclick="@(() => ToggleMenu("organisation"))">
+                <span class="menu-text">Organisation</span>
+            </div>
+            @if (activeMenu == "organisation")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
-                @if (activeMenu == "organisation")
-                {
-                    <div class="submenu">
-                        <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                        <NavLink class="side-item sub" href="/users">Users</NavLink>
-                    </div>
-                }
-
-                <div class="side-item @(activeMenu == "contract" ? "active" : "")"
-                     @onclick="@(() => ToggleMenu("contract"))">
-                    Contract
-                </div>
-                @if (activeMenu == "contract")
-                {
-                    <div class="submenu">
-                        <NavLink class="side-item sub" href="/settings/timesheet">Timesheet</NavLink>
-                        <NavLink class="side-item sub" href="/settings/calendar">Calendar</NavLink>
-                    </div>
             }
 
-            <div class="side-item @(activeMenu == "shiftRoster" ? "active" : "")"
+
+            <div class="side-item setting @(activeMenu == "contract" ? " active" : "")"
+                 @onclick="@(() => ToggleMenu("contract"))">
+                <span class="menu-text">Contract</span>
+            </div>
+            @if (activeMenu == "contract")
+            {
+                <div class="submenu">
+                    <NavLink class="side-item sub" href="/settings/timesheet"> <span class="menu-text">Timesheet</span></NavLink>
+                    <NavLink class="side-item sub" href="/settings/calendar"> <span class="menu-text">Calendar</span></NavLink>
+                </div>
+            }
+
+
+            <div class="side-item setting @(activeMenu == "shiftRoster" ? " active" : "")"
                  @onclick="@(() => ToggleMenu("shiftRoster"))">
-                Shifts and Rosters
+                <span class="menu-text">Shifts and Rosters</span>
             </div>
             @if (activeMenu == "shiftRoster")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            <div class="side-item @(activeMenu == "overtimerule" ? "active" : "")"
+
+            <div class="side-item setting @(activeMenu == "overtimerule" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("overtimerule"))">
-                Overtime rules
+                <span class="menu-text">Overtime rules</span>
             </div>
             @if (activeMenu == "overtimerule")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            <div class="side-item @(activeMenu == "holidaySickness" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "holidaySickness" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("holidaySickness"))">
-                Holiday, Sick and Absence
+                <span class="menu-text">Holiday, Sick and Absence</span>
             </div>
             @if (activeMenu == "holidaySickness")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            <div class="side-item @(activeMenu == "employees" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "employees" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("employees"))">
-                Employees
+                <span class="menu-text">Employees</span>
             </div>
             @if (activeMenu == "employees")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-             <div class="side-item @(activeMenu == "hrRecords" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "hrRecords" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("hrRecords"))">
-                HR records
+                <span class="menu-text">HR records</span>
             </div>
             @if (activeMenu == "hrRecords")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            <div class="side-item @(activeMenu == "flexitime" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "flexitime" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("flexitime"))">
-                Flexitime, Annualised and Committed hours
+                <span class="menu-text"> Flexitime, Annualised and Committed hours</span>
             </div>
             @if (activeMenu == "flexitime")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            <div class="side-item @(activeMenu == "clockingTerminals" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "clockingTerminals" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("clockingTerminals"))">
-                Clocking terminals
+                <span class="menu-text">Clocking terminals</span>
             </div>
             @if (activeMenu == "clockingTerminals")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            <div class="side-item @(activeMenu == "accessControl" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "accessControl" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("accessControl"))">
-                Access control
+                <span class="menu-text">Access control</span>
             </div>
             @if (activeMenu == "accessControl")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
-            <div class="side-item @(activeMenu == "reportingAndException" ? "active" : "")"
+            <div class="side-item setting @(activeMenu == "reportingAndException" ? "active" : "")"
                  @onclick="@(() => ToggleMenu("reportingAndException"))">
-                Reporting and Exceptions
+                <span class="menu-text">Reporting and Exceptions</span>
             </div>
             @if (activeMenu == "reportingAndException")
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags">Tags</NavLink>
-                    <NavLink class="side-item sub" href="/users">Users</NavLink>
+                    <NavLink class="side-item sub" href="/tags"> <span class="menu-text">Tags</span></NavLink>
+                    <NavLink class="side-item sub" href="/users"> <span class="menu-text">Users</span></NavLink>
                 </div>
             }
 
-            </nav>
+        </nav>
 
 
-            <div class="bottom-menu">
-                <NavLink class="side-item-back" @onclick="CloseSettings">
-                    &larr; Back
-                </NavLink>
-            </div>    
+        <div class="bottom-menu">
+            <NavLink class="side-item-back" @onclick="CloseSettings">
+                <span class="menu-text">&larr;Back</span>
+            </NavLink>
+        </div>
     }
 </div>
 
 @code {
-        string activeMenu = "";
-        bool isSettingsOpen = false;
-        void OpenSettings()
-        {
-            isSettingsOpen = true;
-            activeMenu = ""; 
-        }
+    string activeMenu = "";
+    bool isSettingsOpen = false;
+    void OpenSettings()
+    {
+        isSidebarCollapse = false;
+        isSettingsOpen = true;
+        activeMenu = "";
+    }
 
-        void CloseSettings()
-        {
-            isSettingsOpen = false;
-            activeMenu = "";
-        }
+    void CloseSettings()
+    {
+        isSettingsOpen = false;
+        activeMenu = "";
+    }
 
-        // map parent menus to their child routes
-        Dictionary<string, string[]> menuMap = new()
+    // map parent menus to their child routes
+    Dictionary<string, string[]> menuMap = new()
     {
         { "home", new[] { "/dashboard", "/liveactivity" } },
-        { "view", new[] { "/notimplemented" } },
+      //  { "view", new[] { "/tags", "/users", "/dashboard", "/liveactivity", "/notimplemented"} },
+        // { "manage", new[] { "" } },
+        // { "hR", new[] { "" } },
+        // { "access", new[] { "" } },
+        // { "reports", new[] { "" } },
+        // { "toolbox", new[] { "" } },
+        // { "billing", new[] { "" } },
+        // { "switchCompany", new[] { "" } },
+        // { "outlook", new[] { "" } },
+        // { "licenceDetail", new[] { "" } },
+        // { "stafflogy", new[] { "" } },
+        // { "xero", new[] { "" } },
+        // { "import", new[] { "" } },
 
         //Setting tabs
         { "organisation", new[] { "/tags", "/users"} },
-        { "contract", new[] {"/notimplemented"} },
-     
+       // { "contract", new[] {""} },
+        // { "shiftRoster", new[] {""} },
+        // { "overtimerule", new[] {""} },
+        // { "holidaySickness", new[] {""} },
+        // { "employees", new[] {""} },
+        // { "hrRecords", new[] {""} },
+        // { "flexitime", new[] {""} },
+        // { "clockingTerminals", new[] {""} },
+        // { "accessControl", new[] {""} },
+        // { "reportingAndException", new[] {""} },
     };
 
     protected override void OnInitialized()
@@ -459,4 +896,13 @@
             .Key ?? "";
     }
 
+    <!--Sidebar Collapse -->
+    bool isSidebarCollapse = false;
+
+    void SidebarCollapse()
+    {
+        isSidebarCollapse = !isSidebarCollapse;
+    }
 }
+
+
