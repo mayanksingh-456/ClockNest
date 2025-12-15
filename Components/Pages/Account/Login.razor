@@ -1,24 +1,13 @@
 ﻿@page "/login"
 @layout AuthLayout
-
-@using ClockNest.ViewModels
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @rendermode InteractiveServer
-@using ClockNest.Services.Auth
-@using ClockNest.Helpers
-@using Microsoft.AspNetCore.WebUtilities
 
-@inject NavigationManager Navigation
-@inject AuthService _AuthService
- 
 <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm" method="post">
     <DataAnnotationsValidator />
 
     <div class="d-flex flex-column justify-content-center align-items-center vh-100">
 
         <div class="login-container-box">
-
-           
 
             <div class="login-wrapper">
                 <div class="text-start mb-3">
@@ -58,11 +47,6 @@
                 <div class="text-end mb-3">
                     <a href="/forgotpassword" class="forgot-link">Forgot password?</a>
                 </div>
-              @*   <div class="d-grid">
-                    <button type="submit" class="btn btn-primary-modern text-white">
-                        Sign in
-                    </button>
-                </div> *@
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary-modern text-white" disabled="@IsProcessing">
                         @if (IsProcessing)
@@ -75,8 +59,6 @@
                         }
                     </button>
                 </div>
-               
-
             </div>
 
             <!-- App Store + Play Store Footer -->
@@ -86,7 +68,6 @@
                     <img src="/images/PlayStore.png" alt="Google Play" class="store-img" />
                 </div>
             </div>
-
         </div>
         <div class="bottom-text">
             Don't have an account? <a href="/contact">Contact us</a>
@@ -98,7 +79,6 @@
     private LoginViewModel loginModel = new();
     private string errorMessage = "";
     private bool IsProcessing = false;
-
 
     private async Task HandleLogin()
     {
@@ -116,9 +96,7 @@
             {
                 returnUrl = param;
             }
-
             var result = await _AuthService.LoginAsync(loginModel, returnUrl);
-           
 
             if (result.Success)
             {
@@ -126,8 +104,7 @@
             }
             else
             {
-                Navigation.NavigateTo(result.RedirectAction ?? "/dashboard", true);
-               // errorMessage = result.ErrorMessage ?? "The email or password you entered is incorrect.";
+                errorMessage = result.ErrorMessage ?? "The email or password you entered is incorrect.";
             }
         }
         catch (Exception ex)

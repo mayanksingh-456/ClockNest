@@ -1,27 +1,6 @@
 ﻿@page "/home"
 <h3>Home</h3>
-<div class="side-item" @onclick="@(() => ToggleMenu("home"))">
-    <i class="fa fa-home"></i> Home
-    <i class="fa fa-chevron-down" style="margin-left:auto"></i>
-</div>
-@if (activeMenu == "home")
-{
-    <div class="submenu">
-        <NavLink class="side-item sub" href="/home/overview">Overview</NavLink>
-        <NavLink class="side-item sub" href="/home/updates">Updates</NavLink>
-        <NavLink class="side-item sub" href="/home/stats">Stats</NavLink>
-    </div>
-}
-
 
 @code {
-    string activeMenu = "home";
-
-    void ToggleMenu(string menuName)
-    {
-        if (activeMenu == menuName)
-            activeMenu = "";
-        else
-            activeMenu = menuName;
-    }
+    
 }

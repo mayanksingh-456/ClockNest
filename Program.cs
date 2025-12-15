@@ -16,6 +16,21 @@ namespace ClockNest
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "ClockNestCookies";
+                options.DefaultSignInScheme = "ClockNestCookies";
+                options.DefaultChallengeScheme = "ClockNestCookies";
+            })
+   .AddCookie("ClockNestCookies", options =>
+   {
+       options.LoginPath = "/login";
+   });
+            builder.Services.AddAuthorization();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
+
+
             builder.Services.AddHttpClient("ChronicleClient", client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration["ChronicleWebApiConnection"]);
@@ -23,8 +38,9 @@ namespace ClockNest
             }).AddHttpMessageHandler<SecurityMessageHandler>();
 
 
-            //builder.Services.AddScoped(sp =>
-            //  new HttpClient { BaseAddress = new Uri("https://localhost:7209/") });
+            //       builder.Services.AddScoped(sp =>
+            //new HttpClient { BaseAddress = new Uri("https://localhost:5124/") });
+
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<Security>();
@@ -44,6 +60,13 @@ namespace ClockNest
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+
+            app.UseRouting();
+            //Add middleware
+            app.UseSession();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseAntiforgery();
 
             app.MapRazorComponents<App>()

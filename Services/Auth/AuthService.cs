@@ -2,9 +2,8 @@
 using ClockNest.Models.Login;
 using ClockNest.Models.User;
 using ClockNest.ViewModels;
+using Microsoft.JSInterop;
 using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static System.Net.WebRequestMethods;
 
 namespace ClockNest.Services.Auth
 {
@@ -13,81 +12,25 @@ namespace ClockNest.Services.Auth
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly Security _Security;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IJSRuntime _js;
 
-        public AuthService(IHttpClientFactory httpClientFactory, Security Security, IHttpContextAccessor httpContextAccessor)
+        public AuthService(IHttpClientFactory httpClientFactory, Security Security, IHttpContextAccessor httpContextAccessor, IJSRuntime js)
         {
             _httpClientFactory = httpClientFactory;
             _Security = Security;
             _httpContextAccessor = httpContextAccessor;
+            _js = js;
         }
-        //public async Task<LoginResult> LoginAsync(string username, string password)
-        //{
-        //public async Task<LoginResult> LoginAsync(LoginViewModel model, string ReturnUrl)
-        //{
-        //    var client = _httpClientFactory.CreateClient("ChronicleClient");
-        //    try
-        //    {
-        //        //var saltResponse = await client.PostAsJsonAsync("chronicle/account/usersaltbyusername/get", username);
-        //        HttpResponseMessage saltResponse = await client.PostAsJsonAsync("chronicle/account/usersaltbyusername/get", model.Username);
-
-
-        //        if (!saltResponse.IsSuccessStatusCode)
-        //        {
-        //            var error = await saltResponse.Content.ReadAsStringAsync();
-        //            return new LoginResult { Success = false, ErrorMessage = error };
-        //        }
-
-        //        string userSalt = await saltResponse.Content.ReadFromJsonAsync<string>();
-
-        //        string hashedPassword = _Security.HashPassword(model.Password, userSalt);
-
-        //        var userObj = new
-        //        {
-        //            UserName = model.Username,
-        //            Password = hashedPassword
-        //        };
-
-        //        var loginResponse = await client.PostAsJsonAsync("chronicle/account/login", userObj);
-
-        //        if (!loginResponse.IsSuccessStatusCode)
-        //        {
-        //            var error = await loginResponse.Content.ReadAsStringAsync();
-        //            return new LoginResult
-        //            {
-        //                Success = false,
-        //                ErrorMessage = string.IsNullOrWhiteSpace(error) ? "Login failed"  : error
-        //            };
-        //        }
-
-        //        var user = await loginResponse.Content.ReadFromJsonAsync<User>();
-
-        //        return new LoginResult
-        //        {
-        //            Success = true,
-        //            RedirectAction = "/dashboard"
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new LoginResult
-        //        {
-        //            Success = false,
-        //            ErrorMessage = ex.Message
-        //        };
-        //    }
-        //}
-
 
         public async Task<LoginResult> LoginAsync(LoginViewModel model, string ReturnUrl)
         {
-
             var companyRequiresTwoFactorAuth = false;
             int? companySystemDaysRemaining = null;
             var systemLicenceDueToExpire = false;
 
             var client = _httpClientFactory.CreateClient("ChronicleClient");
 
-            HttpResponseMessage getUserSaltResponse = await client.PostAsJsonAsync("chronicle/account/usersaltbyusername/get", model.Username);      
+            HttpResponseMessage getUserSaltResponse = await client.PostAsJsonAsync("chronicle/account/usersaltbyusername/get", model.Username);
             if (!getUserSaltResponse.IsSuccessStatusCode)
             {
                 var content = await getUserSaltResponse.Content.ReadAsStringAsync();
@@ -130,10 +73,8 @@ namespace ClockNest.Services.Auth
                 {
                     PropertyNameCaseInsensitive = true
                 });
-
-
                 HttpResponseMessage responseCompany = await client.PostAsJsonAsync("chronicle/account/company/get", usersData.CompanyId);
-                
+
                 if (companySystemDaysRemaining <= 0 && !user.UserName.Contains("chronicle@"))
                 {
                     return new LoginResult
@@ -148,7 +89,6 @@ namespace ClockNest.Services.Auth
                     systemLicenceDueToExpire = true;
 
                 }
-                
 
                 HttpResponseMessage responseUserCompanies = await client.PostAsJsonAsync("chronicle/account/companies/get", usersData.Id);
 
@@ -158,7 +98,6 @@ namespace ClockNest.Services.Auth
                 bool isSelfService = false;
                 bool isDashboard = false;
             }
-           
 
             if (response.IsSuccessStatusCode)
             {
@@ -180,8 +119,6 @@ namespace ClockNest.Services.Auth
                             : errorMessage
                 };
             }
-
         }
     }
-
 }

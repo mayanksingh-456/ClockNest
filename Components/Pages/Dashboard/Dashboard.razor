@@ -1,9 +1,28 @@
 ﻿@page "/dashboard"
+@using Microsoft.AspNetCore.Authorization
+@* @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider *@
 
 
 <h3>Dashboard</h3>
-
+@* @attribute [Authorize] *@
 
 @code {
-  
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+    //     var user = authState.User;
+
+    //     // if (user.Identity.IsAuthenticated)
+    //     // {
+    //     //     Console.WriteLine("✔ User is authenticated");
+    //     //     Console.WriteLine("Username: " + user.Identity.Name);
+    //     // }
+    //     // else
+    //     // {
+    //     //     Console.WriteLine("❌ User is NOT authenticated");
+    //     }
+    // }
 }

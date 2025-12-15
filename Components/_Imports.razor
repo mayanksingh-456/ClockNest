@@ -8,3 +8,21 @@
 @using Microsoft.JSInterop
 @using ClockNest
 @using ClockNest.Components
+
+@using ClockNest.Services.Auth
+@using ClockNest.Helpers
+@using Microsoft.AspNetCore.WebUtilities
+@using static System.Net.WebRequestMethods
+@using ClockNest.ViewModels
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using ClockNest.Components.Pages.Account
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components
+@using ClockNest.Models.Login;
+
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject AuthService _AuthService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Nav
