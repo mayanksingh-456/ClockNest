@@ -1,6 +1,7 @@
 ﻿using ClockNest.Helpers;
 using ClockNest.Models.Login;
 using ClockNest.Models.User;
+using ClockNest.Models.UserClaimModel;
 using ClockNest.ViewModels;
 using Microsoft.JSInterop;
 using System.Text.Json;
@@ -11,7 +12,7 @@ namespace ClockNest.Services.Auth
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly Security _Security;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor; 
         private readonly IJSRuntime _js;
 
         public AuthService(IHttpClientFactory httpClientFactory, Security Security, IHttpContextAccessor httpContextAccessor, IJSRuntime js)
@@ -101,6 +102,13 @@ namespace ClockNest.Services.Auth
 
             if (response.IsSuccessStatusCode)
             {
+                var content = await response.Content.ReadAsStringAsync();
+                var usersData = JsonSerializer.Deserialize<User>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                await IdentitySigninAsync(usersData);
                 return new LoginResult
                 {
                     Success = true,
@@ -120,5 +128,41 @@ namespace ClockNest.Services.Auth
                 };
             }
         }
+
+        private async Task IdentitySigninAsync(User user)
+        {
+            var claims = new UserClaimsModel
+            {
+                NameIdentifier = user.Id.ToString(),
+                Name = $"{user.FirstName} {user.LastName}",
+                UserEmail = user.Email ?? "",
+                CompanyId = user.CompanyId.ToString(),
+                Role = user.RoleType?.Name ?? "User"
+            };
+
+            var headers = new Dictionary<string, string>
+    {
+        { "Content-Type", "application/json" }
+    };
+
+            await _js.InvokeVoidAsync("fetch", "/login", new
+            {
+                method = "POST",
+                credentials = "include",
+                headers = headers,
+                body = JsonSerializer.Serialize(claims)
+            });
+        }
+
+
+        public async Task LogoutAsync()
+        {
+            await _js.InvokeVoidAsync("fetch", "/logout", new
+            {
+                method = "POST",
+                credentials = "include"
+            });
+        }
+
     }
 }

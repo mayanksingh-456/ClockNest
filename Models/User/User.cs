@@ -1,4 +1,6 @@
-﻿namespace ClockNest.Models.User
+﻿using ClockNest.Models.Role;
+
+namespace ClockNest.Models.User
 {
     public class User
     {
@@ -13,5 +15,8 @@
         public int? CompanyId { get; set; }
 
         public string Email { get; set; }
+
+        public short RoleTypeId { get; set; }
+        public RoleType RoleType { get; set; }
     }
 }

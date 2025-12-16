@@ -1,7 +1,9 @@
 using ClockNest.Components;
+using ClockNest.Endpoints;
 using ClockNest.Handler;
 using ClockNest.Helpers;
 using ClockNest.Services.Auth;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http.Headers;
 
 namespace ClockNest
@@ -16,19 +18,24 @@ namespace ClockNest
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = "ClockNestCookies";
-                options.DefaultSignInScheme = "ClockNestCookies";
-                options.DefaultChallengeScheme = "ClockNestCookies";
-            })
-   .AddCookie("ClockNestCookies", options =>
-   {
-       options.LoginPath = "/login";
-   });
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+     .AddCookie(options =>
+     {
+         options.Cookie.Name = "clocknest-auth";
+         options.LoginPath = "/login";
+         options.LogoutPath = "/logout";
+         options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+         options.SlidingExpiration = true;
+
+         options.Cookie.HttpOnly = true;
+         options.Cookie.SameSite = SameSiteMode.Lax;
+         options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+             ? CookieSecurePolicy.SameAsRequest
+             : CookieSecurePolicy.Always;
+     });
+
             builder.Services.AddAuthorization();
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession();
+            builder.Services.AddCascadingAuthenticationState();
 
 
             builder.Services.AddHttpClient("ChronicleClient", client =>
@@ -62,12 +69,15 @@ namespace ClockNest
             app.UseStaticFiles();
 
             app.UseRouting();
+
             //Add middleware
-            app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseAntiforgery();
+
+            app.MapLoginEndpoint();
+            app.MapLogoutEndpoint();
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();

@@ -6,7 +6,16 @@
 
 
 <h3>Dashboard</h3>
-@* @attribute [Authorize] *@
+@attribute [Authorize]
+<AuthorizeView>
+    <Authorized>
+        Welcome <a class="" style="color:blue;">@context.User.Identity.Name</a>
+    </Authorized>
+    <NotAuthorized>
+       Not Authorized
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
 
