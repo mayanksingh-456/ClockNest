@@ -19,6 +19,9 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components
 @using ClockNest.Models.Login;
+@using ClockNest.Models.Employee_Model;
+@using ClockNest.Services.Employee_Service
+@using ClockNest.ViewModels.EmployeeViewModel
 
 
 @inject HttpClient Http
@@ -26,3 +29,4 @@
 @inject AuthService _AuthService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Nav
+@inject EmployeeService EmployeeService

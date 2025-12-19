@@ -2,7 +2,9 @@ using ClockNest.Components;
 using ClockNest.Endpoints;
 using ClockNest.Handler;
 using ClockNest.Helpers;
+using ClockNest.Models.User_Model;
 using ClockNest.Services.Auth;
+using ClockNest.Services.Employee_Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http.Headers;
 
@@ -24,7 +26,7 @@ namespace ClockNest
          options.Cookie.Name = "clocknest-auth";
          options.LoginPath = "/login";
          options.LogoutPath = "/logout";
-         options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
          options.SlidingExpiration = true;
 
          options.Cookie.HttpOnly = true;
@@ -38,7 +40,7 @@ namespace ClockNest
             builder.Services.AddCascadingAuthenticationState();
 
 
-            builder.Services.AddHttpClient("ChronicleClient", client =>
+            builder.Services.AddHttpClient("ClockNestClient", client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration["ChronicleWebApiConnection"]);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -53,6 +55,8 @@ namespace ClockNest
             builder.Services.AddScoped<Security>();
             builder.Services.AddTransient<SecurityMessageHandler>();
             builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<UserContext>();
+            builder.Services.AddScoped<EmployeeService>();
 
             var app = builder.Build();
 

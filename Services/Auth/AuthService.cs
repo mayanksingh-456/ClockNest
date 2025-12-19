@@ -29,7 +29,7 @@ namespace ClockNest.Services.Auth
             int? companySystemDaysRemaining = null;
             var systemLicenceDueToExpire = false;
 
-            var client = _httpClientFactory.CreateClient("ChronicleClient");
+            var client = _httpClientFactory.CreateClient("ClockNestClient");
 
             HttpResponseMessage getUserSaltResponse = await client.PostAsJsonAsync("chronicle/account/usersaltbyusername/get", model.Username);
             if (!getUserSaltResponse.IsSuccessStatusCode)

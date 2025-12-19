@@ -1,7 +1,7 @@
 ﻿body {
-    /*background-color: #f7f7f7 !important;*/
+    background-color: #dedede !important;
     margin: 0 !important;
-    font-family: 'Montserrat', sans-serif !important;
+    font-family: ''Inter'', sans-serif !important;
 }
 
 
@@ -123,7 +123,7 @@
 ---------------------------------*/
 
 .body-medium {
-    font-family: Montserrat !important;
+    font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;
     font-style: normal !important;
     font-weight: 500 !important;
