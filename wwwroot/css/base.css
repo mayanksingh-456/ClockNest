@@ -1,75 +1,145 @@
-﻿body {
-    background-color: #dedede !important;
+﻿
+
+
+/* ==============================
+   Global Styles
+================================ */
+body {
+    background-color: #F4F6FA !important;
     margin: 0 !important;
-    font-family: ''Inter'', sans-serif !important;
+    font-family: 'Montserrat', sans-serif !important;
 }
 
-
-/* ------------------------------
-   LoginPage
----------------------------------*/
+/* ==============================
+   Login Container
+================================ */
 .login-container-box {
     width: 100%;
     max-width: 650px;
-    border-radius: 18px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e3e9f1;
-    background: #ffffff;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0px 20px 45px rgba(15, 23, 42, 0.08);
 }
 
+/* ==============================
+   Login Content
+================================ */
 .login-wrapper {
     padding: 36px 42px;
-    background: #ffffff;
-    border-bottom: 1px solid #e3e9f1;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
 }
 
 .login-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
-    color: #1a3d6f;
-    margin-bottom: 20px;
+    color: #0F172A;
+    margin-bottom: 22px;
 }
 
+/* ==============================
+   Logo
+================================ */
+.login-logo {
+    width: 13.1rem;
+    margin-left: -4px;
+}
+
+/* ==============================
+   Form Labels & Inputs
+================================ */
 .form-label {
     font-size: 14px !important;
     font-weight: 500;
-    color: #334e6f;
+    color: #475569;
     margin-bottom: 6px;
 }
 
 .form-control {
-    border-radius: 5px !important;
-    border: 1px solid #c8d7ea !important;
-    padding: 10px !important;
-    font-size: 12px;
+    border-radius: 8px !important;
+    border: 1px solid #CBD5E1 !important;
+    padding: 12px !important;
+    font-size: 14px;
+    background-color: #FFFFFF;
     transition: all 0.2s ease-in-out;
 }
 
-    .form-control:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0px 0px 0px 4px rgba(59, 130, 246, 0.2);
+    .form-control::placeholder {
+        color: #94A3B8;
     }
 
+    .form-control:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: #80c2b5 !important;
+    }
+
+.form-select {
+    border-radius: 8px !important;
+    border: 1px solid #CBD5E1 !important;
+    padding: 12px !important;
+    font-size: 14px;
+    background-color: #FFFFFF;
+    transition: all 0.2s ease-in-out;
+}
+
+    .form-select::placeholder {
+        color: #94A3B8;
+    }
+    .form-select:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: #80c2b5 !important;
+    }
+
+/* ==============================
+   Validation Messages
+================================ */
+.validation-message {
+    font-size: 12px;
+    color: #DC2626;
+    margin-top: 4px;
+}
+
+/* ==============================
+   Buttons
+================================ */
 .btn-primary-modern {
-    background: #3b82f6;
-    border-radius: 5px;
-    padding: 10px;
+    /* background: linear-gradient(135deg, #2563EB, #1E40AF);*/
+    background: linear-gradient(135deg, #1ABC9C, #1E40AF);
+    /* background-color: #1ABC9C;*/
+    border-radius: 8px;
+    padding: 12px;
     font-size: 15px;
     font-weight: 600;
     border: none !important;
-    box-shadow: 0px 3px 10px rgba(59, 130, 246, 0.35);
-    transition: transform 0.15s ease, background 0.2s ease;
+    color: #FFFFFF;
+    box-shadow: 0px 10px 25px rgba(37, 99, 235, 0.35);
+    transition: all 0.2s ease;
 }
 
     .btn-primary-modern:hover {
-        background: #2563eb;
+        /* background: linear-gradient(135deg, #1E40AF, #1E3A8A);*/
+        background: linear-gradient(135deg, #16A085, #1E3A8A);
+        /* background-color: #16A085;*/
         transform: translateY(-2px);
     }
 
+    /* Disabled Button */
+ /*   .btn-primary-modern:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }*/
+
+/* ==============================
+   Links
+================================ */
 .forgot-link {
     font-size: 13px;
-    color: #3b82f6;
+    color: #2563EB;
     font-weight: 500;
     text-decoration: none;
 }
@@ -78,11 +148,13 @@
         text-decoration: underline;
     }
 
-/* Footer area attached to card */
+/* ==============================
+   App Footer (Store Buttons)
+================================ */
 .app-footer {
-    background: #0b0f19;
+    background: #020617;
     width: 100%;
-    padding: 12px 0;
+    padding: 14px 0;
     display: flex;
     justify-content: center;
 }
@@ -102,30 +174,31 @@
         transform: scale(1.05);
     }
 
+/* ==============================
+   Bottom Text
+================================ */
 .bottom-text {
     margin-top: 18px;
-    font-size: 15px;
+    font-size: 14px;
+    color: #475569;
 }
 
     .bottom-text a {
-        color: #5028db;
-        font-weight: bold;
+        color: #2563EB;
+        font-weight: 600;
+        text-decoration: none;
     }
 
-.login-logo {
-    width: 13.1rem;
-    margin-left: -4px;
-}
+        .bottom-text a:hover {
+            text-decoration: underline;
+        }
 
-
-/* ------------------------------
-   Typography Styles
----------------------------------*/
-
+/* ==============================
+   Typography Utility
+================================ */
 .body-medium {
     font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;
-    font-style: normal !important;
     font-weight: 500 !important;
     line-height: 18px !important;
 }

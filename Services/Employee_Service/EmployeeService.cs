@@ -69,7 +69,7 @@ namespace ClockNest.Services.Employee_Service
 
         public async Task<EmployeeAllDetails> GetEmployeeAllDetailsAsync(ParameterList parameterList)
         {
-            var client = _httpClientFactory.CreateClient("ChronicleClient").AddDefaultHeader(_userContext);
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
 
             var response = await client.PostAsJsonAsync("chronicle/setup/employees/employeealldetails/get", parameterList);
 

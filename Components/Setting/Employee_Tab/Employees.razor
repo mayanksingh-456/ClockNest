@@ -1,5 +1,6 @@
 ﻿@page "/employee"
 @using ClockNest.ViewModels.Parameter_List
+@using Microsoft.AspNetCore.Mvc.Rendering
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
 
@@ -7,10 +8,7 @@
     /* ===========================
        # Custom Table Styles
            =========================== */
-    .custom-table {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 14px;
-    }
+ 
     /* Wrapper controls height & scrolling */
     .custom-table-wrapper {
         max-height: 365px; 
@@ -24,7 +22,8 @@
     .custom-table {
         width: 100%;
         margin-bottom: 0;
-
+        font-weight: 300 !important;
+        font-size: 14px; 
     }
 
         /* Sticky header */
@@ -34,7 +33,52 @@
             z-index: 2;
             background-color: #f8f9fa;
             box-shadow: inset 0 -1px 0 #E5E7EB;
+
+            font-size: 13px;
+            font-weight: 600;
+           /*  text-transform: uppercase; */
+            letter-spacing: 0.03em;
+            color: #374151;
         }
+
+        .custom-table tbody td {
+            color: #495057d9;
+            font-weight: 400; 
+        }
+
+            /* ✅ ADDED */
+           /*  .custom-table thead th:first-child {
+                border-top-left-radius: 6px;
+            }
+
+            .custom-table thead th:last-child {
+                border-top-right-radius: 6px;
+            } */
+
+      /*   .custom-table tbody tr:nth-child(even) {
+            background-color: #FAFAFA;
+        }
+
+        .custom-table tbody tr:has(input[type="checkbox"]:checked) {
+            background-color: #EEF6FF;
+        } */
+
+        .custom-table tbody tr {
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .custom-table th:first-child,
+        .custom-table td:first-child {
+            text-align: center;
+        }
+
+        .custom-table input[type="checkbox"] {
+            width: 13px;
+            height: 13px;
+        }
+
+
 
         /* Better row height */
         .custom-table tbody tr td {
@@ -49,14 +93,14 @@
             border-left: none !important;
             border-right: none !important;
         }
-        .custom-table tfoot td {
+      /*   .custom-table tfoot td {
             position: sticky;
             bottom: 0;
             z-index: 2;
             background: #f1f3f5;
             font-weight: 600;
             border-top: 2px solid #dee2e6;
-        }
+        } */
 
         /* Hover highlight */
         .custom-table tbody tr:hover {
@@ -86,22 +130,24 @@
         align-items: center;
         padding: 3px 10px;
         margin-right: -8px;
+
+
     }
     .page-title{
-        font-family: 'Inter', sans-serif !important;
+       /*  font-family: 'Inter', sans-serif !important; */
         font-size: 24px !important;
        
         margin-left: -9px;
     }
 
     .chronic-bg-secondary {
-        background-color: #80C0D3 !important;
+        background-color: #80c2b5 !important;
         color: #FFFFFF !important;
         transition: background-color 0.2s ease-in-out !important;
     }
 
         .chronic-bg-secondary:hover {
-            background-color: #0281A7 !important;
+            background-color: #56bca8 !important;
             color: #FFFFFF !important;
         }
 
@@ -130,14 +176,14 @@
         align-items: center;
         gap: 16px;
         color: #FFF;
-        font-family: 'Montserrat', sans-serif;
+        /* font-family: 'Montserrat', sans-serif; */
         font-size: 14px;
         font-weight: 500;
     }
 
     .selectedBar_deleteButton {
         color: #FFF;
-        font-family: 'Montserrat', sans-serif;
+       /*  font-family: 'Montserrat', sans-serif; */
         font-size: 16px;
         font-weight: 400;
         cursor: pointer;
@@ -166,14 +212,17 @@
         height: 40px;
         border-radius: 8px;
        /*  margin-right: -8px; */
+
     }
+
 
     .search-group {
         position: relative;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        height: 56px;
+        /* height: 56px; */
+        height:39px;
         border-radius: 8px;
     }
 
@@ -190,16 +239,25 @@
         }
 
     .bg-brand-100 {
-        background-color: #3B82F6;
+        background-color: #e91e63;
         color: #FFFFFF;
         border: none;
         border-radius: 5px;
         font-weight: 500;
 
     }
-    .bg-brand-100:hover {
-            background-color: #2563EB;
-            }
+   /*  .bg-brand-100:hover {
+            background-color: #CC0C4E;
+            } */
+        .bg-brand-100:hover,
+        .bg-brand-100:focus,
+        .bg-brand-100:active,
+        .bg-brand-100:focus-visible {
+            background-color: #CC0C4E !important;
+            color: #FFFFFF !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
 
     .form-control:focus,
     .btn:focus,
@@ -207,6 +265,19 @@
         box-shadow: none !important;
         outline: none !important;
     }
+
+    .form-check-input:checked {
+        background-color: #008d94 !important;
+        border-color: #008d94 !important;
+    }
+
+        .form-check-input:focus,
+        .form-check-input:active,
+        .form-check-input:checked:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            border-color: #CED4DA !important;
+        }
 
 </style>
 
@@ -225,10 +296,97 @@
     }
 
 </style>
+<style>
+    .table-footer-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 16px;
+        margin-top: 8px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        background-color: #FFFFFF;
+    }
+
+    /* Left text */
+    .footer-info {
+        font-size: 13px;
+        color: #6B7280;
+    }
+
+    /* Center page size */
+    .footer-pagesize {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #374151;
+    }
+
+        .footer-pagesize select {
+            width: 70px;
+        }
+
+    .pagination {
+        gap: 6px;
+    }
+
+        .pagination .page-link {
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            border: 1px solid #E5E7EB;
+            background-color: #FFFFFF;
+            color: #374151;
+        }
+
+            .pagination .page-link:hover {
+                background-color: #F3F4F6;
+            }
+
+    .page-status {
+        background-color: #F9FAFB;
+        font-weight: 500;
+    }
+
+  
+</style>
+
+<style>
+    /* TABLE SCROLLBAR */
+    .custom-table-wrapper::-webkit-scrollbar {
+        width: 6px; 
+        height: 8px;
+    }
+
+    .custom-table-wrapper::-webkit-scrollbar-track {
+        background: #F1F3F5; /* track color */
+        border-radius: 6px;
+    }
+
+    .custom-table-wrapper::-webkit-scrollbar-thumb {
+        background-color: #9AA0A6; 
+        border-radius: 5px;
+        width: 8px;
+    }
+
+
+</style>
+
+<style>
+    .form-select {
+        border-radius: 6px !important;
+        border: 1px solid #CBD5E1 !important;
+        padding: 5px !important;
+        font-size: 13px;
+        transition: all 0.2s ease-in-out;
+    }
+</style>
+
 
 <div class="top-bar body">
     <div class="page-title ">Employees</div>
-    <div class="actions d-flex gap-2">
+   @*  <div class="actions d-flex gap-2">
         <button class="btn chronic-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
             <i class="fas fa-sync-alt"></i>
         </button>
@@ -236,6 +394,18 @@
             <img src="images/plus.png" />
             <span>Create Employee</span>
         </button>
+    </div> *@
+    <div class="actions d-flex gap-2">
+        <button class="btn chronic-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    <div class="search-group">
+        <i class="fa fa-search search-icon"></i>
+        <input class="form-control search-input body-medium" type="text" placeholder="Search"
+               @bind="searchText"
+               @bind:event="oninput"
+               @bind:after="ResetPage" />
+    </div>
     </div>
 </div>
 
@@ -266,14 +436,23 @@
     }
     else
     {
-        <div class="form-group mb-0">
-        </div>
-        <div class="search-group">
+        @* <div class="form-group mb-0">
+        </div> *@
+        @* <div class="search-group">
             <i class="fa fa-search search-icon"></i>
             <input class="form-control search-input body-medium" type="text" placeholder="Search"
                    @bind="searchText"
                    @bind:event="oninput"
                    @bind:after="ResetPage" />          
+        </div> *@
+        <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
+            @* <button class="btn chronic-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
+                <i class="fas fa-sync-alt"></i>
+            </button> *@
+            <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateEmployee">
+                <img src="images/plus.png" />
+                <span>Create Employee</span>
+            </button>
         </div>
     }
 </div>
@@ -329,33 +508,41 @@
             }
         </tbody>
 
-        <tfoot>
+       @*  <tfoot>
             <tr>
                 <td colspan="6" class="table-footer">
                     Showing @PagedEmployees.Count() of @FilteredEmployees.Count() employees
                 </td>
             </tr>
-        </tfoot>
+        </tfoot> *@
 
     </table>
 </div>
 
 <!-- Pagination + Page Size -->
-<div class="d-flex justify-content-between align-items-center">
+<!-- Table Footer Bar -->
+<div class="table-footer-bar">
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedEmployees.Count()</strong> of
+        <strong>@FilteredEmployees.Count()</strong> employees
+    </div>
 
-    <!-- Page Size -->
-    <select class="form-select form-select-sm w-auto"
-            @bind="pageSize"
-            @bind:after="ResetPage">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="0">All</option>
-    </select>
+    <!-- Paze Size -->
+    <div class="footer-pagesize">
+        <span>Rows:</span>
+        <select class="form-select form-select-sm"
+                @bind="pageSize"
+                @bind:after="ResetPage">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="0">All</option>
+        </select>
+    </div>
 
-
-    <!-- Pagination -->
-    <nav class="body-medium">
+    <!-- Previous Next Button -->
+    <nav>
         <ul class="pagination mb-0">
             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                 <button class="page-link" @onclick="PreviousPage">
@@ -364,7 +551,7 @@
             </li>
 
             <li class="page-item disabled">
-                <span class="page-link">
+                <span class="page-link page-status">
                     Page @currentPage of @totalPages
                 </span>
             </li>
@@ -376,7 +563,9 @@
             </li>
         </ul>
     </nav>
+
 </div>
+
 @if (isLoading)
 {
     <div class="spinner-overlay">
@@ -386,7 +575,6 @@
     </div>
 }
 
-
 <CreateEditEmployeeModel @ref="employeeModelRef" OnSubmit="SaveEmployee"></CreateEditEmployeeModel>
 
 @code {
@@ -395,9 +583,12 @@
     public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
     private List<Employee> employees = new();
     private List<Employee> selectedEmployee = new List<Employee>();
+
+    private List<EmployeeAllDetails> employeeAllDetails = new();
+    private List<CompanyLicenceDetails> companylicencedetail = new();
+
     private int companyId;
     private bool isLoading = false;
-
 
     private string searchText = "";
     private int currentPage = 1;
@@ -444,8 +635,6 @@
             }
         }
     }
-
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -531,14 +720,81 @@
 
     private async void CreateEmployee()
     {
+        var company = await EmployeeService.GetCompanyAsync(companyId);
+        var companylicencedetail = await EmployeeService.GetCompanyLicenceDetailsAsync(companyId);
+        var parameterList = new ParameterList
+        {
+            Id = 0,
+            CompanyId = companyId
+        };
+
+        var employeeAllDetails = await EmployeeService.GetEmployeeAllDetailsAsync(parameterList);
         var newEmployee = new CreateEditEmployeeViewModel
         {
+           Id=0,
+           CompanyId = companyId,
+
+            // <!--DetailsTab-->
+              CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
+              {
+                PersonTypes = employeeAllDetails?.PersonTypes
+                .Where(x => x.Id != 3)
+                .Select(x => new SelectListItem
+                {
+                     Value = x.Id.ToString(),
+                     Text = x.Name
+                }).ToList() ?? new List<SelectListItem>(),
+
+                Titles = employeeAllDetails.Titles
+                .Select(x => new SelectListItem
+                {
+                     Value = x.Id.ToString(),
+                     Text = x.Name
+                }).ToList() ?? new List<SelectListItem>(),
+
+                Rosters = employeeAllDetails.Rosters
+                .Select(x => new SelectListItem
+                {
+                     Value = x.Id.ToString(),
+                     Text = x.Name
+                }).ToList() ?? new List<SelectListItem>(),
+
+                Activities = employeeAllDetails.Activities
+                .Select(x => new SelectListItem
+                {
+                     Value = x.Id.ToString(),
+                     Text = x.Name
+                }).ToList() ?? new List<SelectListItem>(),
+
+                CostCentres = employeeAllDetails.CostCentres
+                .Select(x => new SelectListItem
+                {
+                     Value = x.Id.ToString(),
+                     Text = x.Name
+                }).ToList() ?? new List<SelectListItem>(),
+
+                // GTTerminalGroups = employeeAllDetails.GTTerminalGroups
+                // .Select(x => new SelectListItem
+                // {
+                //      Value = x.Id.ToString(),
+                //      Text = x.Name
+                // }).ToList() ?? new List<SelectListItem>(),
+                GTTerminalGroups = employeeAllDetails.GTTerminalGroups?
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList() ?? new List<SelectListItem>(),
+
+                AccessGroups = employeeAllDetails.AccessGroups
+                .Select(x => new SelectListItem
+                {
+                     Value = x.Id.ToString(),
+                     Text = x.Name
+                }).ToList() ?? new List<SelectListItem>(),
+            },
 
         }; 
         await employeeModelRef.ShowModal(newEmployee);
     }
-
-
+  
     private async Task EditEmployee(Employee? employee = null)
     {
         try
@@ -546,20 +802,108 @@
             var editTarget = employee ?? selectedEmployee.FirstOrDefault();
             if (editTarget == null) return;
 
-            // var company = await EmployeeService.GetCompanyAsync(companyId);
-            // var companylicencedetail = await EmployeeService.GetCompanyLicenceDetailsAsync(companyId);
-            // var parameterList = new ParameterList
-            // {
-            //     Id = editTarget.Id,
-            //     EmployeeId = editTarget.Id,
-            //     CompanyId = companyId
-            // };
+            var company = await EmployeeService.GetCompanyAsync(companyId);
+            var companylicencedetail = await EmployeeService.GetCompanyLicenceDetailsAsync(companyId);
+            var parameterList = new ParameterList
+            {
+                Id = editTarget.Id,
+                EmployeeId = editTarget.Id,
+                CompanyId = companyId
+            };
 
-            // var employeeAllDetails = await EmployeeService.GetEmployeeAllDetailsAsync(parameterList);
+            var employeeAllDetails = await EmployeeService.GetEmployeeAllDetailsAsync(parameterList);
 
             EmployeeModal = new CreateEditEmployeeViewModel
             {
                 Id = editTarget.Id,
+                CompanyId = companyId,
+
+                // <!--DetailsTab-->
+               CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
+                {
+                    Forename = editTarget.Forename,
+                    Surname = editTarget.Surname,
+                    BadgeId = editTarget.BadgeId ?? string.Empty,
+                    BadgeId2 = editTarget.BadgeId2,
+                    DateOfBirth = editTarget.DateOfBirth,
+                    Rotation = editTarget.Rotation,
+
+                    Gender = employeeAllDetails.Employee?.Gender ?? string.Empty,
+
+                    PersonTypeId = editTarget.PersonTypeId,
+                    PersonTypes = (employeeAllDetails.PersonTypes ?? Enumerable.Empty<PersonType>()).Where(x => x.Id != 3)
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name 
+                    }).ToList(),
+
+
+                    TitleId = employeeAllDetails.Employee?.TitleId,
+                    Titles = employeeAllDetails.Titles.Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+
+                    RosterId = editTarget.RosterId,
+                    Rosters = employeeAllDetails.Rosters.Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+
+                    ActivityId = editTarget.ActivityId,
+                    Activities = employeeAllDetails.Activities.Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+
+                    CostCentreId = editTarget.CostCentreId,
+                    CostCentres = employeeAllDetails.CostCentres.Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+
+                    GTTerminalGroupId = editTarget.GTTerminalGroupId,
+                    GTTerminalGroups = employeeAllDetails.GTTerminalGroups.Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+
+                    AccessGroupId = editTarget.AccessGroupId,
+                    AccessGroups = employeeAllDetails.AccessGroups.Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+                },
+
+                // <!--PersonalInfoTab-->
+                CreateEditEmployeePersonalInfoViewModel = new CreateEditEmployeePersonalInfoViewModel
+                {
+                    Address1 = employeeAllDetails.Employee?.Address1 ?? string.Empty,
+                    Address2 = employeeAllDetails.Employee?.Address2 ?? string.Empty,
+                    Address3 = employeeAllDetails.Employee?.Address3 ?? string.Empty,
+                    Address4 = employeeAllDetails.Employee?.Address4 ?? string.Empty,
+
+                    Postcode = employeeAllDetails.Employee?.Postcode ?? string.Empty,
+                    Mobile   = employeeAllDetails.Employee?.Mobile ?? string.Empty,
+                    Mobile2  = employeeAllDetails.Employee?.Mobile2 ?? string.Empty,
+                    Email    = employeeAllDetails.Employee?.Email ?? string.Empty,
+                    Email2   = employeeAllDetails.Employee?.Email2 ?? string.Empty,
+                   NextOfKin = employeeAllDetails.Employee?.NextOfKin ?? string.Empty,
+                    NextOfKinContactNo = employeeAllDetails.Employee?.NextOfKinContactNo ?? string.Empty,
+                },
+
+                CreateEditEmployeeNotesViewModel = new CreateEditEmployeeNotesViewModel
+                {
+                    //Notes = employeeAllDetails.Employee?.Notes ?? string.Empty,
+                    Notes = employeeAllDetails.Employee?.Notes ?? string.Empty,
+                }   
 
             };
 

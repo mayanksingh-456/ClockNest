@@ -1,24 +1,27 @@
 ﻿@inherits LayoutComponentBase
 
-
 <style>
+    nav .side-item.active i {
+        color: #1ABC9C; 
+    }
+
+    nav .side-item:hover i {
+        color: #1ABC9C;
+    }
     .sidebar {
         width: 190px;
         height: 100vh;
-        background: #c9b8ff12;
-        border-right: 1px solid #e5e5e5;
+        background: #F7F7FB;
+        border-right: 1px solid #E6E6EF !important;
         padding: 20px 5px;
         display: flex;
         flex-direction: column;
-        /*  overflow-x: visible !important; */
     }
 
     .menu-scroll {
         flex: 1;
         overflow-y: auto;
         padding-right: 5px;
-        /*   overflow: visible !important; */
-        /*   overflow-x: visible !important; */
     }
 
     .bottom-menu {
@@ -36,6 +39,7 @@
         .sidebar-logo .logo {
             height: 27px;
             margin-left: 2px;
+            margin-top: 1px;
         }
 
         .sidebar-logo .logo-collapsed {
@@ -58,6 +62,7 @@
         text-decoration: none;
         border-radius: 6px;
         margin-bottom: 2px;
+        transition: all 0.2s ease;
     }
 
     .side-item.setting {
@@ -65,13 +70,14 @@
     }
 
     nav .side-item:hover {
-        background: #e6f0ff;
-        color: #486da2;
+        background: #1ABC9C33; /* light teal hover */
+        color: #1ABC9C; /* match login button */
         cursor: pointer;
     }
 
     nav .side-item.active {
-        color: #486da2;
+        color: #1ABC9C;
+        font-weight: 600;
     }
 
     .bottom-menu .side-item {
@@ -83,18 +89,28 @@
         text-decoration: none;
         border-radius: 6px;
         margin-bottom: 2px;
+        transition: all 0.2s ease;
     }
 
         .bottom-menu .side-item:hover,
         .bottom-menu .side-item.active {
-            background: #e6f0ff;
-            color: #486da2;
+            background: #1ABC9C33; /* light teal hover */
+            color: #1ABC9C;
         }
+
+            .bottom-menu .side-item.active i {
+        color: #1ABC9C; 
+    }
+
+            .bottom-menu .side-item:hover i {
+        color: #1ABC9C;
+    }
 
     .logout {
         margin-top: auto;
         margin-bottom: -12px !important;
-        color: #f87210 !important;
+        /* color: #f87210 !important; */
+        cursor:pointer;
     }
 
     .separator {
@@ -107,6 +123,7 @@
         font-size: 12px;
         margin-left: -7px;
         margin-top: 0px;
+        color: #333;
     }
 
     .sidebar.collapsed i {
@@ -122,12 +139,12 @@
         margin-bottom: -19px !important;
     }
 
-     .side-item.arrow-icon:hover {
+    .side-item.arrow-icon:hover {
         background: transparent !important;
         color: inherit !important;
         cursor: default !important;
     }
-   
+
     .bottom-menu .side-item-back {
         display: flex;
         align-items: center;
@@ -142,8 +159,7 @@
     }
 
     .toggle-button {
-       /*  color: cornflowerblue; */
-        margin-left: 76px;
+        margin-left: 72px;
         margin-bottom: -14px;
         font-size: 13px;
         cursor: pointer;
@@ -154,17 +170,16 @@
         font-weight: 500 !important;
         font-size: 14px;
         line-height: 18px;
-        letter-spacing: 0.8px;
     }
 
-    .menu-text-collapsed{
+    .menu-text-collapsed {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 500 !important;
         font-size: 14px !important;
         line-height: 18px !important;
-        letter-spacing: 0.8px !important;
     }
 </style>
+
 <style>
     .sidebar.collapsed {
         width: 68px;
@@ -176,17 +191,13 @@
             display: none;
         }
 
-
     nav .side-item {
         position: relative !important;
     }
 
-
     .flyout-menu {
         position: fixed;
         left: 50px;
-        /* top: 55px; */
-
         top: var(--flyout-top);
         background: #fff;
         min-width: 140px;
@@ -208,8 +219,14 @@
     .flyout-menu .side-item {
         padding: 4px 15px;
         white-space: nowrap;
+        color: #333;
+        transition: all 0.2s ease;
     }
 
+        .flyout-menu .side-item:hover {
+            background: #1ABC9C33;
+            color: #1ABC9C;
+        }
 </style>
 
 <style>
@@ -226,15 +243,14 @@
 
         .submenu .side-item:hover {
             background: none !important;
-            color: #0F3D91;
+            color: #1ABC9C;
         }
-
 
     .menu-scroll .setting.active + .submenu {
         margin-left: 17px !important;
     }
-
 </style>
+
 <style>
     .menu-scroll::-webkit-scrollbar {
         width: 5px !important;
@@ -246,13 +262,13 @@
 
     .menu-scroll::-webkit-scrollbar-thumb {
         background: #b1b1b1 !important;
-        /*  border-radius: 5px !important; */
     }
 
         .menu-scroll::-webkit-scrollbar-thumb:hover {
             background: #8a8a8a !important;
         }
 </style>
+
 
 <div class="sidebar @(isSidebarCollapse ? "collapsed" : "") ">
 
@@ -642,7 +658,7 @@
         <div class="separator"></div>
 
         <div class="bottom-menu">
-            <NavLink class="side-item" href="/settings">
+            <NavLink class="side-item" href="/developmentRoadmap">
                 <i class="fa-brands fa-connectdevelop"></i><span class="menu-text">Development rodmap</span>
             </NavLink>
             <NavLink class="side-item">
@@ -650,7 +666,7 @@
                 <i class="fa-regular fa-user"></i> <span class="menu-text">@context.User.Identity.Name</span>
                 </AuthorizeView>
             </NavLink>
-            <NavLink class="side-item" href="/settings">
+            <NavLink class="side-item" href="/help">
                 <i class="fa-regular fa-circle-question"></i> <span class="menu-text">Help/FAQ</span>
             </NavLink>
             <NavLink class="side-item" @onclick="OpenSettings">

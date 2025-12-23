@@ -1,0 +1,13 @@
+﻿
+<h5>Notes</h5>
+<div class="mb-1">
+    <div class="col-md-12 colNoPaddingRight">
+        <InputTextArea @bind-Value="notesViewModel.Notes"
+                       class="form-control"
+                       style="width:100%; max-width:100%; min-height:300px;" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public CreateEditEmployeeNotesViewModel notesViewModel { get; set; } = new();
+}

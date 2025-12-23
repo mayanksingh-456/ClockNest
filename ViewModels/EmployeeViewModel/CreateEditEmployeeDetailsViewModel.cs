@@ -7,7 +7,7 @@ namespace ClockNest.ViewModels.EmployeeViewModel
     {
         public CreateEditEmployeeDetailsViewModel()
         {
-            //CreateEditEmployeePhotoViewModel = new CreateEditEmployeePhotoViewModel();
+            CreateEditEmployeePhotoViewModel = new CreateEditEmployeePhotoViewModel();
             PersonTypes = new List<SelectListItem>();
 
             GenderTypes = new List<SelectListItem>();
@@ -92,6 +92,6 @@ namespace ClockNest.ViewModels.EmployeeViewModel
 
         public List<SelectListItem> AccessGroups { get; set; }
 
-       // public CreateEditEmployeePhotoViewModel CreateEditEmployeePhotoViewModel { get; set; }
+        public CreateEditEmployeePhotoViewModel CreateEditEmployeePhotoViewModel { get; set; }
     }
 }

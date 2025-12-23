@@ -4,21 +4,21 @@ namespace ClockNest.Models.Employee_Model
 {
     public class Employee
     {
-        //public Employee()
-        //{
-        //    EmployeeTagDetails = new List<EmployeeTagDetails>();
-        //    Titles = new List<Title>();
-        //    Rosters = new List<Roster>();
-        //    Activities = new List<Activity>();
-        //    CostCentres = new List<CostCentre>();
-        //    TerminalGroups = new List<TerminalGroupDetails>();
-        //    GTTerminalGroups = new List<GTTerminalGroupDetails>();
-        //    EmployeeTag = new List<EmployeeTag>();
-        //    EmployeeOnOffSite = new List<EmployeeOnOffSite>();
-        //    EmployeeItem = new List<EmployeeItem>();
-        //    AbsencePeriod = new List<AbsencePeriod>();
-        //    EmployeePhoto = new EmployeePhoto();
-        //}
+        public Employee()
+        {
+            EmployeeTagDetails = new List<EmployeeTagDetails>();
+            Titles = new List<Title>();
+            Rosters = new List<Roster>();
+            Activities = new List<Activity>();
+            CostCentres = new List<CostCentre>();
+            TerminalGroups = new List<TerminalGroupDetails>();
+            GTTerminalGroups = new List<GTTerminalGroupDetails>();
+            EmployeeTag = new List<EmployeeTag>();
+            EmployeeOnOffSite = new List<EmployeeOnOffSite>();
+            EmployeeItem = new List<EmployeeItem>();
+            AbsencePeriod = new List<AbsencePeriod>();
+            EmployeePhoto = new EmployeePhoto();
+        }
 
         public int Id { get; set; }
         public int PersonTypeId { get; set; }
@@ -30,24 +30,24 @@ namespace ClockNest.Models.Employee_Model
 
         public string FullName => Forename + " " + Surname;
 
-        //public List<EmployeeTagDetails> EmployeeTagDetails { get; set; }
+        public List<EmployeeTagDetails> EmployeeTagDetails { get; set; }
 
-        //public string EmployeeTagDetailsDisplay
-        //{
-        //    get
-        //    {
-        //        var displayText = string.Empty;
-        //        //return String.Join(", ", TerminalDetails.FindAll(t=>t.Name).ToArray());
-        //        EmployeeTagDetails.ForEach(delegate (EmployeeTagDetails t)
-        //        {
-        //            displayText += t.Name + " ";
+        public string EmployeeTagDetailsDisplay
+        {
+            get
+            {
+                var displayText = string.Empty;
+                //return String.Join(", ", TerminalDetails.FindAll(t=>t.Name).ToArray());
+                EmployeeTagDetails.ForEach(delegate (EmployeeTagDetails t)
+                {
+                    displayText += t.Name + " ";
 
-        //        });
+                });
 
-        //        return displayText;
-        //    }
+                return displayText;
+            }
 
-        //}
+        }
 
         public DateTime? DateOfBirth { get; set; }
         public string Mobile { get; set; }
@@ -181,18 +181,18 @@ namespace ClockNest.Models.Employee_Model
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public string SerialNumber { get; set; }
-        //public List<Title> Titles { get; set; }
-        //public EmployeeCascadeEmployees EmployeeCascadeEmployees { get; set; }
-        //public List<Roster> Rosters { get; set; }
-        //public List<Activity> Activities { get; set; }
-        //public List<CostCentre> CostCentres { get; set; }
-        //public List<TerminalGroupDetails> TerminalGroups { get; set; }
-        //public List<GTTerminalGroupDetails> GTTerminalGroups { get; set; }
-        //public List<EmployeeTag> EmployeeTag { get; set; }
-        //public List<EmployeeOnOffSite> EmployeeOnOffSite { get; set; }
-        //public List<EmployeeItem> EmployeeItem { get; set; }
-        //public List<AbsencePeriod> AbsencePeriod { get; set; }
-        //public EmployeePhoto EmployeePhoto { get; set; }
+        public List<Title> Titles { get; set; }
+        public EmployeeCascadeEmployees EmployeeCascadeEmployees { get; set; }
+        public List<Roster> Rosters { get; set; }
+        public List<Activity> Activities { get; set; }
+        public List<CostCentre> CostCentres { get; set; }
+        public List<TerminalGroupDetails> TerminalGroups { get; set; }
+        public List<GTTerminalGroupDetails> GTTerminalGroups { get; set; }
+        public List<EmployeeTag> EmployeeTag { get; set; }
+        public List<EmployeeOnOffSite> EmployeeOnOffSite { get; set; }
+        public List<EmployeeItem> EmployeeItem { get; set; }
+        public List<AbsencePeriod> AbsencePeriod { get; set; }
+        public EmployeePhoto EmployeePhoto { get; set; }
         public string RosterName { get; set; }
         public string ActivityName { get; set; }
         public string CostCentreName { get; set; }

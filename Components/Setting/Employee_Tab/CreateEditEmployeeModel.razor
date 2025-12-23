@@ -5,7 +5,7 @@
         Modal: Slide from Right
        =========================== */
     .modal.right .modal-dialog {
-        width: 55vw;
+        width: 75vw;
         height: 100vh;
         max-width: none;
         position: fixed;
@@ -51,6 +51,132 @@
   
 </style>
 
+<style>
+	.nav-tabs .nav-link {
+		color: #333 !important;
+		font-weight: 500;
+		border: none !important;
+	}
+
+		.nav-tabs .nav-link.active {
+			color: #008d94 !important;
+			border-bottom: 2px solid #008d94 !important;
+			background: transparent !important;
+		}
+
+	/* Consistent text sizes */
+	.body-medium {
+		font-size: 0.95rem;
+		color: #444;
+	}
+
+	.section-title {
+		font-weight: 600;
+		font-size: 1rem;
+		margin-bottom: 0.5rem;
+		color: #222;
+	}
+
+	.info-box {
+		background: #fff;
+		border-radius: 10px;
+		padding: 1rem;
+		margin-bottom: 1rem;
+		box-shadow: 0px 1px 4px rgba(0,0,0,0.05);
+	}
+
+	.modal-body {
+		word-wrap: break-word;
+		overflow-wrap: anywhere;
+	}
+
+	.info-box .scroll-container {
+		max-height: 240px;
+		overflow-y: auto;
+		padding-right: 5px;
+	}
+
+	.employee-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 10px;
+	}
+
+	.employee-name {
+		color: #333;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-weight: 700;
+		font-size: 1rem;
+	}
+
+
+	.managed-employees-list,
+	.managed-employees-list li {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.profile-img {
+		width: 26px !important;
+		height: 26px !important;
+		border-radius: 50% !important;
+		opacity: 1 !important;
+		transform: rotate(0deg) !important;
+	}
+
+
+
+	.section-title {
+		font-weight: 700;
+		font-size: 0.95rem;
+		margin-bottom: 0.5rem;
+	}
+
+</style>
+
+<style>
+	.btn_modal-success_save {
+		width: 127.5px;
+		height: 40px;
+		border-radius: 8px;
+		padding: 8px 16px;
+		background: #e91e63;
+		border: none;
+		color: white;
+		font-family: 'Montserrat', sans-serif;
+		font-size: 16px !important;
+		font-weight: 400 !important;
+		line-height: 24px !important;
+		text-align: center !important;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.btn_modal-close {
+		width: 127.5px;
+		height: 40px;
+		border-radius: 8px;
+		padding: 8px 16px;
+		background: #FFFFFF;
+		border: 1px solid #D9DBDE !important;
+		color: black;
+		font-family: 'Montserrat', sans-serif;
+		font-size: 16px !important;
+		font-weight: 400 !important;
+		line-height: 24px !important;
+		text-align: center !important;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+</style>
+
+
+
 <div class="modal fade right" id="employeeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right">
         <div class="modal-content h-100 border-0">
@@ -65,19 +191,156 @@
                 </div>
 
                 <!-- Body-->
-                <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh;">
+				<div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
+					<div class="row h-100">
+					@* <div class="col-md-3 bg-light p-3 border-end"> *@
+						<div class="col-md-3 p-3 border-end" style="background:#F9FAFB;">
 
-                    @* <div class="mb-3">
-                        <label class="form-label">First Name</label>
 
-                    </div> *@
+						<div class="text-center mb-3">
+							<div class="position-relative d-inline-block">
+								<img src=""@*  @GetBase64Photo() *@
+									 class="rounded-circle"
+										 style="width:120px; height:120px; object-fit:cover; object-position:center; border: 3px solid #e91e63;" />
+								<label class="btn_modal-success_save p-1 position-absolute"
+									   style="bottom:0; right:0; border-radius:50%; width: 28px ! Important; height:28px; cursor:pointer;">
+									<i class="fa-solid fa-pen-to-square" style="color:#FFFFFF; pointer-events: none;"></i>
+									@* <InputFile OnChange="OnPhotoSelected"
+											   accept="image/*"
+											   style="opacity:0; position:absolute; left:0; top:0; width:100%; height:100%;" /> *@
+								</label>
+							</div>
+							<h6 class="employee-name fw-bold mt-2">
+								@($"{EmployeeModal.CreateEditEmployeeDetailsViewModel.Forename} {EmployeeModal.CreateEditEmployeeDetailsViewModel.Surname}")
+							</h6>
+						</div>
+
+						<div class="info-box">
+							<h6 class="section-title">Contact</h6>
+							@* <p class="body-medium mb-1">Email: @EmployeeModal.CreateEditEmployeePersonalInfoViewModel.Email</p>
+							<p class="body-medium mb-0">Phone:  @EmployeeModal.CreateEditEmployeePersonalInfoViewModel.Mobile</p> *@
+						</div>
+
+						<div class="info-box">
+							<h6 class="section-title">Employment</h6>
+							<p class="body-medium mb-1">Join Date: @EmployeeModal.CreateEditEmployeeAdditionalInfoViewModel.JoinDateDisplay</p>
+							<p class="body-medium mb-0">Length of service: @EmployeeModal.CreateEditEmployeeAdditionalInfoViewModel.LengthOfService</p>
+						</div>
+
+						<div class="info-box">
+							<h6 class="section-title">Manager</h6>
+							@if (EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel == null)
+							{
+								<div class="d-flex align-items-center body-medium">Not set</div>
+							}
+							@* else
+							{
+								<div class="d-flex align-items-center">
+									<img src="@(EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Photo != null
+																		  			 ? $"data:image/png;base64,{Convert.ToBase64String(EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Photo)}"
+																		  			 : "avtar.png")"
+																															 class="rounded-circle border me-2"
+																															 style="width:40px; height:40px; object-fit:cover;" />
+
+									<span class="body-medium">
+										@(string.IsNullOrWhiteSpace(EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager?.Forename)
+																			? "Not set"
+																			: $"{EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Forename} {EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Surname}")
+								</span>
+							</div>
+														} *@
+						</div>
+
+						<div class="info-box">
+							<h6 class="section-title">Employees Managed</h6>
+							@if (EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel?.EmployeesManaged?.Any() == true)
+							{
+								<div class="scroll-container">
+									@* @foreach (var emp in EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.EmployeesManaged)
+									{
+										string imageSrc;
+										if (emp.Photo != null && emp.Photo.Length > 0)
+										{
+											imageSrc = $"data:image/png;base64,{Convert.ToBase64String(emp.Photo)}";
+										}
+										else
+										{
+											imageSrc = "/avtar.png";
+										}
+										<div class="employee-item">
+											<img src="@imageSrc"
+												 class="rounded-circle border me-2"
+												 style="width:40px; height:40px; object-fit:cover;" />
+											<span class="body-medium ">@emp.FullName</span>
+										</div>
+									} *@
+								</div>
+							}
+							else
+							{
+								<p class="body-medium mb-0">None</p>
+							}
+						</div>
+					</div>
+
+						<div class="col-md-9 p-3 pt-0 body-medium">
+								<ul class="nav nav-tabs mb-3">
+									<li class="nav-item">
+										<a class="nav-link @(activeTab == "dashboard" ? "active" : "")" href="#dashboard" data-bs-toggle="tab" @onclick="@(() => OnTabClick("dashboard"))">Dashboard</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link @(activeTab == "details" ? "active" : "")" href="#details" data-bs-toggle="tab" @onclick="@(() => OnTabClick("details"))">Details</a>
+									</li>
+									<li class="nav-item">
+									<a class="nav-link @(activeTab == "personalInfo" ? "active" : "")" href="#personalInfo" data-bs-toggle="tab" @onclick="@(() => OnTabClick("personalInfo"))">Personal info</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link @(activeTab == "notes" ? "active" : "")" href="#notes" data-bs-toggle="tab" @onclick="@(() => OnTabClick("notes"))">Notes</a>
+									</li>
+								
+                                </ul>
+
+								<div class="tab-content p-0 bg-transparent">
+									<div class="tab-pane fade @(activeTab == "dashboard" ? "show active" : "")" id="dashboard">
+										
+									</div>
+									<div class="tab-pane fade @(activeTab == "details" ? "show active" : "")" id="details">
+									<CreateEditEmployeeDetailsTab employeeDetailsViewModel="EmployeeModal.CreateEditEmployeeDetailsViewModel" />
+									</div>
+								<div class="tab-pane fade @(activeTab == "personalInfo" ? "show active" : "")" id="personalInfo">
+										<CreateEditEmployeePersonalInfoTab personalInfoViewModel="EmployeeModal.CreateEditEmployeePersonalInfoViewModel"/>
+									</div>
+								</div>
+
+								<div class="tab-pane fade @(activeTab == "notes" ? "show active" : "")" id="notes">
+									<CreateEditEmployeeNotesTab notesViewModel="EmployeeModal.CreateEditEmployeeNotesViewModel"/>
+								</div>
+
+								</div>
+</div>
                 </div>
 
                 <!-- Footer-->
-                <div class="modal-footer sticky-bottom border-0">
+               @*  <div class="modal-footer sticky-bottom border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
-                </div>
+                </div> *@
+				<div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
+					<button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit"
+							class="btn_modal-success_save title-h4-semi-bold"
+							disabled="@isSubmitting"
+							style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
+						@if (isSubmitting)
+						{
+							<span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
+						}
+						else
+						{
+							<span>Save</span>
+						}
+					</button>
+				</div>
 
             </EditForm>
         </div>
@@ -85,12 +348,22 @@
 </div>
 
 @code{
-    [Parameter] public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
-    [Parameter] public EventCallback<CreateEditEmployeeViewModel> OnSubmit { get; set; }
 
-    public async Task ShowModal(CreateEditEmployeeViewModel model)
+
+
+	[Parameter] public bool isSubmitting { get; set; }
+	[Parameter] public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
+	[Parameter] public EventCallback<CreateEditEmployeeViewModel> OnSubmit { get; set; }
+
+	private string activeTab;
+	private void OnTabClick(string details)
+	{
+		activeTab = details;
+	}
+	public async Task ShowModal(CreateEditEmployeeViewModel model)
     {
         EmployeeModal = model; 
+        activeTab = "details"; 
         await JS.InvokeVoidAsync("showModal", "employeeModal");
     }
 

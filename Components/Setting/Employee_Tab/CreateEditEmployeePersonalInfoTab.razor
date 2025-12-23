@@ -1,0 +1,97 @@
+﻿
+<h5>Personal info</h5>
+
+<div class="row">
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Address1</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Address1" placeholder="Address1">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Address2</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Address2" placeholder="Address2">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Address3</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Address3" placeholder="Address3">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Address4</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Address4" placeholder="Address4">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Postcode</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Postcode" placeholder="Postcode">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Mobile1</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Mobile" placeholder="Mobile1">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Mobile2</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Mobile2" placeholder="Mobile2">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Email1</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Email" placeholder="Email">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Email2</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.Email2" placeholder="Email2">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Nest of Kin</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.NextOfKin" placeholder="Next of kin">
+
+        </InputText>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Next of kin contact no</label>
+        <InputText class="form-control form-control-lg body-medium"
+                   @bind-Value="personalInfoViewModel.NextOfKinContactNo" placeholder="Next of kin contact no">
+
+        </InputText>
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public CreateEditEmployeePersonalInfoViewModel personalInfoViewModel { get; set; } = new();
+}

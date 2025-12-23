@@ -1,0 +1,131 @@
+﻿
+
+<h5>Details</h5>
+<div class="row">
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Person type id  <span class="text-danger">*</span></label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.PersonTypeId" class="form-select form-control-lg body-medium  no-outline">
+            @foreach (var personType in employeeDetailsViewModel.PersonTypes)
+            {
+                <option value="@Convert.ToInt32(personType.Value)">@personType.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Title</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.TitleId" class="form-select form-control-lg body-medium  no-outline">
+            @foreach (var titles in employeeDetailsViewModel.Titles)
+            {
+                <option value="@Convert.ToInt32(titles.Value)">@titles.Text</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Forname <span class="text-danger">*</span></label>
+        <InputText class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeDetailsViewModel.Forename"
+                   placeholder="Forname" />
+        <ValidationMessage For="@(() => employeeDetailsViewModel.Forename)" />
+    </div>
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Surname <span class="text-danger">*</span></label>
+        <InputText class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeDetailsViewModel.Surname"
+                   placeholder="Surname" />
+        <ValidationMessage For="@(() => employeeDetailsViewModel.Surname)" />
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Gender</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.Gender" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var gender in employeeDetailsViewModel.GenderTypes)
+            {
+                <option value=@gender.Value>@gender.Text</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Date of birth</label>
+        <InputDate class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeDetailsViewModel.DateOfBirth"
+                   placeholder="DOB" />
+    </div>
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Badge id  <span class="text-danger">*</span></label>
+        <InputText class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeDetailsViewModel.BadgeId"
+                   placeholder="BadgeId" />
+        <ValidationMessage For="@(() => employeeDetailsViewModel.BadgeId)" />
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Badge id 2 </label>
+        <InputText class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeDetailsViewModel.BadgeId2"
+                   placeholder="BadgeId2" />
+    </div>
+   
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Roster id</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.RosterId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var rosters in employeeDetailsViewModel.Rosters)
+            {
+                <option value="@Convert.ToInt32(rosters.Value)">@rosters.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">Activity id</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.ActivityId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var activities in employeeDetailsViewModel.Activities)
+            {
+                <option value="@Convert.ToInt32(activities.Value)">@activities.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+        <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">CostCentre id</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.CostCentreId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var costCentres in employeeDetailsViewModel.CostCentres)
+            {
+                <option value="@Convert.ToInt32(costCentres.Value)">@costCentres.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">GTTerminalGroup id</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.GTTerminalGroupId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var terminalGroups in employeeDetailsViewModel.GTTerminalGroups)
+            {
+                <option value="@Convert.ToInt32(terminalGroups.Value)">@terminalGroups.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">AccessGroup id</label>
+        <InputSelect @bind-Value="employeeDetailsViewModel.AccessGroupId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var accessGroups in employeeDetailsViewModel.AccessGroups)
+            {
+                <option value="@Convert.ToInt32(accessGroups.Value)">@accessGroups.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+  
+</div>
+@code {
+
+    [Parameter] public CreateEditEmployeeDetailsViewModel employeeDetailsViewModel { get; set; } = new();
+}
