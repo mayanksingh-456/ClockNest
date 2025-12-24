@@ -1,12 +1,9 @@
 ﻿@page "/employee"
-@using ClockNest.Services.Spinner_Service
-@using ClockNest.ViewModels.Parameter_List
-@using Microsoft.AspNetCore.Mvc.Rendering
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IJSRuntime JS
-@inject SpinnerService SpinnerService
 
-<style>
+
+ 
+
+@* <style>
     /* ===========================
        # Custom Table Styles
            =========================== */
@@ -38,7 +35,6 @@
 
             font-size: 13px;
             font-weight: 600;
-           /*  text-transform: uppercase; */
             letter-spacing: 0.03em;
             color: #374151;
         }
@@ -64,8 +60,6 @@
             height: 13px;
         }
 
-
-
         /* Better row height */
         .custom-table tbody tr td {
             padding: 0.65rem;
@@ -79,14 +73,6 @@
             border-left: none !important;
             border-right: none !important;
         }
-      /*   .custom-table tfoot td {
-            position: sticky;
-            bottom: 0;
-            z-index: 2;
-            background: #f1f3f5;
-            font-weight: 600;
-            border-top: 2px solid #dee2e6;
-        } */
 
         /* Hover highlight */
         .custom-table tbody tr:hover {
@@ -104,9 +90,9 @@
             max-height: 300px;
         }
     }
-</style>
+</style> *@
 
-<style>
+@* <style>
     /* ===========================
        # Top Bar
                =========================== */
@@ -120,9 +106,7 @@
 
     }
     .page-title{
-       /*  font-family: 'Inter', sans-serif !important; */
-        font-size: 24px !important;
-       
+        font-size: 24px !important;      
         margin-left: -9px;
     }
 
@@ -140,7 +124,6 @@
     .actions .btn {
         height: 40px;
     }
-
 
     /* ===========================
        # Selected Bar
@@ -162,14 +145,12 @@
         align-items: center;
         gap: 16px;
         color: #FFF;
-        /* font-family: 'Montserrat', sans-serif; */
         font-size: 14px;
         font-weight: 500;
     }
 
     .selectedBar_deleteButton {
         color: #FFF;
-       /*  font-family: 'Montserrat', sans-serif; */
         font-size: 16px;
         font-weight: 400;
         cursor: pointer;
@@ -201,13 +182,11 @@
 
     }
 
-
     .search-group {
         position: relative;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        /* height: 56px; */
         height:39px;
         border-radius: 8px;
     }
@@ -232,9 +211,7 @@
         font-weight: 500;
 
     }
-   /*  .bg-brand-100:hover {
-            background-color: #CC0C4E;
-            } */
+
         .bg-brand-100:hover,
         .bg-brand-100:focus,
         .bg-brand-100:active,
@@ -265,24 +242,10 @@
             border-color: #CED4DA !important;
         }
 
-</style>
+</style> *@
 
-<style>
-    .spinner-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(255, 255, 255, 0.6);
-        z-index: 1000;
-    }
 
-</style>
-<style>
+@* <style>
     .table-footer-bar {
         display: flex;
         align-items: center;
@@ -336,9 +299,9 @@
     }
 
   
-</style>
+</style> *@
 
-<style>
+@* <style>
     /* TABLE SCROLLBAR */
     .custom-table-wrapper::-webkit-scrollbar {
         width: 6px; 
@@ -357,7 +320,7 @@
     }
 
 
-</style>
+</style> *@
 
 <style>
     .form-select {
@@ -382,7 +345,7 @@
         </button>
     </div> *@
     <div class="actions d-flex gap-2">
-        <button class="btn chronic-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
+        <button class="btn clockNest-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
             <i class="fas fa-sync-alt"></i>
         </button>
     <div class="search-group">
@@ -447,7 +410,7 @@
 <div class="table-responsive custom-table-wrapper">
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
-            <tr >
+            <tr>
                 <th style="width:5%">
                     <input type="checkbox"
                            class="form-check-input"
@@ -469,7 +432,6 @@
                 @foreach (var emp in PagedEmployees)
                 {
                     <tr @ondblclick="@(() => EditEmployee(emp))">
-                       @*  *@
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
@@ -493,15 +455,6 @@
                 </tr>
             }
         </tbody>
-
-       @*  <tfoot>
-            <tr>
-                <td colspan="6" class="table-footer">
-                    Showing @PagedEmployees.Count() of @FilteredEmployees.Count() employees
-                </td>
-            </tr>
-        </tfoot> *@
-
     </table>
 </div>
 
@@ -552,15 +505,6 @@
 
 </div>
 
-@if (isLoading)
-{
-    <div class="spinner-overlay">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-}
-
 <CreateEditEmployeeModel @ref="employeeModelRef" OnSubmit="SaveEmployee"></CreateEditEmployeeModel>
 
 @code {
@@ -574,7 +518,6 @@
     private List<CompanyLicenceDetails> companylicencedetail = new();
 
     private int companyId;
-    private bool isLoading = false;
 
     private string searchText = "";
     private int currentPage = 1;
@@ -644,7 +587,6 @@
 
     private async Task RefreshGrid()
     {
-        //isLoading = true;
         SpinnerService.Show();
         await Task.Delay(1000);
         StateHasChanged(); 
@@ -658,7 +600,6 @@
         }
         finally
         {
-            //isLoading = false;
             SpinnerService.Hide();
         }
     }
@@ -763,12 +704,6 @@
                      Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
 
-                // GTTerminalGroups = employeeAllDetails.GTTerminalGroups
-                // .Select(x => new SelectListItem
-                // {
-                //      Value = x.Id.ToString(),
-                //      Text = x.Name
-                // }).ToList() ?? new List<SelectListItem>(),
                 GTTerminalGroups = employeeAllDetails.GTTerminalGroups?
             .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
             .ToList() ?? new List<SelectListItem>(),

@@ -202,3 +202,313 @@ body {
     font-weight: 500 !important;
     line-height: 18px !important;
 }
+
+
+/* ===========================
+       # Custom Table Styles
+           =========================== */
+
+/* Wrapper controls height & scrolling */
+.custom-table-wrapper {
+    max-height: 365px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+
+/* Table width */
+.custom-table {
+    width: 100%;
+    margin-bottom: 0;
+    font-weight: 300 !important;
+    font-size: 14px;
+}
+
+    /* Sticky header */
+    .custom-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: #f8f9fa;
+        box-shadow: inset 0 -1px 0 #E5E7EB;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: #374151;
+    }
+
+    .custom-table tbody td {
+        color: #495057d9;
+        font-weight: 400;
+    }
+
+
+    .custom-table tbody tr {
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    .custom-table th:first-child,
+    .custom-table td:first-child {
+        text-align: center;
+    }
+
+    .custom-table input[type="checkbox"] {
+        width: 13px;
+        height: 13px;
+    }
+
+    /* Better row height */
+    .custom-table tbody tr td {
+        padding: 0.65rem;
+        vertical-align: middle;
+    }
+
+
+
+    .custom-table th,
+    .custom-table td {
+        border-left: none !important;
+        border-right: none !important;
+    }
+
+    /* Hover highlight */
+    .custom-table tbody tr:hover {
+        background-color: #F9FAFB;
+    }
+
+    /* Checkbox alignment */
+    .custom-table input[type="checkbox"] {
+        cursor: pointer;
+    }
+
+/* Responsive height for small screens */
+@@media (max-width: 768px) {
+    .custom-table-wrapper {
+        max-height: 300px;
+    }
+}
+
+/* ===========================
+       # Top Bar
+               =========================== */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 10px;
+    margin-right: -8px;
+}
+
+.page-title {
+    font-size: 24px !important;
+    margin-left: -9px;
+}
+
+.clockNest-bg-secondary {
+    background-color: #80c2b5 !important;
+    color: #FFFFFF !important;
+    transition: background-color 0.2s ease-in-out !important;
+}
+
+    .clockNest-bg-secondary:hover {
+        background-color: #56bca8 !important;
+        color: #FFFFFF !important;
+    }
+
+.actions .btn {
+    height: 40px;
+}
+
+/* ===========================
+       # Selected Bar
+           =========================== */
+.selectedBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background-color: #215770;
+    border-radius: 8px;
+    height: 50px;
+    margin-left: -10px;
+    margin-right: -2px;
+}
+
+.selectedBar_container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.selectedBar_deleteButton {
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+    .selectedBar_deleteButton:hover {
+        text-decoration: underline;
+    }
+
+.selectedCount {
+    font-weight: 700;
+}
+
+.selectedText {
+    margin-right: 16px;
+}
+
+/* ===========================
+       # Search Input
+       =========================== */
+.search-input {
+    width: 322px;
+    height: 40px;
+    border-radius: 8px;
+    /*  margin-right: -8px; */
+}
+
+.search-group {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 39px;
+    border-radius: 8px;
+}
+
+    .search-group i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #A0A6B0;
+    }
+
+    .search-group input {
+        padding-left: 36px !important;
+    }
+
+.bg-brand-100 {
+    background-color: #e91e63;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+    .bg-brand-100:hover,
+    .bg-brand-100:focus,
+    .bg-brand-100:active,
+    .bg-brand-100:focus-visible {
+        background-color: #CC0C4E !important;
+        color: #FFFFFF !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+.form-control:focus,
+.btn:focus,
+.btn:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.form-check-input:checked {
+    background-color: #008d94 !important;
+    border-color: #008d94 !important;
+}
+
+    .form-check-input:focus,
+    .form-check-input:active,
+    .form-check-input:checked:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: #CED4DA !important;
+    }
+
+
+
+    /* ===========================
+       # Table Footer
+           =========================== */
+.table-footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 16px;
+    margin-top: 8px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+}
+
+/* Left text */
+.footer-info {
+    font-size: 13px;
+    color: #6B7280;
+}
+
+/* Center page size */
+.footer-pagesize {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #374151;
+}
+
+    .footer-pagesize select {
+        width: 70px;
+    }
+
+.pagination {
+    gap: 6px;
+}
+
+    .pagination .page-link {
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        border: 1px solid #E5E7EB;
+        background-color: #FFFFFF;
+        color: #374151;
+    }
+
+        .pagination .page-link:hover {
+            background-color: #F3F4F6;
+        }
+
+.page-status {
+    background-color: #F9FAFB;
+    font-weight: 500;
+}
+
+
+/* ===========================
+       # Table scrollbar
+           =========================== */
+.custom-table-wrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 8px;
+}
+
+.custom-table-wrapper::-webkit-scrollbar-track {
+    background: #F1F3F5; /* track color */
+    border-radius: 6px;
+}
+
+.custom-table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #9AA0A6;
+    border-radius: 5px;
+    width: 8px;
+}

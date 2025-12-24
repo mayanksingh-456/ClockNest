@@ -1,0 +1,380 @@
+﻿@page "/users"
+@using ClockNest.ViewModels.UserViewModel
+
+
+@* <style>
+    .form-select {
+        border-radius: 6px !important;
+        border: 1px solid #CBD5E1 !important;
+        padding: 5px !important;
+        font-size: 13px;
+        transition: all 0.2s ease-in-out;
+    }
+</style> *@
+<div class="top-bar body">
+    <div class="page-title">Users</div>
+
+    <div class="actions d-flex gap-2">
+        <button class="btn clockNest-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+
+        <div class="search-group">
+            <i class="fa fa-search search-icon"></i>
+            <input class="form-control search-input body-medium" type="text" placeholder="Search"
+                   @bind="searchText"
+                   @bind:event="oninput"
+                   @bind:after="ResetPage" />
+        </div>
+    </div>
+</div>
+
+<div class="top-bar">
+    @if (selectedUsers.Any())
+    {
+        <div class="col-12">
+            <div class="selectedBar">
+                <div class="selectedBar_container">
+                    <span class="selectedCount">@selectedUsers.Count</span>
+                    <span class="selectedText">Selected</span>
+                </div>
+                <div class="selectedBar_container">
+                    @if (selectedUsers.Count == 1)
+                    {
+                        <div class="selectedBar_deleteButton">
+                            <i class="fa-regular fa-pen-to-square" style="color: #FFD43B; padding:3px"></i>
+                            <span>Edit</span>
+                        </div>
+                    }
+                    <div class="selectedBar_deleteButton" @onclick="DeleteSelected">
+                        <img src="icons/Close.svg" class="selectedBar_closeIcon" />
+                        <span>Delete</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
+            <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateEmployee">
+                <img src="images/plus.png" />
+                <span>Create User</span>
+            </button>
+        </div>
+    }
+</div>
+
+<!--Table-->
+
+<div class="table-responsive custom-table-wrapper">
+    <table class="table table-hover table-bordered align-middle custom-table">
+        <thead>
+            <tr>
+                <th style="width:5%">
+                    <input type="checkbox" class="form-check-input"
+                           @bind="IsAllSelected"
+                           @bind:event="onchange" />
+                </th>
+                <th style="width: 10%;">Id</th>
+                <th style="width:20%">Name</th>
+                <th style="width:15%">Username</th>
+                <th style="width:25%">E-mail</th>
+                <th style="width:25%">Account type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (PagedUser.Any())
+            {
+                @foreach (var user in PagedUser)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input"
+                                   checked="@selectedUsers.Contains(user.Id)"
+                                   @onchange="() => ToggleRow(user.Id)" />
+                        </td>
+                        <td>@user.Id</td>
+                        <td>@user.FullName</td>
+                        <td>@user.UserName</td>
+                        <td>@user.Email</td>
+                       @*  <td>@user.UserAccountStatusTypeId</td> *@
+                        <td>
+                            @{
+                                var type = "";
+
+                                if (user.IsSystemAdminUser == true)
+                                    type = "Admin";
+
+                                if (user.IsSelfServiceUser == true)
+                                    type += type.Length > 0 ? ", Self Service" : "Self Service";
+
+                                if (user.IsMobileAppUser == true)
+                                    type += type.Length > 0 ? ", Mobile" : "Mobile";
+
+                                if (user.IsVisitorModuleUser == true)
+                                    type += type.Length > 0 ? ", Visitor Module" : "Visitor Module";
+
+                                if (user.IsPayrollRunUser == true)
+                                    type += type.Length > 0 ? ", Payroll" : "Payroll";
+
+                                if (user.IsManagerAppUser == true)
+                                    type += type.Length > 0 ? ", Manager App" : "Manager App";
+
+                                if (user.RoleTypeId == 1)
+                                    type += type.Length > 0 ? ", Super User" : "Super User";
+                            }
+                            @type
+                        </td>
+
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No user found
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination + Page Size -->
+<!-- Table Footer Bar -->
+<div class="table-footer-bar">
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedUser.Count()</strong> of
+        <strong>@FilteredUser.Count()</strong> employees
+    </div>
+
+    <!-- Paze Size -->
+    <div class="footer-pagesize">
+        <span>Rows:</span>
+        <select class="form-select form-select-sm"
+                @bind="pageSize"
+                @bind:after="ResetPage"
+                style=" border-radius: 6px !important; border: 1px solid #CBD5E1 !important; padding: 5px !important; font-size: 13px;">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="0">All</option>
+        </select>
+    </div>
+
+    <!-- Previous Next Button -->
+    <nav>
+        <ul class="pagination mb-0">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PreviousPage">
+                    Previous
+                </button>
+            </li>
+
+            <li class="page-item disabled">
+                <span class="page-link page-status">
+                    Page @currentPage of @totalPages
+                </span>
+            </li>
+
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">
+                    Next
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+
+@* <CreateEditUsersModel @ref="userModelRef" OnSubmit="SaveUser"></CreateEditUsersModel> *@
+
+@code {
+
+    // public CreateEditUsersModel userModelRef;
+    // public CreateEditUserViewModel createEditUsersModel { get; set; } = new();
+
+    private List<User> users = new();
+    private List<User> selectedUser = new List<User>();
+
+    private int companyId;
+
+    private string searchText = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private HashSet<int> selectedUsers = new();
+
+    private IEnumerable<User> FilteredUser => users
+    .Where(e => string.IsNullOrWhiteSpace(searchText) ||
+    (e.FullName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+         (e.UserName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+         (e.Email?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+         (e.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+         GetAccountType(e).Contains(searchText, StringComparison.OrdinalIgnoreCase)
+    );
+    string GetAccountType(User user)
+    {
+        var type = "";
+
+        if (user.IsSystemAdminUser == true)
+            type = "Admin";
+
+        if (user.IsSelfServiceUser == true)
+            type += type.Length > 0 ? ", Self Service" : "Self Service";
+
+        if (user.IsMobileAppUser == true)
+            type += type.Length > 0 ? ", Mobile" : "Mobile";
+
+        if (user.IsVisitorModuleUser == true)
+            type += type.Length > 0 ? ", Visitor Module" : "Visitor Module";
+
+        if (user.IsPayrollRunUser == true)
+            type += type.Length > 0 ? ", Payroll" : "Payroll";
+
+        if (user.IsManagerAppUser == true)
+            type += type.Length > 0 ? ", Manager App" : "Manager App";
+
+        if (user.RoleTypeId == 1)
+            type += type.Length > 0 ? ", Super User" : "Super User";
+
+        return type;
+    }
+
+    private int totalPages =>
+    pageSize == 0 ? 1 : (int)Math.Ceiling(FilteredUser.Count() / (double)pageSize);
+
+    private IEnumerable<User> PagedUser =>
+    pageSize == 0
+    ? FilteredUser
+    : FilteredUser
+    .Skip((currentPage - 1) * pageSize)
+    .Take(pageSize);
+
+    private bool IsAllSelected
+    {
+        get => PagedUser.Any() && PagedUser.All(e => selectedUsers.Contains(e.Id));
+        set
+        {
+            if (value)
+            {
+                foreach (var user in PagedUser)
+                    selectedUsers.Add(user.Id);
+            }
+            else
+            {
+                foreach (var user in PagedUser)
+                    selectedUsers.Remove(user.Id);
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            SpinnerService.Show();
+            await LoadUserAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+
+    }
+
+    private async Task LoadUserAsync()
+    {
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        users = await UserService.GetUserAsync(companyId);
+    }
+    private async Task RefreshGrid()
+    {
+        SpinnerService.Show();
+        await Task.Delay(1000);
+        StateHasChanged();
+        try
+        {
+            searchText = "";
+            selectedUsers.Clear();
+            currentPage = 1;
+            pageSize = 10;
+            await LoadUserAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    <!-- Checkbox Selection -->
+    private void ToggleRow(int id)
+    {
+        if (!selectedUsers.Add(id))
+            selectedUsers.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = e.Value?.ToString() == "true";
+
+        foreach (var user in PagedUser)
+        {
+            if (isChecked)
+                selectedUsers.Add(user.Id);
+            else
+                selectedUsers.Remove(user.Id);
+        }
+    }
+
+    <!-- Pagination-->
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+            currentPage++;
+    }
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+    private void ResetPage()
+    {
+        currentPage = 1;
+    }
+
+    private void DeleteSelected()
+    {
+        users.RemoveAll(e => selectedUsers.Contains(e.Id));
+        selectedUsers.Clear();
+        ResetPage();
+    }
+
+    private async void CreateEmployee()
+    {
+        try
+        {
+            SpinnerService.Show();
+            // await Task.Delay(500);
+            // var newUser = new CreateEditUserViewModel
+            // {
+            //     Id = 0,
+            //     //CompanyId = companyId,
+            // };
+            // await userModelRef.ShowModal(newUser);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+       
+    }
+
+    private async Task SaveUser()
+    {
+        
+    }
+}
