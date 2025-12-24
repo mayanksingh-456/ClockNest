@@ -1,8 +1,10 @@
 ﻿@page "/employee"
+@using ClockNest.Services.Spinner_Service
 @using ClockNest.ViewModels.Parameter_List
 @using Microsoft.AspNetCore.Mvc.Rendering
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
+@inject SpinnerService SpinnerService
 
 <style>
     /* ===========================
@@ -46,23 +48,7 @@
             font-weight: 400; 
         }
 
-            /* ✅ ADDED */
-           /*  .custom-table thead th:first-child {
-                border-top-left-radius: 6px;
-            }
-
-            .custom-table thead th:last-child {
-                border-top-right-radius: 6px;
-            } */
-
-      /*   .custom-table tbody tr:nth-child(even) {
-            background-color: #FAFAFA;
-        }
-
-        .custom-table tbody tr:has(input[type="checkbox"]:checked) {
-            background-color: #EEF6FF;
-        } */
-
+           
         .custom-table tbody tr {
             cursor: pointer;
             transition: background-color 0.15s ease-in-out;
@@ -640,12 +626,12 @@
     {
         try
         {
-            isLoading = true;
+            SpinnerService.Show();
             await LoadEmployeesAsync();
         }
         finally
         {
-            isLoading = false;
+            SpinnerService.Hide();
         }
 
     }
@@ -658,7 +644,9 @@
 
     private async Task RefreshGrid()
     {
-        isLoading = true;
+        //isLoading = true;
+        SpinnerService.Show();
+        await Task.Delay(1000);
         StateHasChanged(); 
         try
         {
@@ -670,7 +658,8 @@
         }
         finally
         {
-            isLoading = false;
+            //isLoading = false;
+            SpinnerService.Hide();
         }
     }
 
@@ -720,6 +709,7 @@
 
     private async void CreateEmployee()
     {
+        SpinnerService.Show();
         var company = await EmployeeService.GetCompanyAsync(companyId);
         var companylicencedetail = await EmployeeService.GetCompanyLicenceDetailsAsync(companyId);
         var parameterList = new ParameterList
@@ -793,12 +783,14 @@
 
         }; 
         await employeeModelRef.ShowModal(newEmployee);
+        SpinnerService.Hide();
     }
   
     private async Task EditEmployee(Employee? employee = null)
     {
         try
         {
+            SpinnerService.Show();
             var editTarget = employee ?? selectedEmployee.FirstOrDefault();
             if (editTarget == null) return;
 
@@ -911,7 +903,7 @@
         }
         finally
         {
-            
+            SpinnerService.Hide(); 
         }
     }
 

@@ -1,0 +1,98 @@
+﻿@using ClockNest.Services.Spinner_Service
+@inject SpinnerService SpinnerService
+
+
+<style>
+    .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .spinner-box {
+        text-align: center;
+    }
+
+        .spinner-box p {
+            margin-top: 12px;
+            font-size: 14px;
+          /*   color: #334155; */
+            color: #e91e63
+        }
+
+    .clock-hand {
+        transform-origin: 50% 50%;
+        animation: rotateHand 1s linear infinite;
+    }
+
+    @@keyframes rotateHand {
+        from
+
+    {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+    }
+</style>
+@if (visible)
+{
+    <div class="spinner-overlay">
+        <div class="spinner-box">
+            <svg class="clock-spinner" width="70" height="70" viewBox="0 0 100 100">
+                <!-- Clock circle -->
+                <circle cx="50" cy="50" r="45"
+                        stroke="#e91e63"
+                        stroke-width="6"
+                        fill="none"
+                        opacity="0.3" />
+
+                <!-- Clock hand -->
+                <line class="clock-hand"
+                      x1="50" y1="50" x2="50" y2="15"
+                     
+                      stroke="#e91e63"
+                      stroke-width="6"
+                      stroke-linecap="round" />
+
+                <!-- Center dot -->
+                <circle cx="50" cy="50" r="4" fill="#2563eb" />
+            </svg>
+
+            @if (!string.IsNullOrEmpty(SpinnerService.Message))
+            {
+                <p>@SpinnerService.Message</p>
+            }
+        </div>
+    </div>
+}
+
+
+@code {
+    private bool visible;
+
+    protected override void OnInitialized()
+    {
+        SpinnerService.OnShow += Show;
+        SpinnerService.OnHide += Hide;
+    }
+
+    void Show()
+    {
+        visible = true;
+        InvokeAsync(StateHasChanged);
+    }
+
+    void Hide()
+    {
+        visible = false;
+        InvokeAsync(StateHasChanged);
+    }
+}
