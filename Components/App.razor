@@ -33,13 +33,13 @@
     <!--Show/hide Modal-->
     <script> 
         window.showModal = (id) =>{
-            const modal = new bootstrap.Modal(document.getElementById(id));
+        const modal = new bootstrap.Modal(document.getElementById(id));
         modal.show();
         }
     </script>
    
     <script>
-                window.hideModal = (id) => {
+            window.hideModal = (id) => {
             const el = document.getElementById(id);
             const modal = bootstrap.Modal.getInstance(el);
             modal.hide();

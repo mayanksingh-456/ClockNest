@@ -1,5 +1,9 @@
 ﻿@using ClockNest.Components.Pages.CommonPages
+@using ClockNest.Models.User_Model
 @inherits LayoutComponentBase
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserContext UserContext
 
 <div class="layout-wrapper">
 
@@ -32,3 +36,14 @@
         padding: 20px;
     }
 </style>
+
+@code{
+    protected override async Task OnInitializedAsync()
+    {
+        UserContext.UserId =
+            (await UserContextService.GetUserIdAsync(AuthStateProvider)).ToString();
+
+        // UserContext.CompanyId =
+        //     await UserContextService.GetCompanyIdAsync(AuthStateProvider);
+    }
+}

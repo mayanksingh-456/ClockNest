@@ -3,326 +3,8 @@
 
  
 
-@* <style>
-    /* ===========================
-       # Custom Table Styles
-           =========================== */
- 
-    /* Wrapper controls height & scrolling */
-    .custom-table-wrapper {
-        max-height: 365px; 
-        overflow-y: auto;
-        overflow-x: auto;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-    }
-
-    /* Table width */
-    .custom-table {
-        width: 100%;
-        margin-bottom: 0;
-        font-weight: 300 !important;
-        font-size: 14px; 
-    }
-
-        /* Sticky header */
-        .custom-table thead th {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            background-color: #f8f9fa;
-            box-shadow: inset 0 -1px 0 #E5E7EB;
-
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            color: #374151;
-        }
-
-        .custom-table tbody td {
-            color: #495057d9;
-            font-weight: 400; 
-        }
-
-           
-        .custom-table tbody tr {
-            cursor: pointer;
-            transition: background-color 0.15s ease-in-out;
-        }
-
-        .custom-table th:first-child,
-        .custom-table td:first-child {
-            text-align: center;
-        }
-
-        .custom-table input[type="checkbox"] {
-            width: 13px;
-            height: 13px;
-        }
-
-        /* Better row height */
-        .custom-table tbody tr td {
-            padding: 0.65rem;
-            vertical-align: middle;
-        }
-
-    
-
-        .custom-table th,
-        .custom-table td {
-            border-left: none !important;
-            border-right: none !important;
-        }
-
-        /* Hover highlight */
-        .custom-table tbody tr:hover {
-            background-color: #F9FAFB;
-        }
-
-        /* Checkbox alignment */
-        .custom-table input[type="checkbox"] {
-            cursor: pointer;
-        }
-
-    /* Responsive height for small screens */
-    @@media (max-width: 768px) {
-        .custom-table-wrapper {
-            max-height: 300px;
-        }
-    }
-</style> *@
 
 @* <style>
-    /* ===========================
-       # Top Bar
-               =========================== */
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 3px 10px;
-        margin-right: -8px;
-
-
-    }
-    .page-title{
-        font-size: 24px !important;      
-        margin-left: -9px;
-    }
-
-    .chronic-bg-secondary {
-        background-color: #80c2b5 !important;
-        color: #FFFFFF !important;
-        transition: background-color 0.2s ease-in-out !important;
-    }
-
-        .chronic-bg-secondary:hover {
-            background-color: #56bca8 !important;
-            color: #FFFFFF !important;
-        }
-
-    .actions .btn {
-        height: 40px;
-    }
-
-    /* ===========================
-       # Selected Bar
-           =========================== */
-    .selectedBar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px;
-        background-color: #215770;
-        border-radius: 8px;
-        height: 50px;
-        margin-left: -10px;
-        margin-right: -2px;
-    }
-
-    .selectedBar_container {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        color: #FFF;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .selectedBar_deleteButton {
-        color: #FFF;
-        font-size: 16px;
-        font-weight: 400;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-        .selectedBar_deleteButton:hover {
-            text-decoration: underline;
-        }
-
-    .selectedCount {
-        font-weight: 700;
-    }
-
-    .selectedText {
-        margin-right: 16px;
-    }
-
-    /* ===========================
-       # Search Input
-       =========================== */
-    .search-input {
-        width: 322px;
-        height: 40px;
-        border-radius: 8px;
-       /*  margin-right: -8px; */
-
-    }
-
-    .search-group {
-        position: relative;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height:39px;
-        border-radius: 8px;
-    }
-
-        .search-group i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #A0A6B0;
-        }
-
-        .search-group input {
-            padding-left: 36px !important;
-        }
-
-    .bg-brand-100 {
-        background-color: #e91e63;
-        color: #FFFFFF;
-        border: none;
-        border-radius: 5px;
-        font-weight: 500;
-
-    }
-
-        .bg-brand-100:hover,
-        .bg-brand-100:focus,
-        .bg-brand-100:active,
-        .bg-brand-100:focus-visible {
-            background-color: #CC0C4E !important;
-            color: #FFFFFF !important;
-            box-shadow: none !important;
-            outline: none !important;
-        }
-
-    .form-control:focus,
-    .btn:focus,
-    .btn:focus-visible {
-        box-shadow: none !important;
-        outline: none !important;
-    }
-
-    .form-check-input:checked {
-        background-color: #008d94 !important;
-        border-color: #008d94 !important;
-    }
-
-        .form-check-input:focus,
-        .form-check-input:active,
-        .form-check-input:checked:focus {
-            outline: none !important;
-            box-shadow: none !important;
-            border-color: #CED4DA !important;
-        }
-
-</style> *@
-
-
-@* <style>
-    .table-footer-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 7px 16px;
-        margin-top: 8px;
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        background-color: #FFFFFF;
-    }
-
-    /* Left text */
-    .footer-info {
-        font-size: 13px;
-        color: #6B7280;
-    }
-
-    /* Center page size */
-    .footer-pagesize {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        color: #374151;
-    }
-
-        .footer-pagesize select {
-            width: 70px;
-        }
-
-    .pagination {
-        gap: 6px;
-    }
-
-        .pagination .page-link {
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 13px;
-            border: 1px solid #E5E7EB;
-            background-color: #FFFFFF;
-            color: #374151;
-        }
-
-            .pagination .page-link:hover {
-                background-color: #F3F4F6;
-            }
-
-    .page-status {
-        background-color: #F9FAFB;
-        font-weight: 500;
-    }
-
-  
-</style> *@
-
-@* <style>
-    /* TABLE SCROLLBAR */
-    .custom-table-wrapper::-webkit-scrollbar {
-        width: 6px; 
-        height: 8px;
-    }
-
-    .custom-table-wrapper::-webkit-scrollbar-track {
-        background: #F1F3F5; /* track color */
-        border-radius: 6px;
-    }
-
-    .custom-table-wrapper::-webkit-scrollbar-thumb {
-        background-color: #9AA0A6; 
-        border-radius: 5px;
-        width: 8px;
-    }
-
-
-</style> *@
-
-<style>
     .form-select {
         border-radius: 6px !important;
         border: 1px solid #CBD5E1 !important;
@@ -330,33 +12,76 @@
         font-size: 13px;
         transition: all 0.2s ease-in-out;
     }
-</style>
+</style> *@
 
 
-<div class="top-bar body">
+@* <div class="top-bar body">
     <div class="page-title ">Employees</div>
-   @*  <div class="actions d-flex gap-2">
-        <button class="btn chronic-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-        <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateEmployee" >
-            <img src="images/plus.png" />
-            <span>Create Employee</span>
-        </button>
-    </div> *@
+
     <div class="actions d-flex gap-2">
-        <button class="btn clockNest-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
-            <i class="fas fa-sync-alt"></i>
+        <button class="btn icon-btn bg-brand-100" @onclick="CreateEmployee">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" @onclick="RefreshGrid" title="Refresh">
+            <i class="fa-solid fa-rotate-right"></i>
         </button>
     <div class="search-group">
-        <i class="fa fa-search search-icon"></i>
-        <input class="form-control search-input body-medium" type="text" placeholder="Search"
+        
+        <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
                @bind="searchText"
                @bind:event="oninput"
                @bind:after="ResetPage" />
+
+            @if (string.IsNullOrWhiteSpace(searchText))
+            {
+                <i class="fa fa-search search-icon"></i>
+            }
+            else
+            {
+                <i class="fa fa-times clear-icon" style="cursor:pointer" @onclick="ClearSearch"></i>
+            }
     </div>
     </div>
 </div>
+ *@
+
+
+<div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
+    <!-- Page title -->
+    <div class="page-title "> Employees </div>
+
+    <!-- Search input  -->
+    <div class="flex-grow-1 mx-3 d-flex justify-content-center">
+        <div class="search-group">
+            <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
+                   @bind="searchText"
+                   @bind:event="oninput"
+                   @bind:after="ResetPage" />
+
+            @if (string.IsNullOrWhiteSpace(searchText))
+            {
+                <i class="fa fa-search search-icon"></i>
+            }
+            else
+            {
+                <i class="fa fa-times clear-icon" style="cursor:pointer" @onclick="ClearSearch"></i>
+            }
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group" role="group" >
+        <button class="btn icon-btn bg-brand-100" @onclick="CreateEmployee" type="button">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" @onclick="RefreshGrid" title="Refresh" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+
 
 <div class="top-bar">
     @if (selectedEmployees.Any())
@@ -394,15 +119,12 @@
                    @bind:event="oninput"
                    @bind:after="ResetPage" />          
         </div> *@
-        <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
-            @* <button class="btn chronic-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
-                <i class="fas fa-sync-alt"></i>
-            </button> *@
+       @*  <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
             <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateEmployee">
                 <img src="images/plus.png" />
                 <span>Create Employee</span>
             </button>
-        </div>
+        </div> *@
     }
 </div>
 
@@ -461,18 +183,14 @@
 <!-- Pagination + Page Size -->
 <!-- Table Footer Bar -->
 <div class="table-footer-bar">
-    <!-- No of employes -->
-    <div class="footer-info">
-        Showing <strong>@PagedEmployees.Count()</strong> of
-        <strong>@FilteredEmployees.Count()</strong> employees
-    </div>
 
     <!-- Paze Size -->
     <div class="footer-pagesize">
         <span>Rows:</span>
         <select class="form-select form-select-sm"
                 @bind="pageSize"
-                @bind:after="ResetPage">
+                @bind:after="ResetPage"
+                style=" border-radius: 6px !important; border: 1px solid #CBD5E1 !important; padding: 5px !important; font-size: 13px;">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -480,8 +198,16 @@
         </select>
     </div>
 
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedEmployees.Count()</strong> of
+        <strong>@FilteredEmployees.Count()</strong> employees
+    </div>
+
+
+
     <!-- Previous Next Button -->
-    <nav>
+  @*   <nav>
         <ul class="pagination mb-0">
             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                 <button class="page-link" @onclick="PreviousPage">
@@ -501,6 +227,58 @@
                 </button>
             </li>
         </ul>
+    </nav> *@
+    <nav>
+        <ul class="pagination mb-0 custom-pagination">
+
+            <!-- First -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(1)">
+                    &laquo;
+                </button>
+            </li>
+
+            <!-- Previous -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PreviousPage">
+                    &lsaquo;
+                </button>
+            </li>
+
+            <!-- Page Numbers -->
+            @foreach (var pageNumber in VisiblePages)
+            {
+                if (pageNumber == -1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(pageNumber)">
+                            @pageNumber
+                        </button>
+                    </li>
+                }
+            }
+
+            <!-- Next -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">
+                    &rsaquo;
+                </button>
+            </li>
+
+            <!-- Last -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(totalPages)">
+                    &raquo;
+                </button>
+            </li>
+
+        </ul>
     </nav>
 
 </div>
@@ -508,6 +286,59 @@
 <CreateEditEmployeeModel @ref="employeeModelRef" OnSubmit="SaveEmployee"></CreateEditEmployeeModel>
 
 @code {
+
+    void ClearSearch()
+    {
+        searchText = string.Empty;
+        ResetPage();
+    }
+
+    int maxVisiblePages = 5;
+
+    List<int> VisiblePages
+    {
+        get
+        {
+            var pages = new List<int>();
+
+            if (totalPages <= maxVisiblePages)
+            {
+                for (int i = 1; i <= totalPages; i++)
+                    pages.Add(i);
+            }
+            else
+            {
+                int start = Math.Max(1, currentPage - 2);
+                int end = Math.Min(totalPages, currentPage + 2);
+
+                if (start > 1)
+                {
+                    pages.Add(1);
+                    pages.Add(-1); // ellipsis
+                }
+
+                for (int i = start; i <= end; i++)
+                    pages.Add(i);
+
+                if (end < totalPages)
+                {
+                    pages.Add(-1); // ellipsis
+                    pages.Add(totalPages);
+                }
+            }
+
+            return pages;
+        }
+    }
+
+    void GoToPage(int page)
+    {
+        if (page < 1 || page > totalPages)
+            return;
+
+        currentPage = page;
+    }
+
 
     public CreateEditEmployeeModel employeeModelRef;
     public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();

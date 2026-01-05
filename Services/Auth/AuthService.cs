@@ -1,7 +1,11 @@
-﻿using ClockNest.Helpers;
+﻿using ClockNest.Enum;
+using ClockNest.Helpers;
+using ClockNest.Models.Employee_Model;
 using ClockNest.Models.Login;
 using ClockNest.Models.User;
+using ClockNest.Models.User_Model;
 using ClockNest.Models.UserClaimModel;
+using ClockNest.Services.CommonService;
 using ClockNest.ViewModels;
 using Microsoft.JSInterop;
 using System.Text.Json;
@@ -129,21 +133,70 @@ namespace ClockNest.Services.Auth
             }
         }
 
+        //    private async Task IdentitySigninAsync(User user)
+        //    {
+        //        var claims = new UserClaimsModel
+        //        {
+        //            NameIdentifier = user.Id.ToString(),
+        //            Name = $"{user.FirstName} {user.LastName}",
+        //            UserEmail = user.Email ?? "",
+        //            CompanyId = user.CompanyId.ToString(),
+        //            EmployeeId = user.EmployeeId.ToString(),
+        //            Role = user.RoleType?.Name ?? "User"
+        //        };
+
+        //        var headers = new Dictionary<string, string>
+        //{
+        //    { "Content-Type", "application/json" }
+        //};
+
+        //        await _js.InvokeVoidAsync("fetch", "/login", new
+        //        {
+
+        //            method = "POST",
+        //            credentials = "include",
+        //            headers = headers,
+        //            body = JsonSerializer.Serialize(claims)
+        //        });
+        //        Console.WriteLine($"LOGIN EmployeeId = {user.EmployeeId}");
+
+        //    }
+
         private async Task IdentitySigninAsync(User user)
         {
+            int companyId = user.CompanyId ?? 0;
+            var company = await GetCompany(companyId);
+            var payroll = company?.Payroll.ToString() ?? "false";
+            var xeroPayroll = company?.XeroPayroll.ToString() ?? "false";
+            var region = (await GetRegion(companyId))?.ToString() ?? "";
             var claims = new UserClaimsModel
             {
                 NameIdentifier = user.Id.ToString(),
                 Name = $"{user.FirstName} {user.LastName}",
                 UserEmail = user.Email ?? "",
+
                 CompanyId = user.CompanyId.ToString(),
-                Role = user.RoleType?.Name ?? "User"
+                RoleTypeId = user.RoleTypeId.ToString(),
+                EmployeeId = user.EmployeeId.ToString(),
+
+                IsSwitchCompany = user.IsSwitchCompany.ToString(),
+                Payroll = payroll,
+                XeroPayroll = xeroPayroll,
+                Region = region,
+                //StaffologyPayroll = user.StaffologyPayrollEnabled.ToString(),
+
+                //LogoutAfter = user.LogoutAfter?.ToString(),
+                //CascadeCredentialId = user.CascadeCredentialId?.ToString(),
+
+                Role = user.RoleType?.Name ?? "User",
+
+                //AdditionalRoles = user.Roles ?? new List<string>()
             };
 
             var headers = new Dictionary<string, string>
-    {
-        { "Content-Type", "application/json" }
-    };
+                {
+           { "Content-Type", "application/json" }
+                };
 
             await _js.InvokeVoidAsync("fetch", "/login", new
             {
@@ -154,6 +207,45 @@ namespace ClockNest.Services.Auth
             });
         }
 
+        public async Task<Company?> GetCompany(int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient");
+            HttpResponseMessage response = await client.PostAsJsonAsync("chronicle/generic/company/get", companyId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var company = await response.Content.ReadFromJsonAsync<Company>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (company != null)
+                {
+                    int payroll = company.Payroll;
+                }
+
+                return company;
+            }
+
+            return null;
+        }
+        public async Task<string> GetRegion(int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient");
+            HttpResponseMessage response = await client.PostAsJsonAsync("chronicle/generic/region/get", companyId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var regionName = await response.Content.ReadFromJsonAsync<Region>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                return regionName.ToString() ?? Region.UK.ToString();
+            }
+
+            return Region.UK.ToString();
+        }
 
         public async Task LogoutAsync()
         {

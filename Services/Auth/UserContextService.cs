@@ -83,6 +83,7 @@ namespace ClockNest.Services.Auth
                 NameIdentifier = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value,
                 Name = user?.Identity?.Name,
                 UserEmail = user?.FindFirst(ClaimTypes.Email)?.Value,
+
                 CompanyId = user?.FindFirst("CompanyId")?.Value,
                 RoleTypeId = user?.FindFirst("RoleTypeId")?.Value,
                 EmployeeId = user?.FindFirst("EmployeeId")?.Value,

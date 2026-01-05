@@ -365,6 +365,7 @@
         EmployeeModal = model; 
         activeTab = "details"; 
         await JS.InvokeVoidAsync("showModal", "employeeModal");
+		StateHasChanged();
     }
 
     public async Task HandelValidSubmit()

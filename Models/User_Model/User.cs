@@ -31,7 +31,7 @@ namespace ClockNest.Models.User
 
         public short? UserAccountStatusTypeId { get; set; }
 
-        //public UserAccountStatusType UserAccountStatusType { get; set; }
+        public UserAccountStatusType UserAccountStatusType { get; set; }
 
         public string Salt { get; set; }
 
@@ -122,7 +122,7 @@ namespace ClockNest.Models.User
         public User()
         {
             RoleTypes = new List<RoleType>();
-            //Photo = new Photo();
+            Photo = new Photo();
             UserAccess = new List<UserAccess>();
             UserSettingAccess = new List<UserSettingAccess>();
             UserValueAccess = new List<UserValueAccess>();

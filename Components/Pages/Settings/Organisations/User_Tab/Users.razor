@@ -1,31 +1,37 @@
 ﻿@page "/users"
-@using ClockNest.ViewModels.UserViewModel
 
+<div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
+    <!-- Page title -->
+    <div class="page-title"> Users </div>
 
-@* <style>
-    .form-select {
-        border-radius: 6px !important;
-        border: 1px solid #CBD5E1 !important;
-        padding: 5px !important;
-        font-size: 13px;
-        transition: all 0.2s ease-in-out;
-    }
-</style> *@
-<div class="top-bar body">
-    <div class="page-title">Users</div>
-
-    <div class="actions d-flex gap-2">
-        <button class="btn clockNest-bg-secondary text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="RefreshGrid">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-
+    <!-- Search input  -->
+    <div class="flex-grow-1 mx-3 d-flex justify-content-center">
         <div class="search-group">
-            <i class="fa fa-search search-icon"></i>
-            <input class="form-control search-input body-medium" type="text" placeholder="Search"
+            <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
                    @bind="searchText"
                    @bind:event="oninput"
                    @bind:after="ResetPage" />
+
+            @if (string.IsNullOrWhiteSpace(searchText))
+            {
+                <i class="fa fa-search search-icon"></i>
+            }
+            else
+            {
+                <i class="fa fa-times clear-icon " style="cursor:pointer" @onclick="ClearSearch"></i>
+            }
         </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group" role="group">
+        <button class="btn icon-btn bg-brand-100" @onclick="CreateUser" type="button">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" @onclick="RefreshGrid" title="Refresh" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
     </div>
 </div>
 
@@ -56,12 +62,12 @@
     }
     else
     {
-        <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
-            <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateEmployee">
+        @*   <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
+            <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateUser">
                 <img src="images/plus.png" />
                 <span>Create User</span>
             </button>
-        </div>
+        </div> *@
     }
 </div>
 
@@ -88,7 +94,7 @@
             {
                 @foreach (var user in PagedUser)
                 {
-                    <tr>
+                    <tr @ondblclick="@(() => EditUser(user))">
                         <td>
                             <input type="checkbox" class="form-check-input"
                                    checked="@selectedUsers.Contains(user.Id)"
@@ -98,7 +104,6 @@
                         <td>@user.FullName</td>
                         <td>@user.UserName</td>
                         <td>@user.Email</td>
-                       @*  <td>@user.UserAccountStatusTypeId</td> *@
                         <td>
                             @{
                                 var type = "";
@@ -145,11 +150,6 @@
 <!-- Pagination + Page Size -->
 <!-- Table Footer Bar -->
 <div class="table-footer-bar">
-    <!-- No of employes -->
-    <div class="footer-info">
-        Showing <strong>@PagedUser.Count()</strong> of
-        <strong>@FilteredUser.Count()</strong> employees
-    </div>
 
     <!-- Paze Size -->
     <div class="footer-pagesize">
@@ -165,42 +165,83 @@
         </select>
     </div>
 
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedUser.Count()</strong> of
+        <strong>@FilteredUser.Count()</strong> employees
+    </div>
+
+
     <!-- Previous Next Button -->
     <nav>
-        <ul class="pagination mb-0">
+        <ul class="pagination mb-0 custom-pagination">
+
+            <!-- First -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(1)">
+                    &laquo;
+                </button>
+            </li>
+
+            <!-- Previous -->
             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                 <button class="page-link" @onclick="PreviousPage">
-                    Previous
+                    &lsaquo;
                 </button>
             </li>
 
-            <li class="page-item disabled">
-                <span class="page-link page-status">
-                    Page @currentPage of @totalPages
-                </span>
-            </li>
+            <!-- Page Numbers -->
+            @foreach (var pageNumber in VisiblePages)
+            {
+                if (pageNumber == -1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(pageNumber)">
+                            @pageNumber
+                        </button>
+                    </li>
+                }
+            }
 
+            <!-- Next -->
             <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
                 <button class="page-link" @onclick="NextPage">
-                    Next
+                    &rsaquo;
                 </button>
             </li>
+
+            <!-- Last -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(totalPages)">
+                    &raquo;
+                </button>
+            </li>
+
         </ul>
     </nav>
 
+
 </div>
 
-@* <CreateEditUsersModel @ref="userModelRef" OnSubmit="SaveUser"></CreateEditUsersModel> *@
+<CreateEditUsersModel @ref="userModelRef" isSubmitting="@isSubmitting" OnSubmit="SaveUser"></CreateEditUsersModel>
 
 @code {
 
-    // public CreateEditUsersModel userModelRef;
-    // public CreateEditUserViewModel createEditUsersModel { get; set; } = new();
+    public CreateEditUserViewModel createEditUsersModel { get; set; } = new();
+    public CreateEditUsersModel userModelRef;
+    public bool isSubmitting { get; set; }
 
     private List<User> users = new();
     private List<User> selectedUser = new List<User>();
 
     private int companyId;
+    private int userId;
 
     private string searchText = "";
     private int currentPage = 1;
@@ -272,25 +313,12 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    void ClearSearch()
     {
-        try
-        {
-            SpinnerService.Show();
-            await LoadUserAsync();
-        }
-        finally
-        {
-            SpinnerService.Hide();
-        }
-
+        searchText = string.Empty;
+        ResetPage();
     }
 
-    private async Task LoadUserAsync()
-    {
-        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
-        users = await UserService.GetUserAsync(companyId);
-    }
     private async Task RefreshGrid()
     {
         SpinnerService.Show();
@@ -331,6 +359,8 @@
     }
 
     <!-- Pagination-->
+    int maxVisiblePages = 5;
+
     private void NextPage()
     {
         if (currentPage < totalPages)
@@ -345,6 +375,49 @@
     {
         currentPage = 1;
     }
+    List<int> VisiblePages
+    {
+        get
+        {
+            var pages = new List<int>();
+
+            if (totalPages <= maxVisiblePages)
+            {
+                for (int i = 1; i <= totalPages; i++)
+                    pages.Add(i);
+            }
+            else
+            {
+                int start = Math.Max(1, currentPage - 2);
+                int end = Math.Min(totalPages, currentPage + 2);
+
+                if (start > 1)
+                {
+                    pages.Add(1);
+                    pages.Add(-1); // ellipsis
+                }
+
+                for (int i = start; i <= end; i++)
+                    pages.Add(i);
+
+                if (end < totalPages)
+                {
+                    pages.Add(-1); // ellipsis
+                    pages.Add(totalPages);
+                }
+            }
+
+            return pages;
+        }
+    }
+
+    void GoToPage(int page)
+    {
+        if (page < 1 || page > totalPages)
+            return;
+
+        currentPage = page;
+    }
 
     private void DeleteSelected()
     {
@@ -353,28 +426,481 @@
         ResetPage();
     }
 
-    private async void CreateEmployee()
+    protected override async Task OnInitializedAsync()
     {
         try
         {
             SpinnerService.Show();
-            // await Task.Delay(500);
-            // var newUser = new CreateEditUserViewModel
-            // {
-            //     Id = 0,
-            //     //CompanyId = companyId,
-            // };
-            // await userModelRef.ShowModal(newUser);
+            await LoadUserAsync();
         }
         finally
         {
             SpinnerService.Hide();
         }
-       
+
     }
 
-    private async Task SaveUser()
+    private async Task LoadUserAsync()
     {
-        
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        users = await UserService.GetUserAsync(companyId);
+
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        var empClaim = user.FindFirst("EmployeeId")?.Value;
+        Console.WriteLine($"EmployeeId from claim = {empClaim}");
+
     }
+
+    private User userById = new();
+    private async Task CreateUser()
+    {
+        try
+        {
+            SpinnerService.Show();
+            await Task.Delay(500);
+
+            var claims = await UserContextService.GetUserClaimsAsync(AuthenticationStateProvider);
+            int? employeeId = int.TryParse(claims.EmployeeId, out int parsedEmployeeId) ? parsedEmployeeId : (int?)null;
+            //userById = await UserService.GetuserByIdAsync(userId);
+
+            var companyLicenceDetails = await UserService.GetCompanyLicenceDetailsAsync(companyId);
+
+            // var parameterList = new ParameterList
+            // {
+            //     Id = employeeId,
+            //     CompanyId = companyId
+            // };
+            //var employeesList = await UserService.GetEmployeeAsync(parameterList);
+
+            //var employeeId = await UserContextService.GetEmployeeIdAsync(AuthenticationStateProvider);
+
+            var employee = await UserService.GetEmployeeAsync(companyId);
+
+            var employeeAllDetails = await UserService.GetEmployeeAllDetailsAsync(employeeId ?? 0, companyId);
+
+            var allEmployees = await UserService.GetAllEmployeesAsync(companyId);
+
+            var accessDetails = await UserService.GetAccessDetailsAsync(userId, companyId);
+
+            // Prepare employee dropdown select list
+            var employeesSelectList = allEmployees
+                .Select(e => new SelectListItem
+                {
+                    Value = e.Id.ToString(),
+                    Text = e.FullName
+
+                })
+                .ToList();
+
+            //prepare access tab dropdown
+            var tagViewModels = accessDetails.Tags?
+               .Select(t => new TagSelectViewModel
+               {
+                   TagId = t.Id,
+                   Name = t.Name,
+                   Selected = false
+               }).ToList() ?? new List<TagSelectViewModel>();
+
+            var valueAccessTypeViewModels = accessDetails.ValueAccessTypes?
+             .Select(v => new ValueAccessTypeSelectViewModel
+             {
+                 Id = v.Id,
+                 Name = v.Name,
+                 Description = v.Description,
+                 Selected = false
+             })
+             .ToList() ?? new List<ValueAccessTypeSelectViewModel>();
+
+            var accessTypeViewModel = accessDetails.AccessTypes?
+              .Select(v => new AccessTypeSelectViewModel
+              {
+                  Id = v.Id,
+                  Name = v.Name,
+                  ViewEditSelected = false,
+              }).ToList() ?? new List<AccessTypeSelectViewModel>();
+
+            //create edit user model
+            var newUser = new CreateEditUserViewModel
+            {
+                Id = 0,
+
+                CreateEditUserDetailsViewModel = new CreateEditUserDetailsViewModel
+                {
+                    Id = 0,
+
+                    CompanyId = companyId,
+                    Employees = allEmployees,
+                    EmployeesSelect = employeesSelectList,
+                    UserName = "",
+                    Password = "",
+
+                    EmployeeId = -1,
+                },
+
+                CreateEditUserAccessViewModel = new CreateEditUserAccessViewModel
+                {
+                    Tags = tagViewModels,
+                    ValueAccessTypes = valueAccessTypeViewModels,
+                    AccessTypes = accessTypeViewModel,
+                },
+            };
+            await userModelRef.ShowModal(newUser);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+
+    }
+
+    public async Task EditUser(User? user = null)
+    {
+        try
+        {
+            SpinnerService.Show();
+            var editTarget = user ?? selectedUser.FirstOrDefault();
+            if (editTarget == null) return;
+
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            var claims = await UserContextService.GetUserClaimsAsync(AuthenticationStateProvider);
+
+            userById = await UserService.GetuserByIdAsync(userId);
+
+            var allEmployees = await UserService.GetAllEmployeesAsync(companyId);
+
+            //var accessDetails = await UserService.GetAccessDetailsAsync(userId, companyId);
+            var accessDetails = await UserService.GetAccessDetailsAsync(editTarget.Id, companyId);
+
+            // Prepare employee dropdown select list
+            var employeesSelectList = allEmployees
+                .Select(e => new SelectListItem
+                {
+                    Value = e.Id.ToString(),
+                    Text = e.FullName
+
+                })
+                .ToList();
+
+            //prepare access tab dropdown
+            var tagViewModels = accessDetails.Tags?
+   .Select(t => new TagSelectViewModel
+   {
+       TagId = t.Id,
+       Name = t.Name,
+       Selected = accessDetails.UserTags?.Any(ut => ut.TagId == t.Id) ?? false
+   }).ToList();
+
+            var valueAccessTypeViewModels = accessDetails.ValueAccessTypes?
+             .Select(v => new ValueAccessTypeSelectViewModel
+             {
+                 Id = v.Id,
+                 Name = v.Name,
+                 Description = v.Description,
+                 Selected = accessDetails.UserValueAccess?.Any(uv => uv.ValueAccessTypeId == v.Id) ?? false
+             })
+             .ToList();
+
+            var accessTypeViewModel = accessDetails.AccessTypes?
+           .Select(v => new AccessTypeSelectViewModel
+           {
+               Id = v.Id,
+               Name = v.Name,
+               ViewEditSelected = accessDetails.UserAccess?.Any(ua => ua.AccessTypeId == v.Id) ?? false,
+           }).ToList();
+
+            createEditUsersModel = new CreateEditUserViewModel
+            {
+                Id = editTarget.Id,
+
+                CreateEditUserDetailsViewModel = new CreateEditUserDetailsViewModel
+                {
+                    Id = editTarget.Id,
+                    FirstName = editTarget.FirstName,
+                    LastName = editTarget.LastName,
+                    Email = editTarget.Email,
+                    UserName = editTarget.UserName,
+                    IsSystemAdminUser = editTarget.IsSystemAdminUser ?? false,
+                    IsMobileAppUser = editTarget.IsMobileAppUser ?? false,
+                    IsSelfServiceUser = editTarget.IsSelfServiceUser ?? false,
+                    IsPayrollRunUser = editTarget.IsPayrollRunUser ?? false,
+                    IsVisitorModuleUser = editTarget.IsVisitorModuleUser ?? false,
+                    IsManagerAppUser = editTarget.IsManagerAppUser ?? false,
+                    RoleTypeId = editTarget.RoleTypeId,
+                    EmployeeId = editTarget.EmployeeId,
+                    PhotoId = editTarget.PhotoId,
+                    Password = editTarget.Password,
+                    ConfirmPassword = editTarget.Password,
+                    LastLoginDateTimeUtc = editTarget.LastLoginDateTimeUtc,
+
+                    SendWelcomeEmail = editTarget.ReceiveEmails,
+                    ForcePasswordChange = editTarget.ForcePasswordChange ?? false,
+                    ReceiveEmails = editTarget.ReceiveEmails,
+                    ReceiveHREmails = editTarget.ReceiveHREmails,
+
+                    Employees = allEmployees,
+                    EmployeesSelect = employeesSelectList,
+                },
+
+                CreateEditUserAccessViewModel = new CreateEditUserAccessViewModel
+                {
+                    Tags = tagViewModels,
+                    ValueAccessTypes = valueAccessTypeViewModels,
+                    AccessTypes = accessTypeViewModel,
+                },
+            };
+            await userModelRef.ShowModal(createEditUsersModel);
+        }
+
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    // private async Task SaveUser(CreateEditUserViewModel model)
+    // {
+    //     isSubmitting = true;
+    //     try
+    //     {
+    //         SpinnerService.Show();
+    //         var m = model.CreateEditUserDetailsViewModel;
+
+    //         var user = new User
+    //         {
+    //             Id = model.Id ?? 0,
+    //             CompanyId = companyId,
+
+    //             FirstName = m.FirstName,
+    //             LastName = m.LastName,
+    //             Email = m.Email,
+    //             UserName = m.UserName,
+    //             RoleTypeId = m.RoleTypeId,
+    //             PhotoId = m.PhotoId,
+    //             Password = m.Password,
+
+    //             LastLoginDateTimeUtc = m.LastLoginDateTimeUtc,
+    //             FaceRecognitionPersonId = m.FaceRecognitionPersonId,
+    //             IsRegisteredForFaceRecognition = m.IsRegisteredForFaceRecognition,
+    //             ForcePasswordChange = m.ForcePasswordChange,
+    //             ReceiveEmails = m.ReceiveEmails,
+    //             ReceiveHREmails = m.ReceiveHREmails,
+    //             IsSystemAdminUser = m.IsSystemAdminUser,
+    //             IsMobileAppUser = m.IsMobileAppUser,
+    //             IsSelfServiceUser = m.IsSelfServiceUser,
+    //             IsPayrollRunUser = m.IsPayrollRunUser,
+    //             IsVisitorModuleUser = m.IsVisitorModuleUser,
+    //             IsManagerAppUser = m.IsManagerAppUser,
+
+    //             Active = true,
+    //             CreationDateTimeUtc = Helper.GetDateTimeNow(),
+    //             UpdatedByUserId = userId,
+    //             UpdatedDate = Helper.GetDateTimeNow(),
+    //             // Only assign EmployeeId if valid (>0)
+    //             EmployeeId = m.EmployeeId > 0 ? m.EmployeeId : null
+    //         };
+
+
+    //         int realEmpId = user.EmployeeId ?? 0;
+    //         Employee? emp = null;
+
+    //         if (realEmpId > 0)
+    //         {
+    //             emp = model.CreateEditUserDetailsViewModel.Employees.FirstOrDefault(e => e.Id == realEmpId);
+    //         }
+
+    //         if (emp != null)
+    //         {
+    //             user.FirstName = emp.Forename;
+    //             user.LastName = emp.Surname;
+    //         }
+    //         else
+    //         {
+    //             user.FirstName = model.CreateEditUserDetailsViewModel.FirstName;
+    //             user.LastName = model.CreateEditUserDetailsViewModel.LastName;
+    //         }
+
+    //         if (!model.Id.HasValue || model.Id == 0)
+    //         {
+    //             user.CreatedByUserId = userId;
+    //         }
+
+    //         //user photo
+    //         if (user.Id == 0)
+    //         {
+    //             user.Photo ??= new Photo { Id = 0 };
+    //         }
+    //         else
+    //         {
+    //             user.Photo ??= new Photo { Id = user.PhotoId ?? 0 };
+    //         }
+
+
+
+    //         var saveUser = await UserService.SaveUserAsync(user);
+
+    //         if(saveUser != null)
+    //         {
+    //             Console.WriteLine($"User saved successfully");
+    //             await LoadUserAsync();
+    //         }
+
+    //         else
+    //         {
+    //             Console.WriteLine("Failed to save user.");
+    //         }
+    //     }
+    //     finally
+    //     {
+    //         SpinnerService.Hide();
+    //         isSubmitting = false;
+    //     }
+    // }
+
+    private async Task SaveUser(CreateEditUserViewModel model)
+    {
+        isSubmitting = true;
+        SpinnerService.Show();
+        try
+        {
+            var m = model.CreateEditUserDetailsViewModel;
+
+            // Pick employee info if exists
+            Employee? emp = (m.EmployeeId > 0)
+                ? m.Employees.FirstOrDefault(e => e.Id == m.EmployeeId)
+                : null;
+
+            // Determine PhotoId for new/existing user
+            int photoId = (model.Id == 0 || !model.Id.HasValue) ? 0 : m.PhotoId ?? 0;
+
+            var user = new User
+            {
+                Id = model.Id ?? 0,
+                CompanyId = companyId,
+                FirstName = emp?.Forename ?? m.FirstName,
+                LastName = emp?.Surname ?? m.LastName,
+                Email = m.Email,
+                UserName = m.UserName,
+                RoleTypeId = m.RoleTypeId,
+                PhotoId = m.PhotoId,
+                Password = m.Password,
+
+                LastLoginDateTimeUtc = m.LastLoginDateTimeUtc,
+                FaceRecognitionPersonId = m.FaceRecognitionPersonId,
+                IsRegisteredForFaceRecognition = m.IsRegisteredForFaceRecognition,
+                ForcePasswordChange = m.ForcePasswordChange,
+                ReceiveEmails = m.ReceiveEmails,
+                ReceiveHREmails = m.ReceiveHREmails,
+                IsSystemAdminUser = m.IsSystemAdminUser,
+                IsMobileAppUser = m.IsMobileAppUser,
+                IsSelfServiceUser = m.IsSelfServiceUser,
+                IsPayrollRunUser = m.IsPayrollRunUser,
+                IsVisitorModuleUser = m.IsVisitorModuleUser,
+                IsManagerAppUser = m.IsManagerAppUser,
+
+                Active = true,
+                CreationDateTimeUtc = Helper.GetDateTimeNow(),
+                UpdatedByUserId = userId,
+                UpdatedDate = Helper.GetDateTimeNow(),
+                EmployeeId = m.EmployeeId > 0 ? m.EmployeeId : null,
+
+                CreatedByUserId = (model.Id == 0 || !model.Id.HasValue) ? userId : 0, // Only set for new users
+                Photo = new Photo
+                {
+                    Id = photoId,
+                    Photo1 = m.Photo,
+                    Description = $"User: {emp?.Forename ?? m.FirstName} {emp?.Surname ?? m.LastName}, company id: {companyId}"
+                }
+            };
+
+            if (createEditUsersModel.CreateEditUserDetailsViewModel.Id == 0 || createEditUsersModel.CreateEditUserDetailsViewModel.Id == null || createEditUsersModel.CreateEditUserDetailsViewModel.EmployeeId == -1)
+            {
+                var salt = Guid.NewGuid().ToString("N");
+                user.Password = Helper.HashPassword(m.Password, salt);
+                user.Salt = salt;
+                user.Active = true;
+                user.CreatedByUserId = userId;
+                user.CreationDateTimeUtc = Helper.GetDateTimeNow();
+                //user.ForcePasswordChange = true;
+            }
+            if (m.RequestResetPassword)
+            {
+                var salt = await UserService.GetUserSaltByUserIdAsync(model.Id.Value);
+
+                if (salt == null)
+                {
+                    //await JS.InvokeVoidAsync("showToast", "User salt not found", "danger");
+                    return;
+                }
+                user.Password = Helper.HashPassword(m.Password, salt);
+            }
+
+
+            var savedUser = await UserService.SaveUserAsync(user);
+
+            if (savedUser == null)
+            {
+                //await JS.InvokeVoidAsync("showToast", "Failed to save user", "danger");
+                Console.WriteLine($"EmployeeId before save: {model.CreateEditUserDetailsViewModel.EmployeeId}");
+                Console.WriteLine($"Failed to save user");
+                return;
+            }
+
+            int realUserId = savedUser.Id;
+
+            //Save access details
+            var accessDetails = new AccessDetails
+            {
+                UserId = realUserId,
+                UpdatedByUserId = userId,
+                UserTags = model.CreateEditUserAccessViewModel.Tags.Where(t => t.Selected).Select(t => new UserTag
+                {
+                    TagId = t.TagId,
+                    UserId = realUserId,
+                    CreatedByUserId = userId,
+                    CreatedDate = Helper.GetDateTimeNow()
+                }).ToList(),
+
+                UserAccess = model.CreateEditUserAccessViewModel.AccessTypes.Where(a => a.ViewEditSelected).Select(a => new UserAccess
+                {
+                    AccessTypeId = a.Id,
+                    UserId = realUserId,
+                    ReadOnly = a.ReadOnlySelected
+                }).ToList(),
+
+                UserValueAccess = model.CreateEditUserAccessViewModel.ValueAccessTypes.Where(v => v.Selected).Select(v => new UserValueAccess
+                {
+                    ValueAccessTypeId = v.Id,
+                    UserId = realUserId,
+                    UpdatedByUserId = userId,
+                    UpdatedDate = Helper.GetDateTimeNow()
+                }).ToList(),
+            };
+            bool acessSaved = await UserService.SaveAccessDetailAsync(accessDetails);
+            if (acessSaved)
+            {
+                //await JS.InvokeVoidAsync("showToast", "User saved successfully!", "success");
+                Console.WriteLine($"User and access details saved successfully");
+                await JS.InvokeVoidAsync("hideModal", "userModal");
+                await JS.InvokeVoidAsync("alert", "User saved successfully!");
+                await RefreshGrid();
+            }
+            else
+            {
+                // await JS.InvokeVoidAsync("showToast", "User saved but access save failed", "danger");
+                Console.WriteLine($"User saved but failed to save access details");
+                await JS.InvokeVoidAsync("hideModal", "userModal");
+                await JS.InvokeVoidAsync("alert", "User saved but failed to save access details");
+                await RefreshGrid();
+            }
+
+        }
+        finally
+        {
+            SpinnerService.Hide();
+            isSubmitting = false;
+        }
+    }
+
 }

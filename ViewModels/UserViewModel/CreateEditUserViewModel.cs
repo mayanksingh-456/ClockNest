@@ -5,8 +5,8 @@
         public CreateEditUserViewModel()
         {
             CreateEditUserDetailsViewModel = new CreateEditUserDetailsViewModel();
-            //CreateEditUserGeneralAccessViewModel = new CreateEditUserGeneralAccessViewModel();
-            //CreateEditUserAccessViewModel = new CreateEditUserAccessViewModel();
+            CreateEditUserGeneralAccessViewModel = new CreateEditUserGeneralAccessViewModel();
+            CreateEditUserAccessViewModel = new CreateEditUserAccessViewModel();
             //CreateEditUserMobileAppAccessViewModel = new CreateEditUserMobileAppAccessViewModel();
             //CreateEditUserSettingAccessViewModel = new CreateEditUserSettingAccessViewModel();
             //CreateEditUserSelfServiceAccessViewModel = new CreateEditUserSelfServiceAccessViewModel();
@@ -16,9 +16,9 @@
 
         public CreateEditUserDetailsViewModel CreateEditUserDetailsViewModel { get; set; }
 
-        //public CreateEditUserGeneralAccessViewModel CreateEditUserGeneralAccessViewModel { get; set; }
+        public CreateEditUserGeneralAccessViewModel CreateEditUserGeneralAccessViewModel { get; set; }
 
-        //public CreateEditUserAccessViewModel CreateEditUserAccessViewModel { get; set; }
+        public CreateEditUserAccessViewModel CreateEditUserAccessViewModel { get; set; }
 
         //public CreateEditUserMobileAppAccessViewModel CreateEditUserMobileAppAccessViewModel { get; set; }
 

@@ -1,0 +1,253 @@
+﻿<style>
+    /* ===========================
+               Toggle Switch Button
+           =========================== */
+    .form-switch .form-check-input {
+        width: 3.2rem; 
+        height: 1.3rem; 
+        cursor: pointer;
+    }
+
+        .form-switch .form-check-input:checked {
+            background-position: right center;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: #008d94 !important;
+            border-color: #008d94 !important;
+        }
+
+
+       /*  Dropdown */
+    .form-select option:checked {
+        background-color: #008d94 !important;
+        color: #fff !important;
+    }
+
+    .form-select:focus {
+        border-color: #008d94 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 141, 148, 0.25);
+    }
+    
+</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="row">
+   <!--Employee Dropdown  -->
+    <div class="mb-3">
+        <label class="form-label body-medium">Is Employee</label>
+        <InputSelect TValue="int?" @bind-Value="userDetailsViewModel.EmployeeId" class="form-select form-control-lg body-medium  no-outline">
+            <option value="-1">No</option>
+            <option value="-2">Multiple Employees</option>
+            @foreach (var personType in userDetailsViewModel.EmployeesSelect)
+            {
+                <option value="@Convert.ToInt32(personType.Value)">@personType.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!-- USer Type -->
+    <div class="mb-3">
+        <lable class="form-label body-medium">User type <span class="text-danger">*</span></lable>
+
+        <!-- Admin -->
+     
+        <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
+            <input type="checkbox" class="form-check-input me-2" @bind="userDetailsViewModel.IsSystemAdminUser" />
+            <label class="form-label body-medium mb-0"> Admin </label>
+        </div>
+       
+
+        @if (SmartPhoneAppModule)
+        {
+        <!-- Mobile App User -->
+        <div class="mb-2  form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.IsMobileAppUser">
+            <label class="form-label body-medium mb-0" >Mobile app user</label>
+        </div>
+       }
+
+     
+        <!--Self service user  -->
+        <div class="mb-2 form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.IsSelfServiceUser">
+            <label class="form-label body-medium mb-0" > Self service user</label>
+        </div>
+  
+
+        <!-- Payroll run user -->
+        <div class="mb-2 form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.IsPayrollRunUser">
+            <label class="form-label body-medium mb-0" > Payroll run user </label>
+        </div>
+        
+
+        @if (VisitorModule)
+        {
+        <!-- Visitor -->
+        <div class="mb-2 form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.IsVisitorModuleUser">
+            <label class="form-label body-medium mb-0" > Visitor module user </label>
+        </div>
+         }
+
+        @if (ManagerAppModule)
+        {
+            <!-- Manager -->
+            <div class="mb-2 form-check form-switch d-flex align-items-center">
+                <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.IsManagerAppUser">
+            <label class="form-label body-medium mb-0" > Manager app user </label>
+        </div>
+        }
+    </div>
+
+    <!-- name-->
+    @if (userDetailsViewModel.EmployeeId == -1 || userDetailsViewModel.EmployeeId == null)
+    {
+        <div class="col-md-6 mb-3">
+            <label class="form-label body-medium">FirstName <span class="text-danger">*</span></label>
+            <InputText class="form-control form-control-lg body-medium  no-outline"
+            @bind-Value="userDetailsViewModel.FirstName"
+            placeholder="FirstName" />
+            <ValidationMessage For="@(() => userDetailsViewModel.FirstName)" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label body-medium">LastName <span class="text-danger">*</span></label>
+            <InputText class="form-control form-control-lg body-medium  no-outline"
+            @bind-Value="userDetailsViewModel.LastName"
+            placeholder="LastName" />
+            <ValidationMessage For="@(() => userDetailsViewModel.LastName)" />
+        </div>
+    }
+
+    <!--Email and username-->
+    @if (userDetailsViewModel.EmployeeId != -2)
+    {
+        <div class="col-md-6 mb-3">
+            <label class="form-label body-medium">Email <span class="text-danger">*</span></label>
+            <InputText class="form-control form-control-lg body-medium  no-outline"
+            @bind-Value="userDetailsViewModel.Email"
+            placeholder="Email" />
+            <ValidationMessage For="@(() => userDetailsViewModel.Email)" />
+        </div>
+
+        <div class="col-md-6 mb-3">  
+            <label class="form-label body-medium">UserName <span class="text-danger">*</span></label>
+            <InputText class="form-control form-control-lg body-medium  no-outline"
+            @bind-Value="userDetailsViewModel.UserName"
+            placeholder="UserName" />
+            <ValidationMessage For="@(() => userDetailsViewModel.UserName)" />
+        </div>
+    }
+    <!--Password-->
+    @if(userDetailsViewModel.Id ==0 || userDetailsViewModel == null)
+{
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Password <span class="text-danger">*</span></label>
+        <InputText type="password" class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="userDetailsViewModel.Password"
+                   placeholder="Password" />
+        <ValidationMessage For="@(() => userDetailsViewModel.Password)" />
+    </div>
+
+    <div class="col-md-6 mb-1">
+        <label class="form-label body-medium">ConfirmPassword <span class="text-danger">*</span></label>
+        <InputText type="password"  class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="userDetailsViewModel.ConfirmPassword"
+                   placeholder="ConfirmPassword" />
+        <ValidationMessage For="@(() => userDetailsViewModel.ConfirmPassword)" />
+        </div>
+
+    
+    }
+    else
+    {
+        //Reset password
+        <div class="col-md-6 mb-3">
+            <label class="form-label body-medium">Reset Password </label>
+            <InputText type="password" class="form-control form-control-lg body-medium  no-outline"
+                       @bind-Value="userDetailsViewModel.Password"
+                       placeholder="ResetPassword" />
+           @*  <button type="button" class="body-medium ms-2">Reset</button> *@
+            <ValidationMessage For="@(() => userDetailsViewModel.Password)" />
+
+               
+        </div>
+    }
+    <!--Other Switch button-->
+    <div class="mb-1">
+
+        <!-- Send welcome e-mail -->
+        @if (userDetailsViewModel.Id == 0 || userDetailsViewModel == null)
+        {
+        <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.SendWelcomeEmail">
+            <label class="form-label body-medium mb-0">
+                Send welcome e-mail
+            </label>
+        </div>
+        }
+
+        <!-- Force password change -->
+        <div class="mb-2  form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.ForcePasswordChange">
+            <label class="form-label body-medium mb-0" for="forcePasswordChange">
+                Force password change 
+            </label>
+        </div>
+
+        <!--Receive TA Alerts  -->
+        <div class="mb-2 form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.ReceiveEmails">
+            <label class="form-label body-medium mb-0" >
+                Receive TA Alerts
+            </label>
+        </div>
+
+        <!-- Receive HR Alerts -->
+        <div class="mb-2 form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.ReceiveHREmails">
+            <label class="form-label body-medium mb-0">
+                Receive HR Alerts
+            </label>
+        </div>
+    </div>
+
+    </div>
+
+@code {
+    [Parameter] public CreateEditUserDetailsViewModel userDetailsViewModel { get; set; } = new();
+    private bool IsAdminUser;
+    private bool SmartPhoneAppModule;
+    private bool PayrollModule;
+    private bool SelfServiceModule;
+    private bool VisitorModule;
+    private bool IsHRModuleUser;
+    private bool ManagerAppModule;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!userDetailsViewModel.EmployeeId.HasValue || userDetailsViewModel.EmployeeId == 0)
+        {
+            userDetailsViewModel.EmployeeId = -1; 
+        }
+
+        // Initialize Photo to avoid NullReferenceException
+        if (userDetailsViewModel.CreateEditUserDetailsPhotoViewModel == null)
+        {
+            userDetailsViewModel.CreateEditUserDetailsPhotoViewModel = new CreateEditUserDetailsPhotoViewModel();
+        }
+
+        var claims =  await UserContextService.GetUserClaimsAsync(AuthenticationStateProvider);
+        IsAdminUser = claims.AdditionalRoles.Contains("IsAdminUser");
+        SmartPhoneAppModule = claims.AdditionalRoles.Contains("SmartPhoneAppModule");
+        PayrollModule = claims.AdditionalRoles.Contains("PayrollModule");
+        SelfServiceModule = claims.AdditionalRoles.Contains("SelfServiceModule");
+        VisitorModule = claims.AdditionalRoles.Contains("VisitorModule");
+
+        IsHRModuleUser = claims.AdditionalRoles.Contains("HRModule");
+        ManagerAppModule = claims.AdditionalRoles.Contains("ManagerAppModule");
+    }
+
+}

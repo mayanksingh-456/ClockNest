@@ -1,0 +1,87 @@
+﻿<style>
+
+    .form-switch .form-check-input {
+        width: 3.2rem;
+        height: 1.3rem;
+        cursor: pointer;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-position: right center;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #008d94 !important;
+        border-color: #008d94 !important;
+    }
+
+</style>
+
+@if(userAccessViewModel.Tags != null && userAccessViewModel.Tags.Any())
+{
+   <div class="d-flex justify-content-center">
+       <table class="table">
+           <thead>
+               <tr>
+                   <th>Tags</th>
+                    <th class="text-center">Access</th>
+               </tr>
+           </thead>
+           <tbody>
+                @foreach (var tag in userAccessViewModel.Tags)
+                {
+                    <tr>
+                    <td>@tag.Name</td>
+                        <td class="text-center">
+                            <div class="form-switch ">
+                                <input class="form-switch form-check-input" type="checkbox" @bind="tag.Selected">
+                            </div>
+                        </td>
+                            
+                    </tr>
+                }
+            </tbody>
+       </table>
+   </div>
+}
+else
+{
+    <p class="text-center">No tags available</p>
+}
+
+@if (userAccessViewModel?.ValueAccessTypes != null && userAccessViewModel.ValueAccessTypes.Any())
+{
+    <div class="d-flex justify-content-center">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Values</th>
+                    <th class="text-center" style="padding-right: 32px">Hide</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var value in userAccessViewModel.ValueAccessTypes)
+                {
+                    <tr>
+                        <td>@value.Name</td>
+                        <td class="text-center" style="padding-right: 32px">
+                            <div class="form-switch ">
+                                <input class="form-switch form-check-input " type="checkbox" @bind="value.Selected">
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+else
+{
+    <p class="text-center">No values available</p>
+}
+
+@code {
+    [Parameter] public CreateEditUserAccessViewModel userAccessViewModel { get; set; } = new();
+}

@@ -1,5 +1,4 @@
-﻿@* @using ClockNest.ViewModels.UserViewModel
-@inject IJSRuntime JS
+﻿@inject IJSRuntime JS
 
 <style>
     /* ===========================
@@ -176,8 +175,6 @@
 	}
 </style>
 
-
-
 <div class="modal fade right" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right">
         <div class="modal-content h-100 border-0">
@@ -196,7 +193,7 @@
 					<div class="row h-100">
 						
 
-						<div class="col-md-9 p-3 pt-0 body-medium">
+						<div class=" p-3 pt-0 body-medium">
 								<ul class="nav nav-tabs mb-3">
 									
 									<li class="nav-item">
@@ -211,8 +208,10 @@
 								<div class="tab-content p-0 bg-transparent">
 									
 									<div class="tab-pane fade @(activeTab == "details" ? "show active" : "")" id="details">
+                                    <CreateEditUserDetailsTab userDetailsViewModel="createEditUsersModel.CreateEditUserDetailsViewModel" />
 									</div>
 								<div class="tab-pane fade @(activeTab == "access" ? "show active" : "")" id="access">
+                                    <CreateEditUserAccessTab userAccessViewModel="createEditUsersModel.CreateEditUserAccessViewModel" />
 									</div>
 								</div>
 
@@ -256,15 +255,20 @@
 	{
 		activeTab = details;
 	}
+
+	public int EmployeeId { get; set; } = -1;
+
 	public async Task ShowModal(CreateEditUserViewModel model)
     {
 		createEditUsersModel = model;
         activeTab = "details"; 
+		EmployeeId = createEditUsersModel?.CreateEditUserDetailsViewModel?.EmployeeId ?? -1;
         await JS.InvokeVoidAsync("showModal", "userModal");
+		StateHasChanged();
     }
 
     public async Task HandelValidSubmit()
     {
-        
+        await OnSubmit.InvokeAsync(createEditUsersModel);
     }
-} *@
+}

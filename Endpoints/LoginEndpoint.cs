@@ -19,7 +19,16 @@ public static class LoginEndpoint
                 new Claim(ClaimTypes.Name, model.Name),
                 new Claim(ClaimTypes.Email, model.UserEmail),
                 new Claim("CompanyId", model.CompanyId),
-                new Claim(ClaimTypes.Role, model.Role)
+                 new Claim("EmployeeId", model.EmployeeId),
+                 new Claim("Payroll", model.Payroll),
+        new Claim("XeroPayroll", model.XeroPayroll),
+        new Claim("Region", model.Region),
+                new Claim(ClaimTypes.Role, model.Role),
+
+        //         new Claim("StaffologyPayroll", model.StaffologyPayroll),
+
+        //new Claim("LogoutAfter", model.LogoutAfter ?? ""),
+        //new Claim("CascadeCredentialId", model.CascadeCredentialId ?? "")
             };
 
             foreach (var role in model.AdditionalRoles)
