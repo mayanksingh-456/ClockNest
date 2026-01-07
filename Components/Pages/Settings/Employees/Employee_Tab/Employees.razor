@@ -1,52 +1,5 @@
 ﻿@page "/employee"
 
-
- 
-
-
-@* <style>
-    .form-select {
-        border-radius: 6px !important;
-        border: 1px solid #CBD5E1 !important;
-        padding: 5px !important;
-        font-size: 13px;
-        transition: all 0.2s ease-in-out;
-    }
-</style> *@
-
-
-@* <div class="top-bar body">
-    <div class="page-title ">Employees</div>
-
-    <div class="actions d-flex gap-2">
-        <button class="btn icon-btn bg-brand-100" @onclick="CreateEmployee">
-            <i class="fa fa-plus"></i>
-        </button>
-
-        <button class="btn icon-btn clockNest-bg-secondary" @onclick="RefreshGrid" title="Refresh">
-            <i class="fa-solid fa-rotate-right"></i>
-        </button>
-    <div class="search-group">
-        
-        <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
-               @bind="searchText"
-               @bind:event="oninput"
-               @bind:after="ResetPage" />
-
-            @if (string.IsNullOrWhiteSpace(searchText))
-            {
-                <i class="fa fa-search search-icon"></i>
-            }
-            else
-            {
-                <i class="fa fa-times clear-icon" style="cursor:pointer" @onclick="ClearSearch"></i>
-            }
-    </div>
-    </div>
-</div>
- *@
-
-
 <div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
     <!-- Page title -->
     <div class="page-title "> Employees </div>
@@ -71,7 +24,7 @@
     </div>
 
     <!-- Buttons -->
-    <div class="btn-group" role="group" >
+    <div class="btn-group" role="group">
         <button class="btn icon-btn bg-brand-100" @onclick="CreateEmployee" type="button">
             <i class="fa fa-plus"></i>
         </button>
@@ -95,7 +48,7 @@
                 <div class="selectedBar_container">
                     @if (selectedEmployees.Count == 1)
                     {
-                        <div class="selectedBar_deleteButton" >
+                        <div class="selectedBar_deleteButton">
                             <i class="fa-regular fa-pen-to-square" style="color: #FFD43B; padding:3px"></i>
                             <span>Edit</span>
                         </div>
@@ -103,28 +56,14 @@
                     <div class="selectedBar_deleteButton" @onclick="DeleteSelected">
                         <img src="icons/Close.svg" class="selectedBar_closeIcon" />
                         <span>Delete</span>
-                    </div> 
+                    </div>
                 </div>
             </div>
         </div>
     }
     else
     {
-        @* <div class="form-group mb-0">
-        </div> *@
-        @* <div class="search-group">
-            <i class="fa fa-search search-icon"></i>
-            <input class="form-control search-input body-medium" type="text" placeholder="Search"
-                   @bind="searchText"
-                   @bind:event="oninput"
-                   @bind:after="ResetPage" />          
-        </div> *@
-       @*  <div class="actions d-flex gap-2" style="margin-left: -9px; margin-bottom:5px">
-            <button class="btn bg-brand-100 text-white d-flex align-items-center justify-content-center gap-2 px-3 py-2" @onclick="CreateEmployee">
-                <img src="images/plus.png" />
-                <span>Create Employee</span>
-            </button>
-        </div> *@
+
     }
 </div>
 
@@ -204,30 +143,6 @@
         <strong>@FilteredEmployees.Count()</strong> employees
     </div>
 
-
-
-    <!-- Previous Next Button -->
-  @*   <nav>
-        <ul class="pagination mb-0">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <button class="page-link" @onclick="PreviousPage">
-                    Previous
-                </button>
-            </li>
-
-            <li class="page-item disabled">
-                <span class="page-link page-status">
-                    Page @currentPage of @totalPages
-                </span>
-            </li>
-
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <button class="page-link" @onclick="NextPage">
-                    Next
-                </button>
-            </li>
-        </ul>
-    </nav> *@
     <nav>
         <ul class="pagination mb-0 custom-pagination">
 
@@ -283,10 +198,90 @@
 
 </div>
 
-<CreateEditEmployeeModel @ref="employeeModelRef" OnSubmit="SaveEmployee"></CreateEditEmployeeModel>
+<CreateEditEmployeeModel @ref="employeeModelRef" isSubmitting="@isSubmitting" OnSubmit="SaveEmployee"></CreateEditEmployeeModel>
 
 @code {
 
+    public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
+    public CreateEditEmployeeModel employeeModelRef;
+    public bool isSubmitting { get; set; }
+
+    private List<Employee> employees = new();
+    private List<Employee> selectedEmployee = new List<Employee>();
+
+    private List<EmployeeAllDetails> employeeAllDetails = new();
+    private List<CompanyLicenceDetails> companylicencedetail = new();
+
+    private int companyId;
+    private int userId;
+
+    private string searchText = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private HashSet<int> selectedEmployees = new();
+
+    private IEnumerable<Employee> FilteredEmployees =>
+     employees.Where(e =>
+         string.IsNullOrWhiteSpace(searchText) ||
+         (e.Forename?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+         (e.Surname?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+         (e.PayRollNo?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+         (e.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+        (e.BadgeId?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+     );
+
+    private int totalPages =>
+        pageSize == 0
+            ? 1
+            : (int)Math.Ceiling(FilteredEmployees.Count() / (double)pageSize);
+
+    private IEnumerable<Employee> PagedEmployees =>
+        pageSize == 0
+            ? FilteredEmployees
+            : FilteredEmployees
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize);
+
+    private bool IsAllSelected
+    {
+        get => PagedEmployees.Any() && PagedEmployees.All(e => selectedEmployees.Contains(e.Id));
+        set
+        {
+            if (value)
+            {
+                foreach (var emp in PagedEmployees)
+                    selectedEmployees.Add(emp.Id);
+            }
+            else
+            {
+                foreach (var emp in PagedEmployees)
+                    selectedEmployees.Remove(emp.Id);
+            }
+        }
+    }
+
+    <!-- Checkbox Selection -->
+    private void ToggleRow(int id)
+    {
+        if (!selectedEmployees.Add(id))
+            selectedEmployees.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = e.Value?.ToString() == "true";
+
+        foreach (var emp in PagedEmployees)
+        {
+            if (isChecked)
+                selectedEmployees.Add(emp.Id);
+            else
+                selectedEmployees.Remove(emp.Id);
+        }
+    }
+
+    <!-- Pagination-->
     void ClearSearch()
     {
         searchText = string.Empty;
@@ -338,124 +333,6 @@
 
         currentPage = page;
     }
-
-
-    public CreateEditEmployeeModel employeeModelRef;
-    public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
-    private List<Employee> employees = new();
-    private List<Employee> selectedEmployee = new List<Employee>();
-
-    private List<EmployeeAllDetails> employeeAllDetails = new();
-    private List<CompanyLicenceDetails> companylicencedetail = new();
-
-    private int companyId;
-
-    private string searchText = "";
-    private int currentPage = 1;
-    private int pageSize = 10;
-
-    private HashSet<int> selectedEmployees = new();
-
-    private IEnumerable<Employee> FilteredEmployees =>
-     employees.Where(e =>
-         string.IsNullOrWhiteSpace(searchText) ||
-         (e.Forename?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-         (e.Surname?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-         (e.PayRollNo?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-         (e.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
-        (e.BadgeId?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
-     );
-
-    private int totalPages =>
-        pageSize == 0
-            ? 1
-            : (int)Math.Ceiling(FilteredEmployees.Count() / (double)pageSize);
-
-    private IEnumerable<Employee> PagedEmployees =>
-        pageSize == 0
-            ? FilteredEmployees
-            : FilteredEmployees
-                .Skip((currentPage - 1) * pageSize)
-                .Take(pageSize);
-
-    private bool IsAllSelected
-    {
-        get => PagedEmployees.Any() && PagedEmployees.All(e => selectedEmployees.Contains(e.Id));
-        set
-        {
-            if (value)
-            {
-                foreach (var emp in PagedEmployees)
-                    selectedEmployees.Add(emp.Id);
-            }
-            else
-            {
-                foreach (var emp in PagedEmployees)
-                    selectedEmployees.Remove(emp.Id);
-            }
-        }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            SpinnerService.Show();
-            await LoadEmployeesAsync();
-        }
-        finally
-        {
-            SpinnerService.Hide();
-        }
-
-    }
-
-    private async Task LoadEmployeesAsync()
-    {
-        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
-        employees = await EmployeeService.GetEmployeeAsync(companyId);
-    }
-
-    private async Task RefreshGrid()
-    {
-        SpinnerService.Show();
-        await Task.Delay(1000);
-        StateHasChanged(); 
-        try
-        {
-            searchText = "";
-            selectedEmployees.Clear();
-            currentPage = 1;
-            pageSize = 10;
-            await LoadEmployeesAsync();
-        }
-        finally
-        {
-            SpinnerService.Hide();
-        }
-    }
-
-    <!-- Checkbox Selection -->
-    private void ToggleRow(int id)
-    {
-        if (!selectedEmployees.Add(id))
-            selectedEmployees.Remove(id);
-    }
-
-    private void ToggleSelectAll(ChangeEventArgs e)
-    {
-        bool isChecked = e.Value?.ToString() == "true";
-
-        foreach (var emp in PagedEmployees)
-        {
-            if (isChecked)
-                selectedEmployees.Add(emp.Id);
-            else
-                selectedEmployees.Remove(emp.Id);
-        }
-    }
-
-    <!-- Pagination-->
     private void NextPage()
     {
         if (currentPage < totalPages)
@@ -479,6 +356,47 @@
     }
 
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            SpinnerService.Show();
+
+            await LoadEmployeesAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+
+    }
+
+    private async Task LoadEmployeesAsync()
+    {
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        employees = await EmployeeService.GetEmployeeAsync(companyId);
+    }
+
+    private async Task RefreshGrid()
+    {
+        SpinnerService.Show();
+        await Task.Delay(1000);
+        StateHasChanged();
+        try
+        {
+            searchText = "";
+            selectedEmployees.Clear();
+            currentPage = 1;
+            pageSize = 10;
+            await LoadEmployeesAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
     private async void CreateEmployee()
     {
         SpinnerService.Show();
@@ -493,46 +411,46 @@
         var employeeAllDetails = await EmployeeService.GetEmployeeAllDetailsAsync(parameterList);
         var newEmployee = new CreateEditEmployeeViewModel
         {
-           Id=0,
-           CompanyId = companyId,
+            Id = 0,
+            CompanyId = companyId,
 
             // <!--DetailsTab-->
-              CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
-              {
+            CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
+            {
                 PersonTypes = employeeAllDetails?.PersonTypes
                 .Where(x => x.Id != 3)
                 .Select(x => new SelectListItem
                 {
-                     Value = x.Id.ToString(),
-                     Text = x.Name
+                    Value = x.Id.ToString(),
+                    Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
 
                 Titles = employeeAllDetails.Titles
                 .Select(x => new SelectListItem
                 {
-                     Value = x.Id.ToString(),
-                     Text = x.Name
+                    Value = x.Id.ToString(),
+                    Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
 
                 Rosters = employeeAllDetails.Rosters
                 .Select(x => new SelectListItem
                 {
-                     Value = x.Id.ToString(),
-                     Text = x.Name
+                    Value = x.Id.ToString(),
+                    Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
 
                 Activities = employeeAllDetails.Activities
                 .Select(x => new SelectListItem
                 {
-                     Value = x.Id.ToString(),
-                     Text = x.Name
+                    Value = x.Id.ToString(),
+                    Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
 
                 CostCentres = employeeAllDetails.CostCentres
                 .Select(x => new SelectListItem
                 {
-                     Value = x.Id.ToString(),
-                     Text = x.Name
+                    Value = x.Id.ToString(),
+                    Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
 
                 GTTerminalGroups = employeeAllDetails.GTTerminalGroups?
@@ -542,16 +460,16 @@
                 AccessGroups = employeeAllDetails.AccessGroups
                 .Select(x => new SelectListItem
                 {
-                     Value = x.Id.ToString(),
-                     Text = x.Name
+                    Value = x.Id.ToString(),
+                    Text = x.Name
                 }).ToList() ?? new List<SelectListItem>(),
             },
 
-        }; 
+        };
         await employeeModelRef.ShowModal(newEmployee);
         SpinnerService.Hide();
     }
-  
+
     private async Task EditEmployee(Employee? employee = null)
     {
         try
@@ -577,7 +495,7 @@
                 CompanyId = companyId,
 
                 // <!--DetailsTab-->
-               CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
+                CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
                 {
                     Forename = editTarget.Forename,
                     Surname = editTarget.Surname,
@@ -593,7 +511,7 @@
                     .Select(x => new SelectListItem
                     {
                         Value = x.Id.ToString(),
-                        Text = x.Name 
+                        Text = x.Name
                     }).ToList(),
 
 
@@ -649,11 +567,11 @@
                     Address4 = employeeAllDetails.Employee?.Address4 ?? string.Empty,
 
                     Postcode = employeeAllDetails.Employee?.Postcode ?? string.Empty,
-                    Mobile   = employeeAllDetails.Employee?.Mobile ?? string.Empty,
-                    Mobile2  = employeeAllDetails.Employee?.Mobile2 ?? string.Empty,
-                    Email    = employeeAllDetails.Employee?.Email ?? string.Empty,
-                    Email2   = employeeAllDetails.Employee?.Email2 ?? string.Empty,
-                   NextOfKin = employeeAllDetails.Employee?.NextOfKin ?? string.Empty,
+                    Mobile = employeeAllDetails.Employee?.Mobile ?? string.Empty,
+                    Mobile2 = employeeAllDetails.Employee?.Mobile2 ?? string.Empty,
+                    Email = employeeAllDetails.Employee?.Email ?? string.Empty,
+                    Email2 = employeeAllDetails.Employee?.Email2 ?? string.Empty,
+                    NextOfKin = employeeAllDetails.Employee?.NextOfKin ?? string.Empty,
                     NextOfKinContactNo = employeeAllDetails.Employee?.NextOfKinContactNo ?? string.Empty,
                 },
 
@@ -661,7 +579,7 @@
                 {
                     //Notes = employeeAllDetails.Employee?.Notes ?? string.Empty,
                     Notes = employeeAllDetails.Employee?.Notes ?? string.Empty,
-                }   
+                }
 
             };
 
@@ -669,15 +587,86 @@
         }
         finally
         {
-            SpinnerService.Hide(); 
+            SpinnerService.Hide();
         }
     }
 
-    private async Task SaveEmployee()
+    private async Task SaveEmployee(CreateEditEmployeeViewModel model)
     {
-        await LoadEmployeesAsync();
+        isSubmitting = true;
+        SpinnerService.Show();
+        try
+        {
+            var details = model.CreateEditEmployeeDetailsViewModel;
+            var personal = model.CreateEditEmployeePersonalInfoViewModel;
+            var employee = new Employee
+            {
+                Id = model.Id ?? 0,
+
+                //Details Tab
+                Forename = details.Forename,
+                Surname = details.Surname,
+                BadgeId = details.BadgeId,
+                BadgeId2 = details.BadgeId2,
+                PersonTypeId = details.PersonTypeId,
+                DateOfBirth = details.DateOfBirth,
+                Gender = details.Gender,
+                TitleId = details.TitleId,
+                RosterId = details.RosterId,
+                Rotation = details.Rotation,
+                ActivityId = details.ActivityId,
+                CostCentreId = details.CostCentreId,
+                TerminalGroupId = details.TerminalGroupId,
+                GTTerminalGroupId = details.GTTerminalGroupId,
+                AccessGroupId = details.AccessGroupId,
+
+                // Personal Info tab
+                Address1 = personal.Address1,
+                Address2 = personal.Address2,
+                Address3 = personal.Address3,
+                Address4 = personal.Address4,
+                Postcode = personal.Postcode,
+                Mobile = personal.Mobile,
+                Mobile2 = personal.Mobile2,
+                Home = personal.Home,
+                Email = personal.Email,
+                Email2 = personal.Email2,
+                NextOfKin = personal.NextOfKin,
+                NextOfKinContactNo = personal.NextOfKinContactNo,
+
+                //Notes Tab
+                Notes = model.CreateEditEmployeeNotesViewModel.Notes,
+
+
+                CreatedByUserId = userId,
+                UpdatedByUserId = userId,
+                CompanyId = companyId,
+                UpdatedDate = Helper.GetDateTimeNow(),
+                CreatedDate = Helper.GetDateTimeNow(),
+            };
+
+            var savedEmployee = await EmployeeService.SaveEmployeeAsync(employee);
+
+            if (savedEmployee != null)
+            {
+                await JS.InvokeVoidAsync("hideModal", "employeeModal");
+
+                await LoadEmployeesAsync();
+                await JS.InvokeVoidAsync("alert", "Employee saved successfully!");
+            }
+            else
+            {
+                //await JS.InvokeVoidAsync("alert", "Failed to save employee. Please try again.");
+            }
+        }
+
+        finally
+        {
+            isSubmitting = false;
+            SpinnerService.Hide();
+        }
     }
 
-   
+
 
 }

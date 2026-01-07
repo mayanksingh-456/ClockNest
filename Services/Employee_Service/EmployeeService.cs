@@ -84,5 +84,24 @@ namespace ClockNest.Services.Employee_Service
             return details;
         }
 
+        //Save employee
+        public async Task<Employee?> SaveEmployeeAsync(Employee employee)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/setup/employees/employee/post", employee);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<Employee>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.Error.WriteLine($"API Save Failed: {response.StatusCode} - {error}");
+                return null;
+            }
+
+        }
+
     }
 }

@@ -181,12 +181,13 @@
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right">
         <div class="modal-content h-100 border-0">
 
-            <EditForm Model="@EmployeeModal" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
+			 <EditForm Model="@createEditEmployeeModel" OnValidSubmit="HandelValidSubmit"  OnInvalidSubmit="@(() => activeTab = "details")" class="d-flex flex-column h-100">
+				
                 <DataAnnotationsValidator />
 
                 <!-- Header-->
                 <div class="modal-header border-0">
-                    <h5 > @((EmployeeModal.Id ==0) ? "Create Employee" : "Edit Employee") </h5>
+                    <h5 > @((createEditEmployeeModel.Id ==0) ? "Create Employee" : "Edit Employee") </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -211,41 +212,41 @@
 								</label>
 							</div>
 							<h6 class="employee-name fw-bold mt-2">
-								@($"{EmployeeModal.CreateEditEmployeeDetailsViewModel.Forename} {EmployeeModal.CreateEditEmployeeDetailsViewModel.Surname}")
+								@($"{createEditEmployeeModel.CreateEditEmployeeDetailsViewModel.Forename} {createEditEmployeeModel.CreateEditEmployeeDetailsViewModel.Surname}")
 							</h6>
 						</div>
 
 						<div class="info-box">
 							<h6 class="section-title">Contact</h6>
-							@* <p class="body-medium mb-1">Email: @EmployeeModal.CreateEditEmployeePersonalInfoViewModel.Email</p>
-							<p class="body-medium mb-0">Phone:  @EmployeeModal.CreateEditEmployeePersonalInfoViewModel.Mobile</p> *@
+							@* <p class="body-medium mb-1">Email: @createEditEmployeeModel.CreateEditEmployeePersonalInfoViewModel.Email</p>
+							<p class="body-medium mb-0">Phone:  @createEditEmployeeModel.CreateEditEmployeePersonalInfoViewModel.Mobile</p> *@
 						</div>
 
 						<div class="info-box">
 							<h6 class="section-title">Employment</h6>
-							<p class="body-medium mb-1">Join Date: @EmployeeModal.CreateEditEmployeeAdditionalInfoViewModel.JoinDateDisplay</p>
-							<p class="body-medium mb-0">Length of service: @EmployeeModal.CreateEditEmployeeAdditionalInfoViewModel.LengthOfService</p>
+							<p class="body-medium mb-1">Join Date: @createEditEmployeeModel.CreateEditEmployeeAdditionalInfoViewModel.JoinDateDisplay</p>
+							<p class="body-medium mb-0">Length of service: @createEditEmployeeModel.CreateEditEmployeeAdditionalInfoViewModel.LengthOfService</p>
 						</div>
 
 						<div class="info-box">
 							<h6 class="section-title">Manager</h6>
-							@if (EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel == null)
+							@if (createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel == null)
 							{
 								<div class="d-flex align-items-center body-medium">Not set</div>
 							}
 							@* else
 							{
 								<div class="d-flex align-items-center">
-									<img src="@(EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Photo != null
-																		  			 ? $"data:image/png;base64,{Convert.ToBase64String(EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Photo)}"
+									<img src="@(createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel.Manager.Photo != null
+																		  			 ? $"data:image/png;base64,{Convert.ToBase64String(createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel.Manager.Photo)}"
 																		  			 : "avtar.png")"
 																															 class="rounded-circle border me-2"
 																															 style="width:40px; height:40px; object-fit:cover;" />
 
 									<span class="body-medium">
-										@(string.IsNullOrWhiteSpace(EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager?.Forename)
+										@(string.IsNullOrWhiteSpace(createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel.Manager?.Forename)
 																			? "Not set"
-																			: $"{EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Forename} {EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.Manager.Surname}")
+																			: $"{createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel.Manager.Forename} {createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel.Manager.Surname}")
 								</span>
 							</div>
 														} *@
@@ -253,10 +254,10 @@
 
 						<div class="info-box">
 							<h6 class="section-title">Employees Managed</h6>
-							@if (EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel?.EmployeesManaged?.Any() == true)
+							@if (createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel?.EmployeesManaged?.Any() == true)
 							{
 								<div class="scroll-container">
-									@* @foreach (var emp in EmployeeModal.CreateEditEmployeeManagerEmployeeViewModel.EmployeesManaged)
+									@* @foreach (var emp in createEditEmployeeModel.CreateEditEmployeeManagerEmployeeViewModel.EmployeesManaged)
 									{
 										string imageSrc;
 										if (emp.Photo != null && emp.Photo.Length > 0)
@@ -295,6 +296,9 @@
 									<a class="nav-link @(activeTab == "personalInfo" ? "active" : "")" href="#personalInfo" data-bs-toggle="tab" @onclick="@(() => OnTabClick("personalInfo"))">Personal info</a>
 									</li>
 									<li class="nav-item">
+                                    <a class="nav-link @(activeTab =="additionalInfo" ? "active" : "" )" href="#additionalInfo" data-bs-toggle="tab" @onclick ="@(() => OnTabClick("additionalInfo"))">Additional info</a>
+									</li>
+									<li class="nav-item">
 										<a class="nav-link @(activeTab == "notes" ? "active" : "")" href="#notes" data-bs-toggle="tab" @onclick="@(() => OnTabClick("notes"))">Notes</a>
 									</li>
 								
@@ -305,15 +309,17 @@
 										
 									</div>
 									<div class="tab-pane fade @(activeTab == "details" ? "show active" : "")" id="details">
-									<CreateEditEmployeeDetailsTab employeeDetailsViewModel="EmployeeModal.CreateEditEmployeeDetailsViewModel" />
+									<CreateEditEmployeeDetailsTab employeeDetailsViewModel="createEditEmployeeModel.CreateEditEmployeeDetailsViewModel" />
 									</div>
 								<div class="tab-pane fade @(activeTab == "personalInfo" ? "show active" : "")" id="personalInfo">
-										<CreateEditEmployeePersonalInfoTab personalInfoViewModel="EmployeeModal.CreateEditEmployeePersonalInfoViewModel"/>
+										<CreateEditEmployeePersonalInfoTab personalInfoViewModel="createEditEmployeeModel.CreateEditEmployeePersonalInfoViewModel"/>
 									</div>
 								</div>
-
+								<div class="tab-pane fade @(activeTab == "additionalInfo" ? "show active" : "")" id="additionalInfo">
+                              @*   <CreateEditEmployeeAdditionalInfoTab additionalInfoViewModel="createEditEmployeeModel.CreateEditEmployeeAdditionalInfoViewModel" />) *@
+							  </div>
 								<div class="tab-pane fade @(activeTab == "notes" ? "show active" : "")" id="notes">
-									<CreateEditEmployeeNotesTab notesViewModel="EmployeeModal.CreateEditEmployeeNotesViewModel"/>
+									<CreateEditEmployeeNotesTab notesViewModel="createEditEmployeeModel.CreateEditEmployeeNotesViewModel"/>
 								</div>
 
 								</div>
@@ -348,11 +354,9 @@
 </div>
 
 @code{
-
-
-
+	public CreateEditEmployeeDetailsViewModel employeeDetailsViewModel { get; set; }
 	[Parameter] public bool isSubmitting { get; set; }
-	[Parameter] public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
+	[Parameter] public CreateEditEmployeeViewModel createEditEmployeeModel { get; set; } = new();
 	[Parameter] public EventCallback<CreateEditEmployeeViewModel> OnSubmit { get; set; }
 
 	private string activeTab;
@@ -362,14 +366,17 @@
 	}
 	public async Task ShowModal(CreateEditEmployeeViewModel model)
     {
-        EmployeeModal = model; 
+        createEditEmployeeModel = model; 
+		
+
         activeTab = "details"; 
         await JS.InvokeVoidAsync("showModal", "employeeModal");
 		StateHasChanged();
     }
 
-    public async Task HandelValidSubmit()
-    {
-        
-    }
+	public async Task HandelValidSubmit()
+	{
+		await OnSubmit.InvokeAsync(createEditEmployeeModel);
+	}
+	
 }

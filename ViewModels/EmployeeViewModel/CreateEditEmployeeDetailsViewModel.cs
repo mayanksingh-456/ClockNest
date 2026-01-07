@@ -36,11 +36,11 @@ namespace ClockNest.ViewModels.EmployeeViewModel
         public string BadgeId2 { get; set; }
 
         [Display(Name = "Forename")]
-        [Required]
+        [Required(ErrorMessage = "Surname is required")]
         public string Forename { get; set; }
 
         [Display(Name = "Surname")]
-        [Required]
+        [Required(ErrorMessage = "Surname is required")]
         public string Surname { get; set; }
 
         [Display(Name = "Title")]
