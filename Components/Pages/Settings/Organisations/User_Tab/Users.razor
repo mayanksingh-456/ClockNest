@@ -506,8 +506,8 @@
              .Select(v => new ValueAccessTypeSelectViewModel
              {
                  Id = v.Id,
-                 Name = v.Name,
-                 Description = v.Description,
+                 Name = v.Name ?? string.Empty,
+                 Description = v.Description ?? string.Empty,
                  Selected = false
              })
              .ToList() ?? new List<ValueAccessTypeSelectViewModel>();
@@ -579,7 +579,6 @@
                 {
                     Value = e.Id.ToString(),
                     Text = e.FullName
-
                 })
                 .ToList();
 
@@ -590,17 +589,19 @@
        TagId = t.Id,
        Name = t.Name,
        Selected = accessDetails.UserTags?.Any(ut => ut.TagId == t.Id) ?? false
-   }).ToList();
+   }).ToList() ?? new List<TagSelectViewModel>(); ;
+
+           
 
             var valueAccessTypeViewModels = accessDetails.ValueAccessTypes?
              .Select(v => new ValueAccessTypeSelectViewModel
              {
                  Id = v.Id,
-                 Name = v.Name,
-                 Description = v.Description,
+                 Name = v.Name ?? string.Empty,
+                 Description = v.Description ?? string.Empty,
                  Selected = accessDetails.UserValueAccess?.Any(uv => uv.ValueAccessTypeId == v.Id) ?? false
              })
-             .ToList();
+             .ToList() ?? new List<ValueAccessTypeSelectViewModel>(); ;
 
             var accessTypeViewModel = accessDetails.AccessTypes?
            .Select(v => new AccessTypeSelectViewModel
@@ -608,7 +609,7 @@
                Id = v.Id,
                Name = v.Name,
                ViewEditSelected = accessDetails.UserAccess?.Any(ua => ua.AccessTypeId == v.Id) ?? false,
-           }).ToList();
+           }).ToList() ?? new List<AccessTypeSelectViewModel>(); ;
 
             createEditUsersModel = new CreateEditUserViewModel
             {

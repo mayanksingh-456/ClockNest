@@ -146,7 +146,7 @@
     <div class="col-md-6 mb-3">
         <label class="form-label body-medium">Password <span class="text-danger">*</span></label>
         <InputText type="password" class="form-control form-control-lg body-medium  no-outline"
-                   @bind-Value="userDetailsViewModel.Password"
+                   @bind-Value="userDetailsViewModel!.Password"
                    placeholder="Password" />
         <ValidationMessage For="@(() => userDetailsViewModel.Password)" />
     </div>
@@ -182,7 +182,7 @@
         @if (userDetailsViewModel.Id == 0 || userDetailsViewModel == null)
         {
         <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
-            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel.SendWelcomeEmail">
+            <input class="form-check-input me-2" type="checkbox" @bind="userDetailsViewModel!.SendWelcomeEmail">
             <label class="form-label body-medium mb-0">
                 Send welcome e-mail
             </label>

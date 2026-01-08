@@ -203,7 +203,8 @@
 @code {
 
     public CreateEditEmployeeViewModel EmployeeModal { get; set; } = new();
-    public CreateEditEmployeeModel employeeModelRef;
+    //public CreateEditEmployeeModel? employeeModelRef;
+    private CreateEditEmployeeModel employeeModelRef = null!;
     public bool isSubmitting { get; set; }
 
     private List<Employee> employees = new();
@@ -417,7 +418,7 @@
             // <!--DetailsTab-->
             CreateEditEmployeeDetailsViewModel = new CreateEditEmployeeDetailsViewModel
             {
-                PersonTypes = employeeAllDetails?.PersonTypes
+                PersonTypes = employeeAllDetails.PersonTypes
                 .Where(x => x.Id != 3)
                 .Select(x => new SelectListItem
                 {
@@ -465,6 +466,35 @@
                 }).ToList() ?? new List<SelectListItem>(),
             },
 
+            // <!--AdditionalInfoTab-->
+            CreateEditEmployeeAdditionalInfoViewModel = new CreateEditEmployeeAdditionalInfoViewModel
+            {
+                Employees = employeeAllDetails.Employees
+                .Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = string.IsNullOrWhiteSpace(x.PayrollNo)
+                  ? $"{x.Forename} {x.Surname}"
+                  : $"{x.Forename} {x.Surname} ({x.PayrollNo})"
+                }).ToList() ?? new List<SelectListItem>(),
+
+                FlexitimeRules = employeeAllDetails.FlexitimeRules
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+
+                NationalityTypes = employeeAllDetails.NationalityTypes
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+
+                EthnicTypes = employeeAllDetails.EthnicTypes
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+
+                ReligionTypes = employeeAllDetails.ReligionTypes
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+            },
+
         };
         await employeeModelRef.ShowModal(newEmployee);
         SpinnerService.Hide();
@@ -488,6 +518,8 @@
             };
 
             var employeeAllDetails = await EmployeeService.GetEmployeeAllDetailsAsync(parameterList);
+
+            var managerEmployeeDetails = await EmployeeService.GetManagerEmployeeDetailsAsync(parameterList);
 
             EmployeeModal = new CreateEditEmployeeViewModel
             {
@@ -575,11 +607,85 @@
                     NextOfKinContactNo = employeeAllDetails.Employee?.NextOfKinContactNo ?? string.Empty,
                 },
 
+                // <!--AdditionalInfoTab-->
+                CreateEditEmployeeAdditionalInfoViewModel = new CreateEditEmployeeAdditionalInfoViewModel
+                {
+                    JobTitle = employeeAllDetails.Employee?.JobTitle ?? string.Empty,
+
+                    FirstAider = editTarget.FirstAider,
+                    FireMarshall = editTarget.FireMarshall,
+                    Supervisor = employeeAllDetails.Employee?.Supervisor,
+                    JoinDate = editTarget.JoinDate,
+                    LeavingDate = editTarget.LeavingDate,
+                    ReasonForLeaving = employeeAllDetails.Employee?.ReasonForLeaving ?? string.Empty,
+                    PinOnly = employeeAllDetails.Employee?.PinOnly ?? editTarget.PinOnly,
+                    ManagerId = editTarget.ManagerId,
+                    FlexitimeRuleId = editTarget.FlexitimeRuleId,
+                    NationalityTypeId = employeeAllDetails.Employee?.NationalityTypeId,
+                    EthnicTypeId = employeeAllDetails.Employee?.EthnicTypeId ?? 0,
+                    ReligionTypeId = employeeAllDetails.Employee?.ReligionTypeId,
+                    TimeZone = employeeAllDetails.Employee?.TimeZone ?? string.Empty,
+
+                    Employees = employeeAllDetails.Employees
+                .Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = string.IsNullOrWhiteSpace(x.PayrollNo)
+                  ? $"{x.Forename} {x.Surname}"
+                  : $"{x.Forename} {x.Surname} ({x.PayrollNo})"
+                }).ToList(),
+
+                    FlexitimeRules = employeeAllDetails.FlexitimeRules
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+
+
+                    NationalityTypes = employeeAllDetails.NationalityTypes
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+
+                    EthnicTypes = employeeAllDetails.EthnicTypes
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+
+                    ReligionTypes = employeeAllDetails.ReligionTypes
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+            .ToList(),
+                },
+
+                //Notes Tab
                 CreateEditEmployeeNotesViewModel = new CreateEditEmployeeNotesViewModel
                 {
                     //Notes = employeeAllDetails.Employee?.Notes ?? string.Empty,
                     Notes = employeeAllDetails.Employee?.Notes ?? string.Empty,
-                }
+                },
+
+
+                       CreateEditEmployeeManagerEmployeeViewModel = new CreateEditEmployeeManagerEmployeeViewModel
+                       {
+                           Manager = new EmployeeViewModel
+                           {
+                               Id = managerEmployeeDetails.Manager?.Employee?.Id ?? 0,
+                        Forename = managerEmployeeDetails.Manager?.Employee?.Forename ?? string.Empty,
+                        Surname = managerEmployeeDetails.Manager?.Employee?.Surname ?? string.Empty,
+                               //Photo = managerEmployeeDetails.Manager?.EmployeePhoto?.Photo,
+                        Photo = managerEmployeeDetails.Manager?.EmployeePhoto?.Photo ?? Array.Empty<byte>(),
+
+                               PersonTypeId = managerEmployeeDetails.Manager?.Employee?.PersonTypeId ?? 0,
+                               TitleId = managerEmployeeDetails.Manager?.Employee?.TitleId
+                           },
+                           EmployeesManaged = managerEmployeeDetails.ManagerEmployees?
+                             .Select(e => new EmployeeViewModel
+                             {
+                                 Id = e.Employee?.Id ?? 0,
+                                 Forename = e.Employee?.Forename ?? string.Empty,
+                                 Surname = e.Employee?.Surname ?? string.Empty,
+                            
+                                 PersonTypeId = e.Employee?.PersonTypeId ?? 0,
+                                 TitleId = e.Employee?.TitleId,
+                                 Photo = e.EmployeePhoto?.Photo ?? Array.Empty<byte>(),
+                             }).ToList() ?? new List<EmployeeViewModel>()
+                       },
 
             };
 
@@ -599,6 +705,7 @@
         {
             var details = model.CreateEditEmployeeDetailsViewModel;
             var personal = model.CreateEditEmployeePersonalInfoViewModel;
+            var additional = model.CreateEditEmployeeAdditionalInfoViewModel;
             var employee = new Employee
             {
                 Id = model.Id ?? 0,
@@ -633,6 +740,23 @@
                 Email2 = personal.Email2,
                 NextOfKin = personal.NextOfKin,
                 NextOfKinContactNo = personal.NextOfKinContactNo,
+
+                //Additional info Tab
+
+                JobTitle = additional.JobTitle,
+                FirstAider = additional.FirstAider,
+                FireMarshall = additional.FireMarshall,
+                Supervisor = additional.Supervisor,
+                JoinDate = additional.JoinDate,
+                LeavingDate = additional.LeavingDate,
+                ReasonForLeaving = additional.ReasonForLeaving,
+                PinOnly = additional.PinOnly,
+                ManagerId = additional.ManagerId,
+                FlexitimeRuleId = additional.FlexitimeRuleId,
+                NationalityTypeId = additional.NationalityTypeId,
+                EthnicTypeId = additional.EthnicTypeId,
+                ReligionTypeId = additional.ReligionTypeId,
+                TimeZone = additional.TimeZone,
 
                 //Notes Tab
                 Notes = model.CreateEditEmployeeNotesViewModel.Notes,

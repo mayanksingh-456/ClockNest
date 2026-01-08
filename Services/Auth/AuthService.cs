@@ -175,9 +175,9 @@ namespace ClockNest.Services.Auth
                 Name = $"{user.FirstName} {user.LastName}",
                 UserEmail = user.Email ?? "",
 
-                CompanyId = user.CompanyId.ToString(),
-                RoleTypeId = user.RoleTypeId.ToString(),
-                EmployeeId = user.EmployeeId.ToString(),
+                CompanyId = user.CompanyId.ToString() ?? string.Empty,
+                RoleTypeId = user.RoleTypeId.ToString() ?? string.Empty,
+                EmployeeId = user.EmployeeId.ToString() ?? string.Empty,
 
                 IsSwitchCompany = user.IsSwitchCompany.ToString(),
                 Payroll = payroll,

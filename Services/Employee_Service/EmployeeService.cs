@@ -103,5 +103,23 @@ namespace ClockNest.Services.Employee_Service
 
         }
 
+        //manager all detail
+        public async Task<ManagerEmployeeDetails> GetManagerEmployeeDetailsAsync(ParameterList parameterList)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/setup/employees/manageremployeedetails/get", parameterList);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Error fetching manager employee details: {response.StatusCode}");
+
+            var details = await response.Content.ReadFromJsonAsync<ManagerEmployeeDetails>();
+
+            if (details == null)
+                throw new Exception("Manager employee details not found.");
+
+            return details;
+        }
+
     }
 }

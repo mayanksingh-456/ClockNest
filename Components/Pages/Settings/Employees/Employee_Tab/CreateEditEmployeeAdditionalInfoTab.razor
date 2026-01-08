@@ -1,5 +1,140 @@
-﻿<h3>CreateEditEmployeeAdditionalInfoTab</h3>
+﻿
+
+<h5>Additional Info</h5>
+<div class="row">
+
+ <div class="mb-3">
+    <!-- First aider -->
+        <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
+        <input type="checkbox" class="form-check-input me-2" @bind="employeeAdditionalInfoViewModel.FirstAider" />
+            <label class="form-label body-medium mb-0"> First aider </label>
+        </div>
+
+        <!-- Fire Marshall -->
+        <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
+            <input type="checkbox" class="form-check-input me-2" @bind="employeeAdditionalInfoViewModel.FireMarshall" />
+            <label class="form-label body-medium mb-0"> Fire Marshall </label>
+        </div>
+
+        <!-- Supervisor -->
+        <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
+            <input type="checkbox" class="form-check-input me-2" @bind="employeeAdditionalInfoViewModel.Supervisor" />
+            <label class="form-label body-medium mb-0"> Supervisor </label>
+        </div>
+
+        <!-- Pin Only -->
+        <div class="mb-2 pt-1 form-check form-switch d-flex align-items-center">
+            <input type="checkbox" class="form-check-input me-2" @bind="employeeAdditionalInfoViewModel.PinOnly" />
+            <label class="form-label body-medium mb-0"> Pin Only </label>
+        </div>
+</div>
+
+
+    <!-- Job Title -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Job Title</label>
+        <InputText class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeAdditionalInfoViewModel.JobTitle"
+                   placeholder="Job title" />
+    </div>
+
+    <!-- Join Date-->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Joining Date</label>
+        <InputDate class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeAdditionalInfoViewModel.JoinDate" />
+    </div>
+
+    <!-- Leaving Date -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Leaving Date</label>
+        <InputDate class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeAdditionalInfoViewModel.LeavingDate" />
+    </div>
+    
+    <!-- Leavng reason -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Reason of leaving</label>
+        <InputText class="form-control form-control-lg body-medium  no-outline"
+                   @bind-Value="employeeAdditionalInfoViewModel.ReasonForLeaving"
+                   placeholder="Leaving reason" />
+    </div>
+
+    <!--Manager -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Manager</label>
+        <InputSelect @bind-Value="employeeAdditionalInfoViewModel.ManagerId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var manager in employeeAdditionalInfoViewModel.Employees)
+            {
+                <option value="@Convert.ToInt32(manager.Value)">@manager.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!--Flexitime rule -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Flexitime rule</label>
+        <InputSelect @bind-Value="employeeAdditionalInfoViewModel.FlexitimeRuleId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var lexitimeRules in employeeAdditionalInfoViewModel.FlexitimeRules)
+            {
+                <option value="@Convert.ToInt32(lexitimeRules.Value)">@lexitimeRules.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!--Nationality -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Nationality</label>
+        <InputSelect @bind-Value="employeeAdditionalInfoViewModel.NationalityTypeId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var nationality in employeeAdditionalInfoViewModel.NationalityTypes)
+            {
+                <option value=@nationality.Value">@nationality.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!--Ethnicity -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Ethnicity</label>
+        <InputSelect @bind-Value="employeeAdditionalInfoViewModel.EthnicTypeId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var ethnicity in employeeAdditionalInfoViewModel.EthnicTypes)
+            {
+                <option value="@Convert.ToInt32(ethnicity.Value)">@ethnicity.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!--Religion -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Religion</label>
+        <InputSelect @bind-Value="employeeAdditionalInfoViewModel.ReligionTypeId" class="form-select form-control-lg body-medium  no-outline">
+            <option value=""></option>
+            @foreach (var religion in employeeAdditionalInfoViewModel.ReligionTypes)
+            {
+                <option value="@religion.Value">@religion.Text</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!--Time zone -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label body-medium">Time zone</label>
+        <InputSelect @bind-Value="employeeAdditionalInfoViewModel.TimeZone" class="form-select form-control-lg body-medium  no-outline">
+            @foreach (var timeZone in employeeAdditionalInfoViewModel.TimeZones)
+            {
+                <option value="@timeZone.Value">@timeZone.Text</option>
+            }
+        </InputSelect>
+     
+    </div>
+
+
+</div>
 
 @code {
-
+    [Parameter] public CreateEditEmployeeAdditionalInfoViewModel employeeAdditionalInfoViewModel { get; set; } = new(); 
 }
