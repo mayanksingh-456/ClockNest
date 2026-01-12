@@ -1,0 +1,283 @@
+﻿using ClockNest.Common;
+using ClockNest.Models.Employee_Model;
+using ClockNest.Models.SelfService_Model;
+using ClockNest.Models.User_Model;
+using ClockNest.Services.CommonService;
+using ClockNest.ViewModels.Parameter_List;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Globalization;
+using System.Security.Claims;
+using System.Text.Json;
+
+namespace ClockNest.Services.SelfService_Service
+{
+    public class SelfServices
+    {
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly UserContext _userContext;
+        private readonly AuthenticationStateProvider _auth;
+        private readonly IConfiguration _configuration;
+
+        public SelfServices(IHttpClientFactory httpClientFactory, UserContext userContext, AuthenticationStateProvider auth, IConfiguration configuration)
+        {
+            _httpClientFactory = httpClientFactory;
+            _userContext = userContext;
+            _auth = auth;
+            _configuration = configuration;
+        }
+
+        public async Task<List<UserSelfServiceAccess>> GetUserSelfServiceAccessAsync(int userId)
+        {
+            var client = _httpClientFactory .CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/account/userselfserviceaccess/get", userId);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Error in fetching self service access: {response.StatusCode}");
+
+            var accessList = await response.Content.ReadFromJsonAsync<List<UserSelfServiceAccess>>();
+
+            return accessList ?? new List<UserSelfServiceAccess>();
+        }
+
+        public async Task<Employee> GetEmployeeByIdAsync(ParameterList parameterList)
+        {
+            if (parameterList.CompanyId == 0) throw new ArgumentException("CompanyId can not be 0");
+
+            if (parameterList.Id == 0)
+                throw new ArgumentException("EmployeeId can not be 0");
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/setup/employees/employeebyid/get", parameterList);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Error fetching employee: {response.StatusCode}");
+
+            var employee = await response.Content.ReadFromJsonAsync<Employee>();
+
+            return employee ?? throw new Exception("Employee not found");
+        }
+
+        public async Task<List<Activity>> GetActivitiesAsync(int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/setup/organisation/nonarchivedactivities/get", companyId);
+            if (response.IsSuccessStatusCode)
+            {
+                var tags = await response.Content.ReadFromJsonAsync<List<Activity>>();
+                return tags ?? new List<Activity>();
+            }
+
+            return new List<Activity>();
+        }
+
+        public async Task<List<CostCentre>> GetCostCentresAsync(int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/setup/organisation/nonarchivedcostcentres/get", companyId);
+            if (response.IsSuccessStatusCode)
+            {
+                var tags = await response.Content.ReadFromJsonAsync<List<CostCentre>>();
+                return tags ?? new List<CostCentre>();
+            }
+
+            return new List<CostCentre>();
+        }
+
+        //Get employee workflowprogress
+        public async Task<EmployeeWorkflowProgress?> GetEmployeeWorkflowProgress(int employeeId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/home/employeeworkflowprogress/get", employeeId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<EmployeeWorkflowProgress>();
+            }
+
+            return null;
+        }
+
+        //Weekly summary
+        public async Task<List<WeeklySummary>> GetSelfServiceEmployeeWeeklySummary(int employeeId, int companyId, DateTime? date, ClaimsPrincipal user)
+        {
+            var result = await GetEmployeeWeeklySummaryAsync(employeeId, companyId, date, user);
+            return result;
+        }
+
+        public async Task<List<WeeklySummary>> GetEmployeeWeeklySummaryAsync(int employeeId, int companyId, DateTime? date, ClaimsPrincipal user)
+        {
+            if (companyId == 0)
+                throw new ArgumentException("CompanyId cannot be 0");
+            if (employeeId == 0)
+                throw new ArgumentException("EmployeeId cannot be 0");
+
+            var disableVerifyCheckbox = true;
+
+            if (user.IsInRole("LiveReadOnly") && !user.IsInRole("SuperUser"))
+            {
+                disableVerifyCheckbox = true;
+            }
+
+            string dayOfWeek = "Monday";
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/account/company/get", companyId); 
+            if (response.IsSuccessStatusCode)
+            {
+                var company = await response.Content.ReadFromJsonAsync<Company>();
+                if (company.StartOfWeek == "Monday" || company.StartOfWeek == "Tuesday" || company.StartOfWeek == "Wednesday" || company.StartOfWeek == "Thursday" || company.StartOfWeek == "Friday" || company.StartOfWeek == "Saturday" || company.StartOfWeek == "Sunday")
+                {
+                    dayOfWeek = company.StartOfWeek;
+                }
+            }
+
+            var CurrentCulture = CultureInfo.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-GB");
+            while (date.Value.ToString("dddd") != dayOfWeek)
+            {
+                date = date.Value.AddDays(-1);
+            }
+            Thread.CurrentThread.CurrentCulture = CurrentCulture;
+            var filterStartDate = date.Value;
+            var filterEndDate = date.Value.AddDays(6);
+            var holidayThresholdData = new HolidayThresholdCheckDetails();
+
+            ParameterList filterDetails = new ParameterList { EmployeeId = employeeId, StartDate = filterStartDate, EndDate = filterEndDate };
+            response = await client.PostAsJsonAsync("chronicle/timeattendance/weeklysummary/get", filterDetails);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new BoolNullToFalseConverter() }
+                };
+
+                var employeeWeeklySummary = await response.Content.ReadFromJsonAsync<List<WeeklySummary>>(options);
+
+                int contractedMins = 0;
+                int totalMins = 0;
+                int overtimeMins = 0;
+                foreach (WeeklySummary daySummary in employeeWeeklySummary)
+                {
+                    if (daySummary.ContractedMins != null) contractedMins += (int)daySummary.ContractedMins;
+
+                    if (daySummary.TotalMins != null) totalMins += (int)daySummary.TotalMins;
+
+                    if (daySummary.OvertimeMins != null) overtimeMins += (int)daySummary.OvertimeMins;
+
+                    daySummary.VerifyDisabled = disableVerifyCheckbox;
+                }
+
+                WeeklySummary weeklySummary = new WeeklySummary();
+
+                if (companyId != 610)
+                {
+                    response = await client.PostAsJsonAsync("chronicle/timeattendance/flexitimetotals/get", employeeId);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var flexitimeTotals = await response.Content.ReadFromJsonAsync<FlexitimeTotals>();
+
+                        weeklySummary.RosterShiftCode = flexitimeTotals.Scheduled;
+                        weeklySummary.ScheduledShiftCode = flexitimeTotals.Worked;
+                        weeklySummary.ShiftCode = flexitimeTotals.Balance;
+                    }
+                }
+                weeklySummary.ContractedMins = contractedMins;
+                weeklySummary.TotalMins = totalMins;
+                weeklySummary.OvertimeMins = overtimeMins;
+                employeeWeeklySummary.Add(weeklySummary);
+
+                if (companyId != 610)
+                {
+                    List<AnnualisedHours> annualisedHours = new List<AnnualisedHours>();
+                    response = await client.PostAsJsonAsync("chronicle/setup/employees/annualisedhours/get", employeeId);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        annualisedHours = await response.Content.ReadFromJsonAsync<List<AnnualisedHours>>();
+                        foreach (var annualisedHour in annualisedHours)
+                        {
+                            weeklySummary = new WeeklySummary();
+                            if (annualisedHour.TargetHours > 0)
+                            {
+                                weeklySummary.RosterShiftCode = "Pot " + annualisedHour.Pot.ToString();
+
+                                if (annualisedHour.TargetHours > annualisedHour.ActualHours)
+                                {
+                                    weeklySummary.ShiftCode = "-";
+                                }
+
+                                weeklySummary.ShiftCode = weeklySummary.ShiftCode + annualisedHour.Balance.ToString();
+
+                                employeeWeeklySummary.Add(weeklySummary);
+                            }
+                        }
+                    }
+                }
+                return employeeWeeklySummary;
+            }
+            return new List<WeeklySummary>();
+        }
+
+        //chart data
+        public async Task<List<DashboardChartData>> GetSelfServiceEntitlementAsync(int employeeId, int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            bool entitlementsInDecimal = false;
+            bool entitlementInHours = false;
+
+            var responseCompany = await client.PostAsJsonAsync("chronicle/generic/company/get", companyId);
+            if (responseCompany.IsSuccessStatusCode)
+            {
+                var company = await responseCompany.Content.ReadFromJsonAsync<Company>();
+                entitlementsInDecimal = company != null && !company.EntitlementsInHrsMins;
+            }
+
+            var filterDetails = new ParameterList { EmployeeId = employeeId, Id = employeeId, CompanyId = companyId };
+            var responseEmployee = await client.PostAsJsonAsync("chronicle/setup/employees/employee/get", filterDetails);
+            if (responseEmployee.IsSuccessStatusCode)
+            {
+                var employee = await responseEmployee.Content.ReadFromJsonAsync<Employee>();
+                entitlementInHours = employee?.EntitlementInHours ?? false;
+            }
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/selfserviceentitlement/get", filterDetails);
+            if (!response.IsSuccessStatusCode)
+                return new List<DashboardChartData>();
+
+            var selfServiceEntitlement = await response.Content.ReadFromJsonAsync<List<DashboardChartData>>();
+            if (selfServiceEntitlement == null || !selfServiceEntitlement.Any())
+                return new List<DashboardChartData>();
+
+            if (entitlementInHours && !entitlementsInDecimal)
+            {
+                for (int i = 0; i < selfServiceEntitlement.Count; i++)
+                {
+                    var booked = new ConvertHoursDecimalToHoursMinutes(selfServiceEntitlement[i].Datasets[0].Data[0]);
+                    var remaining = new ConvertHoursDecimalToHoursMinutes(selfServiceEntitlement[i].Datasets[0].Data[1]);
+
+                    selfServiceEntitlement[i].Labels.Add($"Booked({booked.Hours}:{booked.Minutes:00})");
+                    selfServiceEntitlement[i].Labels.Add($"Remaining({remaining.Hours}:{remaining.Minutes:00})");
+                }
+            }
+            else
+            {
+                for (int i = 0; i < selfServiceEntitlement.Count; i++)
+                {
+                    selfServiceEntitlement[i].Labels.Add($"Booked({selfServiceEntitlement[i].Datasets[0].Data[0]})");
+                    selfServiceEntitlement[i].Labels.Add($"Remaining({selfServiceEntitlement[i].Datasets[0].Data[1]})");
+                }
+            }
+
+            return selfServiceEntitlement;
+        }
+
+    }
+}

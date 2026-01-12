@@ -29,7 +29,8 @@
 @using ClockNest.Services.User_Service
 @using ClockNest.ViewModels.UserViewModel
 @using ClockNest.Models.User_Model
-
+@using ClockNest.Services.SelfService_Service
+@using ClockNest.Models.SelfService_Model
 
 
 
@@ -38,8 +39,9 @@
 @inject AuthService _AuthService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Nav
-@inject EmployeeService EmployeeService
 @inject SpinnerService SpinnerService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
+@inject EmployeeService EmployeeService
 @inject UserService UserService
+@inject SelfServices SelfServices

@@ -5,6 +5,7 @@ using ClockNest.Helpers;
 using ClockNest.Models.User_Model;
 using ClockNest.Services.Auth;
 using ClockNest.Services.Employee_Service;
+using ClockNest.Services.SelfService_Service;
 using ClockNest.Services.Spinner_Service;
 using ClockNest.Services.User_Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -62,6 +63,7 @@ namespace ClockNest
             builder.Services.AddScoped<UserContext>();
             builder.Services.AddScoped<EmployeeService>();
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<SelfServices>();
 
             var app = builder.Build();
 
