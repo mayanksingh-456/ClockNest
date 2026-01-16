@@ -1,7 +1,7 @@
 ﻿using ClockNest.Models.Role;
 using ClockNest.Models.User_Model;
 
-namespace ClockNest.Models.User
+namespace ClockNest.Models.User_Model
 {
     public class User
     {

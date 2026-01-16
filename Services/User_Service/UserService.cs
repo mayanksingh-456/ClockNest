@@ -1,5 +1,4 @@
 ﻿using ClockNest.Models.Employee_Model;
-using ClockNest.Models.User;
 using ClockNest.Models.User_Model;
 using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;

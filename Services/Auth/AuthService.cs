@@ -2,7 +2,6 @@
 using ClockNest.Helpers;
 using ClockNest.Models.Employee_Model;
 using ClockNest.Models.Login;
-using ClockNest.Models.User;
 using ClockNest.Models.User_Model;
 using ClockNest.Models.UserClaimModel;
 using ClockNest.Services.CommonService;

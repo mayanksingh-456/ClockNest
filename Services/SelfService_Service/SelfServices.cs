@@ -1,10 +1,12 @@
 ﻿using ClockNest.Common;
+using ClockNest.Enum;
 using ClockNest.Models.Employee_Model;
 using ClockNest.Models.SelfService_Model;
 using ClockNest.Models.User_Model;
 using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
@@ -278,6 +280,163 @@ namespace ClockNest.Services.SelfService_Service
 
             return selfServiceEntitlement;
         }
+
+        //Submit clocking
+        public async Task<bool> SubmitClocking(int employeeId, string clockingType, int changeId)
+        {
+            ClockingInfo clockingInfo = new ClockingInfo();
+            clockingInfo.ClockingDevice = enumClockingDevice.SelfService;
+            clockingInfo.EmployeeId = employeeId;
+            switch (clockingType)
+            {
+                case "clockIn":
+                    clockingInfo.ClockingType = enumClockingType.ClockIn;
+                    break;
+                case "clockOut":
+                    clockingInfo.ClockingType = enumClockingType.ClockOut;
+                    break;
+                case "startBreak":
+                    clockingInfo.ClockingType = enumClockingType.BreakStart;
+                    break;
+                case "endBreak":
+                    clockingInfo.ClockingType = enumClockingType.BreakEnd;
+                    break;
+                case "changeActivity":
+                    clockingInfo.ClockingType = enumClockingType.ChangeActivity;
+                    break;
+                case "changeCostCentre":
+                    clockingInfo.ClockingType = enumClockingType.ChangeCostCentre;
+                    break;
+
+                case "contactless":
+                    clockingInfo.ClockingType = enumClockingType.Contactless;
+                    break;
+            }
+            clockingInfo.ChangeId = changeId;
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/clockingbychangeId/post", clockingInfo);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //Get EmployeeHoliday
+
+        public async Task<List<AbsenteeRecord>> GetEmployeeHolidayAsync(int employeeId, int companyId)
+        {
+            DateTime startDate = DateTime.Now.Date;
+            DateTime endDate = DateTime.Now.Date.AddYears(1);
+
+            var parameterList = new ParameterList
+            {
+                EmployeeId = employeeId,
+                StartDate = startDate,
+                EndDate = endDate,
+            };
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var companyResponse = await client.PostAsJsonAsync("chronicle/generic/company/get", companyId);
+            if (companyResponse.IsSuccessStatusCode)
+            {
+                var company = await companyResponse.Content.ReadFromJsonAsync<Company>();
+                var startOfYear = company.StartOfYear == null ? "0101" : company.StartOfYear;
+
+                startDate = new DateTime(DateTime.Now.Year, Convert.ToInt32(startOfYear.Substring(0, 2)), Convert.ToInt32(startOfYear.Substring(2, 2)));
+
+                if (startDate >= DateTime.Now)
+                {
+                    startDate = startDate.AddYears(-1);
+                }
+                endDate = startDate.AddYears(1).AddDays(-1);
+
+                parameterList.StartDate = startDate;
+                parameterList.EndDate = endDate;
+            }
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/absenteerecords/get", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                var absenteeRecords = await response.Content.ReadFromJsonAsync<List<AbsenteeRecord>>();
+                return absenteeRecords?
+                    .Where(x => x.AbsenceTypeId == 1 || x.AbsenceTypeId == 3)
+                    .OrderBy(x => x.AbsenceDate)
+                    .ToList() ?? new List<AbsenteeRecord>();
+            }
+
+            return new List<AbsenteeRecord>();
+        }
+
+        //Get Employee Announcement
+        public async Task<List<EmployeeAnnouncement>> GetEmployeeAnnouncements(int employeeId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/employeeannouncements/get", employeeId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var announcement = await response.Content.ReadFromJsonAsync<List<EmployeeAnnouncement>>();
+                return announcement?.OrderByDescending(x => x.CreatedDate).ToList() ?? new List<EmployeeAnnouncement>();
+            }
+            return new List<EmployeeAnnouncement>();
+        }
+
+
+        //get shift notification
+        public async Task<List<EmployeeShiftNotification>> GetEmployeeShiftNotificationsAsync(int employeeId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/employeeshiftnotifications/get", employeeId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var shiftNotifications = await response.Content.ReadFromJsonAsync<List<EmployeeShiftNotification>>()
+                           ?? new List<EmployeeShiftNotification>();
+
+                var employeeshiftNotifications = shiftNotifications.Where(x => x.Status == 0).OrderByDescending(x => x.CreatedDate).ToList();
+
+                return employeeshiftNotifications;
+            }
+
+            return new List<EmployeeShiftNotification>();
+        }
+
+        // get employee payrollpayment
+        public async Task<List<ShapePayment>> GetEmployeePayrollPaymentsAsync(int employeeId, int companyId)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+                var response = await client.PostAsJsonAsync("chronicle/payroll/shapeemployeepayments/get", employeeId);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var employeeShapePayments = await response.Content.ReadFromJsonAsync<List<ShapePayment>>() ?? new List<ShapePayment>();
+                    if (companyId == 795)
+                    {
+                        foreach (var employeeShapePayment in employeeShapePayments)
+                        {
+                            employeeShapePayment.Amount = 0;
+                        }
+                    }
+                    return employeeShapePayments;
+                }
+                return new List<ShapePayment>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return new List<ShapePayment>();
+            }
+        }
+
 
     }
 }

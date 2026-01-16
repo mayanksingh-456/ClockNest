@@ -1,0 +1,1499 @@
+﻿@page "/selfservice"
+
+
+
+<style>
+    /* Onboarding */
+    .onboarding-card {
+        display: flex;
+        justify-content: space-between;
+        background: #FFFCF5;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .form-control {
+        height: 35px !important;
+    }
+
+    .selfService-heading {
+        font-weight: 600;
+        font-size: 20px;
+    }
+</style>
+
+<style>
+    /*  Custome Table */
+    .custom-table-wrapper {
+        max-height: 380px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+    }
+
+    /* Table width */
+    .custom-table {
+        width: 100%;
+        margin-bottom: 0;
+        font-weight: 300 !important;
+        font-size: 12px !important; /*Changed */
+    }
+
+        /* Sticky header */
+        .custom-table thead th {
+            font-size: 12px !important; /*Changed */
+            height: 12px !important; /*Changed */
+        }
+
+        /*  row height */
+        .custom-table tbody tr td {
+            height: 8px !important; /*Changed */
+        }
+
+        .custom-table tbody tr td {
+            padding: 0.35rem !important;
+            
+        }
+</style>
+
+<style>
+    /* table color */
+
+    .clsbold {
+        font-weight: 700 !important;
+        color: #0C111D !important;
+    }
+
+    .boldText {
+        font-weight: bold;
+        color: #333 !important;
+    }
+
+    tr.bg-holiday td {
+        background-color: yellow;
+    }
+
+    tr.bg-bankholiday td {
+        background-color: lightyellow !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-sick td {
+        background-color: cyan !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-absence td {
+        background-color: magenta !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-holidayrequest td {
+        background-color: orange !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-holidaydeclined td {
+        background-color: coral !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-rostershift td {
+        background-color: lightgreen !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-rest td {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-scheduledshift td {
+        background-color: lightgreen !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-workshift td {
+        background-color: #33cc33 !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-lateness td {
+        background-color: red;
+    }
+
+    tr.bg-excludeshift td {
+        background-color: lightgray;
+    }
+
+    tr.bg-excludeactualshift td {
+        background-color: #b3b3b3;
+    }
+
+    tr.bg-accessdenied td {
+        background-color: red;
+    }
+</style>
+
+<style>
+
+    .selfservice-container {
+        padding: 10px;
+    }
+
+    .welcome-text {
+        font-weight: 600;
+        margin-bottom: 20px;
+        font-size: 22px;
+        margin-top: -8px;
+    }
+
+    .profile-wrapper {
+        display: grid;
+        gap: 20px;
+        /* grid-template-columns: minmax(280px, 340px) 1fr; */
+        /* grid-template-columns: minmax(280px, 340px) 2fr 1fr; */
+        /*  grid-template-columns: 331px 337px 447px; */
+        /* grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); */
+        grid-template-columns: 1.1fr 1.2fr 1.4fr;
+        width: 100%;
+    }
+
+    .profile-top {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .profile-card {
+        background: white;
+        padding: 18px;
+        border-radius: 16px;
+        /* display: flex; */
+        flex-direction: column;
+        gap: 14px;
+        align-items: start;
+        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    }
+
+    .profile-detail {
+        margin-top: 4px;
+    }
+
+    .profile-card img {
+        width: 68px;
+        height: 70px;
+        border-radius: 50%;
+        margin-top: 7px;
+    }
+
+    .profile-card h3 {
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .profile-card span {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .profile-card a {
+        font-size: 13px;
+        color: #ff8c2b;
+        text-decoration: none;
+    }
+
+    .clockin-clockout-button {
+        display: flex;
+        gap: 55px;
+        margin-top: 35px;
+    }
+
+        .clockin-clockout-button button {
+            /* width: 120%; */
+            height: 35px;
+        }
+
+    .clock-summary {
+        background: white;
+        padding: 18px 20px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    }
+
+        .clock-summary h4 {
+            font-size: 14px;
+            color: #35383e;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 3px;
+        font-size: 14px;
+    }
+
+        .summary-row span {
+            color: #6b7280;
+        }
+
+    .status strong {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+    }
+
+    .status-in {
+        background: #dcfce7;
+        color: #166534;
+        margin-right: -7px;
+    }
+
+    .status-out {
+        background: #fee2e2;
+        color: #991b1b;
+        margin-right: -7px;
+    }
+
+</style>
+
+<style>
+    .work-button {
+        background: white;
+        padding: 18px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+        /* Make everything equal */
+        .work-button > button,
+        .work-button > select {
+            width: 100%;
+            height: 35px;
+            box-sizing: border-box;
+        }
+
+    /* Buttons */
+    .chip {
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+        .chip:hover {
+            color: black;
+            border-color: black;
+            background: white;
+        }
+
+    .input-select select {
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        border-radius: 999px;
+        height: 35px !important;
+        width: 100% !important;
+        text-align: center !important;
+        background: white;
+    }
+
+        .input-select select:focus {
+            outline: none;
+            border-color: black;
+        }
+
+        .input-select select option:checked {
+            color: #333;
+            font-weight: bold;
+        }
+
+    .input-select select {
+        color: #333; /* selected text color */
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+    }
+
+</style>
+
+<style>
+
+    .chip.green {
+        background: #22c55e;
+        color: white;
+        width: 100%;
+    }
+
+        .chip.green:hover {
+            color: #16a34a;
+            background: white;
+            border-color: #16a34a;
+        }
+
+    .chip.red {
+        background: #ef4444;
+        color: white;
+        width: 100%;
+    }
+
+        .chip.red:hover {
+            color: #ef4444;
+            background: white;
+            border-color: #ef4444;
+        }
+</style>
+
+<style>
+    .stat-card {
+        position: relative;
+        height: 100%;
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 55px;
+            height: calc(100% - 30px);
+            border-radius: 8px;
+        }
+
+        .stat-card h1 {
+            font-size: 32px;
+            margin-top: -10px;
+            font-weight: 600;
+        }
+
+    /* Borders */
+    .holiday {
+        border-left: 8px solid yellow;
+    }
+
+    .sick {
+        border-left: 8px solid cyan;
+    }
+
+    .absence {
+        border-left: 8px solid magenta;
+    }
+
+    .stat-card.holiday::after {
+        background-color: yellow;
+    }
+
+    .sick::after {
+        background: cyan;
+    }
+
+    .absence::after {
+        background: magenta;
+    }
+
+
+    /* Buttons */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-btn {
+        background: #546f9b;
+        color: white;
+        padding: 5px 14px !important;
+        border-radius: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        height: 35px !important;
+        text-align: center !important;
+    }
+
+        .action-btn:hover {
+            background: #496289;
+        }
+</style>
+
+<style>
+   /*  holiday request table button */
+    .status-btn {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+        min-width: 95px;
+        text-align: center;
+    }
+
+    /* Requested → Pending */
+    .status-requested {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
+
+    /* Declined → Negative */
+    .status-declined {
+        background-color: #FEE2E2;
+        color: #991B1B;
+    }
+
+    /* Authorised → Approved */
+    .status-authorised {
+        background-color: #DCFCE7;
+        color: #166534;
+    }
+
+
+</style>
+
+
+<div class="selfservice-container">
+
+    <div class="welcome-text">
+        Welcome @employee?.Forename
+    </div>
+
+
+
+
+    <!-- Clock Timeline -->
+    <div class="profile-wrapper">
+
+        <!-- Profile -->
+        <div class="profile-card">
+            @if (employee != null)
+            {
+                <div class="profile-top">
+                    <img src="@(string.IsNullOrEmpty(employee?.PhotoBase64) ? "/avtar.png" : $"data:image/png;base64,{employee.PhotoBase64}")" class="profile-img" />
+                    <div class="profile-detail">
+                        <h3><strong>@employee?.FullName</strong></h3>
+                        <span>@employee?.JobTitle</span>
+                        <a href="/employee">Go to Profile</a>
+                    </div>
+                </div>
+                <div class="clockin-clockout-button">
+                    <button class="chip green" @onclick="OnClickClockedIn">Clock In</button>
+                    <button class="chip red" @onclick="OnClickClockOut">Clock Out</button>
+                </div>
+            }
+        </div>
+
+        <!-- Work Buttons -->
+        <div class="work-button">
+            <button class="chip" @onclick="OnClickStartBreak">Start Break</button>
+            <button class="chip" @onclick="OnClickEndBreak">End Break</button>
+
+            <button class="chip" @onclick="OnClickChangeActivity"> Activity</button>
+            <button class="chip" @onclick="OnClickChangeCostCentre">Cost centre</button>
+
+            <div class="input-select">
+                <InputSelect @bind-Value="activityListId">
+                    @if (ActivityList != null)
+                    {
+                        @foreach (var activity in ActivityList)
+                        {
+                            <option value="@activity.Id">@activity.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="input-select">
+                <InputSelect @bind-Value="selectedCostCentreId">
+                    @if (CostCentresList != null)
+                    {
+                        @foreach (var costCentre in CostCentresList)
+                        {
+                            <option value="@costCentre.Id">@costCentre.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+        </div>
+
+
+        <!-- Today Summary -->
+        <div class="clock-summary">
+            <h4>
+                @(
+                  selectedDate.Date == DateTime.Today
+                  ? "Today's activity"
+                  : $"Activity – {selectedDate.ToString("dd MMM yyyy")}"
+                 )
+            </h4>
+
+
+            <div class="summary-row">
+                <span>Clock In</span>
+                <strong>@TodayClockIn</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Clock Out</span>
+                <strong>@TodayClockOut</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Worked</span>
+                <strong>@TodayWorked</strong>
+            </div>
+
+            <div class="summary-row status">
+                <span>Status</span>
+                <strong class="@StatusClass">@TodayStatus</strong>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+    <!-- Stats + Actions -->
+    <div class="dashboard mt-3">
+        <div class="row">
+            <!-- Left: Stats -->
+            <div class="col-md-9">
+                <div class="row stats">
+                    <div class="col-md-4">
+                        <div class="stat-card holiday">
+                            <p>Holiday</p>
+                            <h1>@Holidaybooked/@Holidaytotal</h1>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stat-card sick">
+                            <p>Sick</p>
+                            <h1>@Sickbooked/@Sicktotal</h1>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stat-card absence">
+                            <p>Absence</p>
+                            <h1>@Absencebooked/@Absencetotal</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Quick actions -->
+            <div class="col-md-3 quick-actions">
+
+                <button class="action-btn"> Organisation Chart</button>
+                <button class="action-btn"> Request Holiday / Absence</button>
+                <button class="action-btn"> Visitors / Contractors</button>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!--Onboarding-->
+    @if (employeeWorkflowProgress != null)
+    {
+        <div class="selfService-heading mt-4">Onboarding</div>
+        <div class="onboarding-card mt-2">
+            <div>
+                <i class="bi bi-exclamation-circle text-danger fs-5 me-2"></i>   Workflow Status : <strong>@employeeWorkflowProgress?.AssignmentsCompleted / @employeeWorkflowProgress?.TotalAssignments tasks completed </strong>
+            </div>
+            <button class="btn btn-gray">  Take Action </button>
+        </div>
+    }
+
+
+    <!--Timesheet-->
+    <div class="d-flex align-items-center justify-content-between mt-3">
+        <div class="selfService-heading">Timesheet</div>
+
+        <div class="d-flex align-items-center gap-2">
+            <InputDate Value="selectedDate"
+                       ValueChanged="@(async (DateTime newDate) => await OnDateChanged(newDate))"
+                       ValueExpression="() => selectedDate"
+                       class="form-control"
+                       style="width: 180px;" />
+
+        </div>
+    </div>
+
+    <div class="mt-2 table-responsive custom-table-wrapper">
+        <table class="table table-hover table-bordered align-middle  custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 4%;">Day</th>
+                    <th style="width:8%">Date</th>
+                    <th style="width:8%">Roster Shift</th>
+                    <th style="width:8%">Actual Shift</th>
+                    <th style="width:8%">Start Time</th>
+                    <th style="width:8%">End Time</th>
+                    <th style="width:8%">Hours</th>
+                    <th style="width:8%">Contractrd</th>
+                    <th style="width:8%">Variance</th>
+                    <th style="width:8%">Overtime</th>
+                    <th style="width:8%">Status</th>
+                    <th style="width:8%">Holiday Slot</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    int index = 0;
+                    int totalCount = weeklySummaries.Count;
+                }
+
+                @foreach (var row in weeklySummaries)
+                {
+                    var rowClasses = new List<string>();
+                    string clsbold = "";
+
+                    // Apply bold text if RosterShiftCode exists
+                    if (!string.IsNullOrWhiteSpace(row.RosterShiftCode) && row.RosterShiftCode != "-")
+                    {
+                        rowClasses.Add("boldText");
+                    }
+
+                    // Background color logic
+                    if (!string.IsNullOrEmpty(row.Day))
+                    {
+                        switch (row.AbsenceTypeId)
+                        {
+                            case 1: rowClasses.Add("bg-holiday"); break;
+                            case 2: rowClasses.Add("bg-sick"); break;
+                            case 3: rowClasses.Add("bg-absence"); break;
+                            case 4: rowClasses.Add("bg-holidayrequest"); break;
+                            case 5: rowClasses.Add("bg-holidaydeclined"); break;
+                            case 6: rowClasses.Add("bg-bankholiday"); break;
+                            default:
+                                if (row.IsLate == true)
+                                    rowClasses.Add("bg-lateness");
+                                else if (!string.IsNullOrEmpty(row.EmployeeShiftId?.ToString()) && row.EmployeeShiftId.ToString() != "-")
+                                    rowClasses.Add("bg-workshift");
+                                else if (row.ContractedDisplay == "00:00" || row.ContractedDisplay == "0:00")
+                                    rowClasses.Add("bg-rest");
+                                else if (
+                                (!string.IsNullOrEmpty(row.RosterShiftCode) && row.RosterShiftCode != "-") ||
+                                (!string.IsNullOrEmpty(row.ShiftCode) && row.ShiftCode != "-")
+                                )
+                                    rowClasses.Add("bg-rostershift");
+                                break;
+                        }
+                    }
+
+                    // Make last row bold
+                    if (index == totalCount - 1)
+                    {
+                        clsbold = "clsbold";
+                    }
+
+                    <tr class="@string.Join(" ", rowClasses)">
+                        <td class="cldtext @clsbold">@((row.Day) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.StartDateDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((string.IsNullOrWhiteSpace(row.RosterShiftCode)) ? "-" : row.RosterShiftCode)</td>
+                        <td class="cldtext @clsbold">@(string.IsNullOrWhiteSpace(row.ShiftCode) ? "-" : row.ShiftCode)</td>
+                        <td class="cldtext @clsbold">@((row.StartTimeDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.EndTimeDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.HoursDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.ContractedDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.VarianceDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.OvertimeDisplay) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.Status) ?? "-")</td>
+                        <td class="cldtext @clsbold">@((row.HolidayThresholdDetailsDisplay) ?? "-")</td>
+                    </tr>
+                    index++;
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+    <!--Announcements-->
+    <div class="selfService-heading mt-3">Announcements</div>
+
+    <div class="mt-2 table-responsive custom-table-wrapper">
+        <table class="table table-hover table-bordered align-middle  custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 20%; align-items:start">Mesage</th>
+                    <th style="width:20%">Sent by</th>
+                    <th style="width:20%"> Sent at</th>
+                    <th style="width:20%"> Document</th>
+                    <th style="width:20%">Archive</th>
+
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (employeeAnnouncements.Any())
+                {
+
+                    @foreach (var announcement in employeeAnnouncements)
+                    {
+                        <tr>
+                            <td>@announcement.Message</td>
+                            <td>@announcement.Username</td>
+                            <td>@announcement.CreatedDateDisplay</td>
+                            @*  <td>
+                            @if (!string.IsNullOrEmpty(announcement.IsDocument) && announcement.DocumentId.HasValue)
+                            {
+                                <a href="@($"/documents/download/{announcement.DocumentId}")">@announcement.DocumentName</a>
+                            }
+                            else
+                            {
+                                <span>No Document</span>
+                            } 
+                        <td>*@
+                            @*  <td>
+                            @if (announcement.)
+                            {
+                                <span>Yes</span>
+                            }
+                            else
+                            {
+                                <span>No</span>
+                            } *@
+                        </tr>
+                    }
+                }
+
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No Announcements found.</td>
+                    </tr>
+
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+
+    <!--Holiday Requests-->
+    <div class="selfService-heading mt-3">Holiday Requests</div>
+
+    <div class="mt-2 table-responsive custom-table-wrapper">
+        <table class="table table-hover table-bordered align-middle  custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 20%; align-items:start">Holiday Date</th>
+                    <th style="width:20%">Holiday type</th>
+                    <th style="width:20%"> Status</th>
+                    <th style="width:20%"> Requested at</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var holiday in employeeHolidays)
+                {
+                    <tr>
+                        <td>@holiday.AbsenceDateDisplay</td>
+                        <td>@holiday.AbsenceName</td>
+                        @* <td>@holiday.StatusDisplay</td> *@
+                        <td>
+                            <span class="status-btn @GetStatusClass(holiday.Status)">
+                                @holiday.StatusDisplay
+                            </span>
+                        </td>
+
+                        <td>@holiday.HolidayRequestedAtDisplay</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+    <!--Shift notificetion table-->
+    <div class="selfService-heading mt-3">Shift Notifications</div>
+
+    <div class="mt-2 table-responsive custom-table-wrapper">
+        <table class="table table-hover table-bordered align-middle  custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 10%; align-items:start">Id</th>
+                    <th style="width:15%">Shift code</th>
+                    <th style="width:15%"> Shift name</th>
+                    <th style="width:15%">Shift date </th>
+                    <th style="width:15%"> Sent by</th>
+                    <th style="width:15%">Sent at </th>
+                    <th style="width:15%">Status </th>
+
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (employeeShiftNotifications.Any())
+                {
+
+                    @foreach (var shiftNotification in employeeShiftNotifications)
+                    {
+                        <tr>
+                            <td>@shiftNotification.Id</td>
+                            <td>@shiftNotification.ShiftCode</td>
+                            <td>@shiftNotification.ShiftName</td>
+                            <td>@shiftNotification.ShiftDateDisplay</td>
+                            <td>@shiftNotification.Username</td>
+                            <td>@shiftNotification.CreatedDate</td>
+                            <td>@shiftNotification.StatusDisplay</td>
+
+                        </tr>
+                    }
+                }
+
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No Notification found.</td>
+                    </tr>
+
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+    <div class="col-md-12">
+        <div class="row ">
+        <div class="col-4">
+                <!--Payslip-->
+                <div class="selfService-heading mt-3">Payslip</div>
+
+            <div class="mt-2 table-responsive custom-table-wrapper">
+                <table class="table table-hover table-bordered align-middle  custom-table">
+                    <thead>
+                        <tr>
+                                <th style="width: 33%; align-items:start">CreatedDate</th>
+                                <th style="width:34%">Amount</th>
+                            <th style="width:33%"> View payslip</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                          @if ( employeePayrollPayments.Any())
+                          {
+
+                            @foreach (var payrollPayment in employeePayrollPayments)
+                        {
+                            <tr>
+                                    <td>@payrollPayment.CreatedDate</td>
+                                    <td>@payrollPayment.Amount</td>
+                                    <td>@payrollPayment.ShapePaymentId</td>
+
+                               
+                            </tr>
+                                }
+                            }
+                            else
+                            {
+                            <td colspan="5" class="text-center">No Payslip found.</td>
+                            }
+                        </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <div class="col-8">
+                <!--Other Pay Data-->
+                <div class="selfService-heading mt-3">Other Pay Data</div>
+
+            <div class="mt-2 table-responsive custom-table-wrapper">
+                <table class="table table-hover table-bordered align-middle  custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%; align-items:start">Created date</th>
+                            <th style="width:20%">Financial Year</th>
+                            <th style="width:20%"> Generate Document</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    
+                        <td colspan="5" class="text-center">No Pay data found.</td>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private WeeklySummary? Today =>
+    weeklySummaries?.FirstOrDefault(x => x.ShiftDate?.Date == selectedDate.Date);
+    private string TodayClockIn =>
+    Today?.StartTime?.ToString("hh:mm tt") ?? "--";
+    private string TodayClockOut =>
+    Today?.EndTime?.ToString("hh:mm tt") ?? "--";
+    private string TodayWorked =>
+    Today != null ? Today.HoursDisplay : "--";
+    private string TodayStatus =>
+    Today?.EndTime == null && Today?.StartTime != null
+    ? "Clocked In"
+    : Today?.EndTime != null
+    ? "Clocked Out"
+    : "Not Started";
+
+    private string StatusClass =>
+    TodayStatus == "Clocked In" ? "status-in" : "status-out";
+
+    private string GetStatusClass(int status)
+    {
+        return status switch
+        {
+            10 => "status-requested",
+            20 => "status-declined",
+            _ => "status-authorised"
+        };
+    }
+
+
+    private List<UserSelfServiceAccess> selfServiceAccess = new();
+    private Employee employee;
+    private List<Activity> ActivityList;
+    private List<CostCentre> CostCentresList;
+    private int activityListId;
+    private int selectedCostCentreId;
+
+    private List<DashboardChartData> chartData;
+    private decimal Holidaybooked;
+    private decimal Holidaytotal;
+    private int Holidaypercentage;
+
+    private decimal Sickbooked;
+    private decimal Sicktotal;
+    private int Sickpercentage;
+
+    private decimal Absencebooked;
+    private decimal Absencetotal;
+    private int Absencepercentage;
+    private EmployeeWorkflowProgress? employeeWorkflowProgress;
+
+    private DateTime selectedDate; 
+    //private string startDate = DateTime.Now.ToString("dd/MM/yyyy");
+    private List<WeeklySummary> weeklySummaries = new();
+    private List<AbsenteeRecord> employeeHolidays = new();
+    private List<EmployeeAnnouncement> employeeAnnouncements = new();
+    private List<EmployeeShiftNotification> employeeShiftNotifications = new();
+    private List<ShapePayment> employeePayrollPayments = new();
+
+    private int userId;
+    private int companyId;
+    private int employeeId;
+    // private int employeeId = 36331;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            SpinnerService.Show();
+            //selectedDate = DateTime.Today;
+            selectedDate = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc);
+
+            await LoadDataAsync();
+        }
+
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+
+        employeeId = await UserContextService.GetEmployeeIdAsync(AuthenticationStateProvider);
+        selfServiceAccess = await SelfServices.GetUserSelfServiceAccessAsync(userId);
+
+        var parameterList = new ParameterList
+        {
+            CompanyId = companyId,
+            EmployeeId = employeeId,
+            Id = employeeId,
+        };
+
+        employee = await SelfServices.GetEmployeeByIdAsync(parameterList);
+        if (employee != null && employee.EmployeePhoto?.Photo != null)
+        {
+            employee.PhotoBase64 = Convert.ToBase64String(employee.EmployeePhoto.Photo);
+        }
+
+        ActivityList = await SelfServices.GetActivitiesAsync(companyId);
+        CostCentresList = await SelfServices.GetCostCentresAsync(companyId);
+
+        employeeWorkflowProgress = await SelfServices.GetEmployeeWorkflowProgress(employeeId);
+        employeeWorkflowProgress.AssignmentsCompleted = Convert.ToInt32(employeeWorkflowProgress.AssignmentsCompleted);
+        employeeWorkflowProgress.TotalAssignments = Convert.ToInt32(employeeWorkflowProgress.TotalAssignments);
+
+        // DateTime date = string.IsNullOrEmpty(startDate)
+        // ? Helper.GetDateTimeNow()
+        // : DateTime.Parse(startDate);
+        // weeklySummaries = await SelfServices.GetSelfServiceEmployeeWeeklySummary(employeeId, companyId, date, user);
+        weeklySummaries = await SelfServices.GetSelfServiceEmployeeWeeklySummary(employeeId, companyId, selectedDate, user);
+
+
+        //chart data
+        chartData = await SelfServices.GetSelfServiceEntitlementAsync(employeeId, companyId);
+        if (chartData.Any())
+        {
+            Holidaybooked = Convert.ToInt32(chartData[0].Datasets[0].Data[0]);
+            var Holidayremaining = Convert.ToInt32(chartData[0].Datasets[0].Data[1]);
+            Holidaytotal = Holidaybooked + Holidayremaining;
+
+            Holidaypercentage = Holidaytotal > 0 ? (int)Math.Round((Holidaybooked / Holidaytotal) * 100) : 0;
+
+            Sickbooked = Convert.ToInt32(chartData[1].Datasets[0].Data[0]);
+            var Sickremaining = Convert.ToInt32(chartData[1].Datasets[0].Data[1]);
+            Sicktotal = Sickbooked + Sickremaining;
+
+            Sickpercentage = Sicktotal > 0 ? (int)Math.Round((Sickbooked / Sicktotal) * 100) : 0;
+
+            Absencebooked = Convert.ToInt32(chartData[2].Datasets[0].Data[0]);
+            var Absenceremaining = Convert.ToInt32(chartData[2].Datasets[0].Data[1]);
+            Absencetotal = Absencebooked + Absenceremaining;
+
+            Absencepercentage = Absencetotal > 0 ? (int)Math.Round((Absencebooked / Absencetotal) * 100) : 0;
+        }
+
+        employeeHolidays = await SelfServices.GetEmployeeHolidayAsync(employeeId, companyId);
+        employeeAnnouncements = await SelfServices.GetEmployeeAnnouncements(employeeId);
+        employeeShiftNotifications = await SelfServices.GetEmployeeShiftNotificationsAsync(employeeId);
+        employeePayrollPayments = await SelfServices.GetEmployeePayrollPaymentsAsync(employeeId, companyId);
+
+    }
+
+    <!-- TimeSheet Date Chnge-->
+    private async Task OnDateChanged(DateTime newDate)
+    {
+        try
+        {
+            SpinnerService.Show();
+            selectedDate = newDate;
+        }
+        finally
+        {
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    <!--ClockedIn and clocked out -->
+    private int Clocked;
+    private async Task OnClickClockedIn()
+    {
+        try
+        {
+            SpinnerService.Show();
+            Clocked = 1;
+            bool isClockedIn = await SelfServices.SubmitClocking(employeeId, "clockIn", 0);
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("alert", $"{employee.FullName} clocked in.");
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+    private async Task OnClickClockOut()
+    {
+        try
+        {
+            SpinnerService.Show();
+            Clocked = 2;
+            bool isClockedOut = await SelfServices.SubmitClocking(employeeId, "clockOut", 0);
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("alert", $"{employee.FullName} clocked out.");
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task OnClickStartBreak()
+    {
+        try
+        {
+            SpinnerService.Show();
+            Clocked = 3;
+            bool isStartBreak = await SelfServices.SubmitClocking(employeeId, "startBreak", 0);
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("alert", $"{employee.FullName} started break.");
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task OnClickEndBreak()
+    {
+        try
+        {
+            SpinnerService.Show();
+            Clocked = 4;
+            bool isEndBreak = await SelfServices.SubmitClocking(employeeId, "endBreak", 0);
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("alert", $"{employee.FullName} ended break.");
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task OnClickChangeActivity()
+    {
+        try
+        {
+            SpinnerService.Show();
+            bool isActivity = await SelfServices.SubmitClocking(employeeId, "changeActivity", activityListId);
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("alert", $"{employee.FullName} activity updated.");
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task OnClickChangeCostCentre()
+    {
+        try
+        {
+            SpinnerService.Show();
+            bool isCostCentre = await SelfServices.SubmitClocking(employeeId, "changeCostCentre", selectedCostCentreId);
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("alert", $"{employee.FullName} cost centre updated.");
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*     <!-- Profile Card -->
+    <div class="profile-card">     
+        <div class="profile-left">
+            @if (employee != null)
+            {
+            <img src="@(string.IsNullOrEmpty(employee?.PhotoBase64) ? "/avtar.png" : $"data:image/png;base64,{employee.PhotoBase64}")" class="profile-img" />     
+            <div class="align-content-center">
+               <p class="profile-name">@employee?.FullName</p>
+               <p class="jobTitle">@employee?.JobTitle</p>
+               <a href="/employee" class="profile-link">Go to Profile</a>
+            </div>
+            }
+        </div>
+        
+
+        <div class="profile-actions">
+            <button class="btn btn-clockin" @onclick="OnClickClockedIn"> Clock-In</button>
+           
+            <button class="btn btn-gray" @onclick="OnClickStartBreak"> Start Break</button>
+           
+            <button class="btn btn-gray" @onclick="OnClickChangeActivity"> Activity</button>
+           
+            <button class="btn btn-gray" @onclick="OnClickChangeCostCentre"> Cost Centre</button>
+            <button class="btn btn-clockout" @onclick="OnClickClockOut"> Clock-Out</button>
+            <button class="btn btn-gray" @onclick="OnClickEndBreak"> End Break</button>
+            <div class="input-select">
+                <InputSelect  @bind-Value="activityListId">
+                    @if (ActivityList != null)
+                    {
+                        @foreach (var activity in ActivityList)
+                        {
+                            <option value="@activity.Id">@activity.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="input-select">
+                <InputSelect @bind-Value="selectedCostCentreId">
+                    @if (CostCentresList != null)
+                    {
+                        @foreach (var costCentre in CostCentresList)
+                        {
+                            <option value="@costCentre.Id">@costCentre.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Stats + Actions -->
+    <div class="dashboard ">
+        <div class="row">
+            <!-- Left: Stats -->
+            <div class="col-md-9">
+                <div class="row stats">
+                    <div class="col-md-4">
+                        <div class="stat-card holiday">
+                            <p>Holiday</p>
+                            <h1>@Holidaybooked/@Holidaytotal</h1>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stat-card sick">
+                            <p>Sick</p>
+                            <h1>@Sickbooked/@Sicktotal</h1>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stat-card absence">
+                            <p>Absence</p>
+                            <h1>@Absencebooked/@Absencetotal</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Quick actions -->
+            <div class="col-md-3 quick-actions">
+   
+                    <button class="action-btn"> Organisation Chart</button>
+                    <button class="action-btn"> Request Holiday / Absence</button>
+                    <button class="action-btn"> Visitors / Contractors</button>
+            
+            </div>
+        </div>
+    </div> *@
+@* 
+<style>
+    .selfservice-container {
+        padding: 10px;
+    }
+
+    .welcome-text {
+        font-weight: 600;
+        margin-bottom: 20px;
+        font-size: 22px;
+        margin-top: -8px;
+    }
+
+    /* Profile Card */
+    .profile-card {
+        display: flex;
+        justify-content: space-between;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .profile-left {
+        display: flex;
+        gap: 15px;
+    }
+
+    .profile-img {
+        margin-top: 4px;
+        width: 70px;
+        height: 74px;
+        border-radius: 50%;
+        border: 2px solid gray;
+    }
+
+    .jobTitle {
+        color: gray;
+        margin: 0;
+    }
+
+    .profile-link {
+        color: orange;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .profile-link:hover {
+        text-decoration: none;
+            color: darkorange;
+        }
+
+    .profile-name{
+         accent-color: black;
+            font-size: 19px;           
+        margin: 0;  
+        font-weight: 600;
+    }
+
+    /* Buttons */
+    .profile-actions {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 5px 14px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        height: 35px !important;
+        text-align: center !important;
+    }
+
+    .btn-clockin {
+        background: #28a745;
+        color: white;
+        border: 1px solid transparent;
+    }
+
+    .btn-clockin:hover {
+            color: #28a745;
+            border-color: black;
+        }
+
+    .btn-clockout {
+        background: #c82333;
+        color: white;
+        border: 1px solid transparent;
+    }
+
+    .btn-clockout:hover {
+            color: #c82333;
+            border-color: black;
+        }
+
+    .btn-gray {
+        background: #e0e0e0;
+        color: black;
+        border: 1px solid transparent;
+    }
+    .btn-gray:hover {
+            color: black;
+            border-color: black;
+        }
+
+
+        .input-select select {
+            border: 1px solid #ccc;
+        padding: 5px 14px;
+        border-radius: 8px;
+        height: 35px !important;
+        text-align: center !important;
+
+        }
+        .input-select select:focus {
+            outline: none;
+            border-color: black;
+        }
+
+    .stat-card {
+        position: relative;
+        height: 100%;
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 55px;
+            height: calc(100% - 30px);
+            border-radius: 8px;
+        }
+
+        .stat-card h1 {
+            font-size: 32px;
+            margin-top: -10px;
+            font-weight: 600;
+        }
+
+    /* Borders */
+    /* .holiday {
+        border-left: 8px solid yellow;
+    }
+
+    .sick {
+        border-left: 8px solid cyan;
+    }
+
+    .absence {
+        border-left: 8px solid magenta;
+    } */
+        .stat-card.holiday::after {
+            background-color: yellow;
+        }
+
+    .sick::after {
+        background: cyan;
+    }
+
+    .absence::after {
+        background: magenta;
+    }
+
+
+    /* Buttons */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-btn {
+        background: #f08c3a;
+        color: white;
+        padding: 5px 14px !important;
+        border-radius: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        height: 35px !important;
+        text-align: center !important;
+       
+    }
+</style> *@
