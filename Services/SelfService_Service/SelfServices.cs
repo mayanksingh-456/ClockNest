@@ -437,6 +437,102 @@ namespace ClockNest.Services.SelfService_Service
             }
         }
 
+        // get employee documents
+        public Task<List<SelfServiceEmployeePayrollDocuments>> GetEmployeePayrollDocumentsAsync(int companyId)
+        {
+            var currentYear = DateTime.Now.Year;
+            if (DateTime.Now > new DateTime(currentYear, 4, 1))
+            {
+                currentYear--;
+            }
 
+            var dataList = new List<SelfServiceEmployeePayrollDocuments>
+        {
+            new SelfServiceEmployeePayrollDocuments { DocumentDisplay = "P60", MaxYear = currentYear, DocumentType = "P60" },
+            new SelfServiceEmployeePayrollDocuments { DocumentDisplay = "PBIK", MaxYear = currentYear, DocumentType = "PBIK" }
+        };
+
+            return Task.FromResult(dataList);
+        }
+
+        //get payroll p60
+        public async Task<bool?> CheckPayrollP60Async(int companyId, int employeeId, int payrollDocumentYear)
+        {
+            var parameterList = new ParameterList
+            {
+                CompanyId = companyId,
+                EmployeeId = employeeId,
+                Date = new DateTime(payrollDocumentYear, 1, 1)
+            };
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/payroll/shapep60check/get", parameterList);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<bool>();
+                return result;
+            }
+
+            return null;
+        }
+
+        //get payroll p60
+        public async Task<byte[]> GetPayrollP60(int companyId, int employeeId, int payrollDocumentYear)
+        {
+            var parameterList = new ParameterList
+            {
+                CompanyId = companyId,
+                EmployeeId = employeeId,
+                Date = new DateTime(payrollDocumentYear, 1, 1)
+            };
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/payroll/shapep60/get", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                var bytes = await response.Content.ReadFromJsonAsync<byte[]>();
+                return bytes;
+            }
+            return null;
+        }
+
+        //get payroll pbik
+        public async Task<bool?> CheckPayrollPBIKAsync(int companyId, int employeeId, int payrollDocumentYear)
+        {
+            var parameterList = new ParameterList
+            {
+                CompanyId = companyId,
+                EmployeeId = employeeId,
+                Date = new DateTime(payrollDocumentYear, 1, 1)
+            };
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/payroll/shapepbikcheck/get", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<bool>();
+                return result;
+            }
+            return null;
+        }
+
+        public async Task<byte[]> GetPayrollPBIK(int companyId, int employeeId, int payrollDocumentYear)
+        {
+            var parameterList = new ParameterList
+            {
+                CompanyId = companyId,
+                EmployeeId = employeeId,
+                Date = new DateTime(payrollDocumentYear, 1, 1)
+            };
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/payroll/shapepbik/get", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                var bytes = await response.Content.ReadFromJsonAsync<byte[]>();
+                return bytes;
+            }
+            return null;
+        }
     }
 }

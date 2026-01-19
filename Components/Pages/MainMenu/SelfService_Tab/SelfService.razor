@@ -1,7 +1,310 @@
 ﻿@page "/selfservice"
 
+<!--Profile card and clockin clockout summary-->
+<style>
+
+    .selfservice-container {
+        padding: 10px;
+    }
+
+    .welcome-text {
+        font-weight: 600;
+        margin-bottom: 20px;
+        font-size: 22px;
+        margin-top: -8px;
+    }
 
 
+    /*  Profile card */
+    .profile-wrapper {
+        display: grid;
+        gap: 20px;
+        /* grid-template-columns: minmax(280px, 340px) 1fr; */
+        /* grid-template-columns: minmax(280px, 340px) 2fr 1fr; */
+        /*  grid-template-columns: 331px 337px 447px; */
+        /* grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); */
+        grid-template-columns: 1.2fr 1.3fr 1.4fr;
+        width: 100%;
+    }
+
+    .profile-top {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+    }
+
+    /* Name and detail */
+    .profile-card {
+        background: white;
+        padding: 18px;
+        border-radius: 16px;
+        /* display: flex; */
+        flex-direction: column;
+        gap: 14px;
+        align-items: start;
+        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    }
+
+    .profile-detail {
+        margin-top: 4px;
+        display: grid
+    }
+
+    .profile-card img {
+        width: 68px;
+        height: 70px;
+        border-radius: 50%;
+        margin-top: 7px;
+        border: 2px solid gray;
+    }
+
+    .profile-card h3 {
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .profile-card span {
+        font-size: 15px;
+        color: #262f42;
+    }
+
+    .profile-card a {
+        font-size: 14px;
+        color: #ff6e04;
+        text-decoration: none;
+    }
+
+
+    /*  Clockin clock out button */
+    .clockin-clockout-button {
+        display: flex;
+        gap: 24px;
+        margin-top: 34px;
+    }
+
+        .clockin-clockout-button button {
+            height: 35px;
+        }
+
+    .chip.green {
+        background: #28a745;
+        color: white;
+        width: 100%;
+    }
+
+        .chip.green:hover {
+            color: #28a745;
+            background: white;
+            border-color: #28a745;
+        }
+
+    .chip.red {
+        background: #ee1c30;
+        color: white;
+        width: 100%;
+    }
+
+        .chip.red:hover {
+            color: #ee1c30;
+            background: white;
+            border-color: #ee1c30;
+        }
+
+    /*  Clockin/Clockout summary */
+    .clock-summary {
+        background: white;
+        padding: 18px 20px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    }
+
+        .clock-summary h4 {
+            font-size: 14px;
+            color: #35383e;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 3px;
+        font-size: 14px;
+    }
+
+        .summary-row span {
+            color: #6b7280;
+        }
+
+    .status strong {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+    }
+
+    .status-in {
+        background: #dcfce7;
+        color: #166534;
+        margin-right: -7px;
+    }
+
+    .status-out {
+        background: #fee2e2;
+        color: #991b1b;
+        margin-right: -7px;
+    }
+
+</style>
+
+<!--Work button(start break/end break)-->
+<style>
+    .work-button {
+        background: white;
+        padding: 18px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+        /* Make everything equal */
+        .work-button > button,
+        .work-button > select {
+            width: 100%;
+            height: 35px;
+            box-sizing: border-box;
+        }
+
+    /* Buttons */
+    .chip {
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+        .chip:hover {
+            color: black;
+            border-color: black;
+            background: white;
+        }
+
+    .input-select select {
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        border-radius: 999px;
+        height: 35px !important;
+        width: 100% !important;
+        text-align: center !important;
+        background: white;
+    }
+
+        .input-select select:focus {
+            outline: none;
+            border-color: black;
+        }
+
+        .input-select select option:checked {
+            color: #333;
+            font-weight: bold;
+        }
+
+    .input-select select {
+        color: #333; /* selected text color */
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .form-select {
+        padding: 0px !important;
+    }
+</style>
+
+<!--Holiday/ Sick/ Absence Card-->
+<style>
+    /* Holiday/ Sick/ Absence Card */
+    .stat-card {
+        position: relative;
+        height: 100%;
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 55px;
+            height: calc(100% - 30px);
+            border-radius: 8px;
+        }
+
+        .stat-card h1 {
+            font-size: 32px;
+            margin-top: -10px;
+            font-weight: 600;
+        }
+
+    /* Borders */
+    .holiday {
+        border-left: 8px solid #4CAF50;
+    }
+
+    .sick {
+        border-left: 8px solid #FFB74D;
+    }
+
+    .absence {
+        border-left: 8px solid #E57373;
+    }
+
+    .stat-card.holiday::after {
+        background-color: #4CAF50;
+    }
+
+    .sick::after {
+        background: #FFB74D;
+    }
+
+    .absence::after {
+        background: #E57373;
+    }
+
+
+    /* Buttons */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-btn {
+        /*  background: #546f9b; */
+        background: #031A7F;
+        color: white;
+        padding: 5px 14px !important;
+        border-radius: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        height: 35px !important;
+        text-align: center !important;
+    }
+
+        .action-btn:hover {
+            background: #02145f;
+        }
+</style>
+
+<!--Onboarding-->
 <style>
     /* Onboarding */
     .onboarding-card {
@@ -23,6 +326,7 @@
     }
 </style>
 
+<!-- Custome Table-->
 <style>
     /*  Custome Table */
     .custom-table-wrapper {
@@ -54,12 +358,12 @@
 
         .custom-table tbody tr td {
             padding: 0.35rem !important;
-            
         }
 </style>
 
+@* <!--Timesheet table color -->
 <style>
-    /* table color */
+    /* Timesheet table color */
 
     .clsbold {
         font-weight: 700 !important;
@@ -136,301 +440,219 @@
         background-color: red;
     }
 </style>
+ *@
+
+@*  <style>
+    /* Timesheet table color and typography */
+
+    .clsbold {
+        font-weight: 600 !important;
+        color: #0C111D !important; /* Dark almost black */
+    }
+
+    .boldText {
+        font-weight: bold;
+        color: #333 !important;
+    }
+
+    /* Timesheet row backgrounds with soft, accessible colors */
+
+    tr.bg-holiday td {
+        background-color: #DFF0D8; /* Soft green */
+        color: #3C763D;
+    }
+
+    tr.bg-bankholiday td {
+        background-color: #FCF8E3; /* Light warm yellow */
+        color: #8A6D3B;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-sick td {
+        background-color: #D9EDF7; /* Soft blue */
+        color: #31708F;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-absence td {
+        background-color: #F2DEDE; /* Soft red/pink */
+        color: #A94442;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-holidayrequest td {
+        background-color: #FCE5CD; /* Light orange */
+        color: #B9770E;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-holidaydeclined td {
+        background-color: #F5C6CB; /* Light coral/pink */
+        color: #7F2A2A;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-rostershift td,
+    tr.bg-scheduledshift td {
+        background-color: #E6F2FF; /* Very light blue */
+        color: #004085;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-rest td {
+        background-color: white !important;
+        color: #333;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-workshift td {
+        background-color: #C8E6C9; /* Light green */
+        color: #256029;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-lateness td,
+    tr.bg-accessdenied td {
+        background-color: #F8D7DA; /* Light red */
+        color: #721C24;
+    }
+
+    tr.bg-excludeshift td {
+        background-color: #F0F0F0; /* Very light gray */
+        color: #555;
+    }
+
+    tr.bg-excludeactualshift td {
+        background-color: #D6D6D6; /* Medium gray */
+        color: #444;
+    }
+
+    /* General table text style for readability */
+    table tbody tr td {
+        padding: 0.5rem 1rem;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 0.9rem;
+    }
+
+    /* Optional: subtle hover effect on rows */
+    table tbody tr:hover {
+        background-color: #f1f5f9;
+        cursor: default;
+    }
+</style> *@
 
 <style>
+    /* Timesheet row colors with border left and text color */
 
-    .selfservice-container {
-        padding: 10px;
+    tr.bg-holiday td {
+        background-color: #D6E9C6;
+        border-left: 5px solid #AED581;
+        color: #33691E;
     }
 
-    .welcome-text {
-        font-weight: 600;
-        margin-bottom: 20px;
-        font-size: 22px;
-        margin-top: -8px;
+    tr.bg-bankholiday td {
+        background-color: #FFF9C4;
+        border-left: 5px solid #FFF176;
+        color: #F9A825;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-wrapper {
-        display: grid;
-        gap: 20px;
-        /* grid-template-columns: minmax(280px, 340px) 1fr; */
-        /* grid-template-columns: minmax(280px, 340px) 2fr 1fr; */
-        /*  grid-template-columns: 331px 337px 447px; */
-        /* grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); */
-        grid-template-columns: 1.1fr 1.2fr 1.4fr;
-        width: 100%;
+    tr.bg-sick td {
+        background-color: #B3E5FC;
+        border-left: 5px solid #4FC3F7;
+        color: #01579B;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-top {
-        display: flex;
-        gap: 24px;
-        align-items: center;
+    tr.bg-absence td {
+        background-color: #FFCDD2;
+        border-left: 5px solid #EF9A9A;
+        color: #B71C1C;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-card {
-        background: white;
-        padding: 18px;
-        border-radius: 16px;
-        /* display: flex; */
-        flex-direction: column;
-        gap: 14px;
-        align-items: start;
-        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    tr.bg-holidayrequest td {
+        background-color: #FFE0B2;
+        border-left: 5px solid #FFB74D;
+        color: #E65100;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-detail {
-        margin-top: 4px;
+    tr.bg-holidaydeclined td {
+        background-color: #F8BBD0;
+        border-left: 5px solid #F48FB1;
+        color: #880E4F;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-card img {
-        width: 68px;
-        height: 70px;
-        border-radius: 50%;
-        margin-top: 7px;
+    tr.bg-rostershift td,
+    tr.bg-scheduledshift td {
+        background-color: #E3F2FD;
+        border-left: 5px solid #90CAF9;
+        color: #0D47A1;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-card h3 {
-        margin: 0;
-        font-size: 17px;
+    tr.bg-rest td {
+        background-color: #FFFFFF !important;
+        color: #424242;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-card span {
-        font-size: 13px;
-        color: #6b7280;
+    tr.bg-workshift td {
+        background-color: #C8E6C9;
+        border-left: 5px solid #81C784;
+        color: #2E7D32;
+        -webkit-print-color-adjust: exact !important;
     }
 
-    .profile-card a {
-        font-size: 13px;
-        color: #ff8c2b;
-        text-decoration: none;
+    tr.bg-lateness td,
+    tr.bg-accessdenied td {
+        background-color: #FFEBEE;
+        border-left: 5px solid #EF5350;
+        color: #C62828;
     }
 
-    .clockin-clockout-button {
-        display: flex;
-        gap: 55px;
-        margin-top: 35px;
+    tr.bg-excludeshift td {
+        background-color: #F5F5F5;
+        border-left: 5px solid #BDBDBD;
+        color: #616161;
     }
 
-        .clockin-clockout-button button {
-            /* width: 120%; */
-            height: 35px;
-        }
-
-    .clock-summary {
-        background: white;
-        padding: 18px 20px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    tr.bg-excludeactualshift td {
+        background-color: #EEEEEE;
+        border-left: 5px solid #9E9E9E;
+        color: #424242;
     }
 
-        .clock-summary h4 {
-            font-size: 14px;
-            color: #35383e;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 5px 3px;
-        font-size: 14px;
+    /* General text styles */
+    .clsbold {
+        font-weight: 700 !important;
+        color: #0C111D !important;
     }
 
-        .summary-row span {
-            color: #6b7280;
-        }
-
-    .status strong {
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 12px;
+    .boldText {
+        font-weight: bold;
+        color: #333 !important;
     }
 
-    .status-in {
-        background: #dcfce7;
-        color: #166534;
-        margin-right: -7px;
+    table tbody tr td {
+        padding: 0.5rem 1rem;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 0.9rem;
     }
 
-    .status-out {
-        background: #fee2e2;
-        color: #991b1b;
-        margin-right: -7px;
+    /* Optional hover effect */
+    table tbody tr:hover {
+        background-color: #f5f5f5;
+        cursor: default;
     }
 
 </style>
 
+<!--holiday request table button-->
 <style>
-    .work-button {
-        background: white;
-        padding: 18px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,.05);
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-        /* Make everything equal */
-        .work-button > button,
-        .work-button > select {
-            width: 100%;
-            height: 35px;
-            box-sizing: border-box;
-        }
-
-    /* Buttons */
-    .chip {
-        border: 1px solid #e5e7eb;
-        background: #f9fafb;
-        padding: 8px 14px;
-        border-radius: 999px;
-        font-weight: 600;
-        font-size: 13px;
-        cursor: pointer;
-    }
-
-        .chip:hover {
-            color: black;
-            border-color: black;
-            background: white;
-        }
-
-    .input-select select {
-        border: 1px solid #ccc;
-        padding: 8px 12px;
-        border-radius: 999px;
-        height: 35px !important;
-        width: 100% !important;
-        text-align: center !important;
-        background: white;
-    }
-
-        .input-select select:focus {
-            outline: none;
-            border-color: black;
-        }
-
-        .input-select select option:checked {
-            color: #333;
-            font-weight: bold;
-        }
-
-    .input-select select {
-        color: #333; /* selected text color */
-        font-size: 14px;
-        font-weight: 500;
-        text-align: center;
-    }
-
-</style>
-
-<style>
-
-    .chip.green {
-        background: #22c55e;
-        color: white;
-        width: 100%;
-    }
-
-        .chip.green:hover {
-            color: #16a34a;
-            background: white;
-            border-color: #16a34a;
-        }
-
-    .chip.red {
-        background: #ef4444;
-        color: white;
-        width: 100%;
-    }
-
-        .chip.red:hover {
-            color: #ef4444;
-            background: white;
-            border-color: #ef4444;
-        }
-</style>
-
-<style>
-    .stat-card {
-        position: relative;
-        height: 100%;
-        background: #fff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
-
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 55px;
-            height: calc(100% - 30px);
-            border-radius: 8px;
-        }
-
-        .stat-card h1 {
-            font-size: 32px;
-            margin-top: -10px;
-            font-weight: 600;
-        }
-
-    /* Borders */
-    .holiday {
-        border-left: 8px solid yellow;
-    }
-
-    .sick {
-        border-left: 8px solid cyan;
-    }
-
-    .absence {
-        border-left: 8px solid magenta;
-    }
-
-    .stat-card.holiday::after {
-        background-color: yellow;
-    }
-
-    .sick::after {
-        background: cyan;
-    }
-
-    .absence::after {
-        background: magenta;
-    }
-
-
-    /* Buttons */
-    .quick-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .action-btn {
-        background: #546f9b;
-        color: white;
-        padding: 5px 14px !important;
-        border-radius: 8px !important;
-        border: none !important;
-        cursor: pointer !important;
-        height: 35px !important;
-        text-align: center !important;
-    }
-
-        .action-btn:hover {
-            background: #496289;
-        }
-</style>
-
-<style>
-   /*  holiday request table button */
+    /*  holiday request table button */
     .status-btn {
         display: inline-block;
         padding: 4px 14px;
@@ -458,8 +680,6 @@
         background-color: #DCFCE7;
         color: #166534;
     }
-
-
 </style>
 
 
@@ -468,8 +688,6 @@
     <div class="welcome-text">
         Welcome @employee?.Forename
     </div>
-
-
 
 
     <!-- Clock Timeline -->
@@ -484,23 +702,23 @@
                     <div class="profile-detail">
                         <h3><strong>@employee?.FullName</strong></h3>
                         <span>@employee?.JobTitle</span>
-                        <a href="/employee">Go to Profile</a>
+                        <a href="/employee"><strong>Go to Profile</strong></a>
                     </div>
                 </div>
                 <div class="clockin-clockout-button">
-                    <button class="chip green" @onclick="OnClickClockedIn">Clock In</button>
-                    <button class="chip red" @onclick="OnClickClockOut">Clock Out</button>
+                    <button class="chip green" @onclick="OnClickClockedIn"> <i class="fa-solid fa-clock"></i>&nbsp;&nbsp Clock In</button>
+                    <button class="chip red" @onclick="OnClickClockOut"><i class="bi bi-stop-circle-fill "></i>&nbsp;&nbsp Clock Out</button>
                 </div>
             }
         </div>
 
         <!-- Work Buttons -->
         <div class="work-button">
-            <button class="chip" @onclick="OnClickStartBreak">Start Break</button>
-            <button class="chip" @onclick="OnClickEndBreak">End Break</button>
+            <button class="chip" @onclick="OnClickStartBreak">  <i class="fa-solid fa-utensils "></i>&nbsp;&nbsp Start Break</button>
+            <button class="chip" @onclick="OnClickEndBreak"><i class="fa-solid fa-person-running"></i>&nbsp;&nbsp End Break</button>
 
-            <button class="chip" @onclick="OnClickChangeActivity"> Activity</button>
-            <button class="chip" @onclick="OnClickChangeCostCentre">Cost centre</button>
+            <button class="chip" @onclick="OnClickChangeActivity"><i class="fa-solid fa-wrench"></i>&nbsp;&nbsp Activity</button>
+            <button class="chip" @onclick="OnClickChangeCostCentre"> <i class="fa-solid fa-exchange-alt"></i>&nbsp;&nbsp Cost centre</button>
 
             <div class="input-select">
                 <InputSelect @bind-Value="activityListId">
@@ -532,9 +750,9 @@
         <div class="clock-summary">
             <h4>
                 @(
-                  selectedDate.Date == DateTime.Today
-                  ? "Today's activity"
-                  : $"Activity – {selectedDate.ToString("dd MMM yyyy")}"
+                   selectedDate.Date == DateTime.Today
+                   ? "Today's activity"
+                   : $"Activity – {selectedDate.ToString("dd MMM yyyy")}"
                  )
             </h4>
 
@@ -560,10 +778,7 @@
             </div>
         </div>
 
-
-
     </div>
-
 
     <!-- Stats + Actions -->
     <div class="dashboard mt-3">
@@ -605,7 +820,6 @@
         </div>
     </div>
 
-
     <!--Onboarding-->
     @if (employeeWorkflowProgress != null)
     {
@@ -614,7 +828,7 @@
             <div>
                 <i class="bi bi-exclamation-circle text-danger fs-5 me-2"></i>   Workflow Status : <strong>@employeeWorkflowProgress?.AssignmentsCompleted / @employeeWorkflowProgress?.TotalAssignments tasks completed </strong>
             </div>
-            <button class="btn btn-gray">  Take Action </button>
+            <button class="chip ">  Take Action </button>
         </div>
     }
 
@@ -742,7 +956,6 @@
             <tbody>
                 @if (employeeAnnouncements.Any())
                 {
-
                     @foreach (var announcement in employeeAnnouncements)
                     {
                         <tr>
@@ -752,7 +965,7 @@
                             @*  <td>
                             @if (!string.IsNullOrEmpty(announcement.IsDocument) && announcement.DocumentId.HasValue)
                             {
-                                <a href="@($"/documents/download/{announcement.DocumentId}")">@announcement.DocumentName</a>
+                                <a href="@($"/employeePayrollDocument/download/{announcement.DocumentId}")">@announcement.DocumentName</a>
                             }
                             else
                             {
@@ -862,7 +1075,6 @@
                     <tr>
                         <td colspan="5" class="text-center">No Notification found.</td>
                     </tr>
-
                 }
             </tbody>
 
@@ -871,102 +1083,96 @@
 
     <div class="col-md-12">
         <div class="row ">
-        <div class="col-4">
+            <div class="col-4">
                 <!--Payslip-->
                 <div class="selfService-heading mt-3">Payslip</div>
 
-            <div class="mt-2 table-responsive custom-table-wrapper">
-                <table class="table table-hover table-bordered align-middle  custom-table">
-                    <thead>
-                        <tr>
+                <div class="mt-2 table-responsive custom-table-wrapper">
+                    <table class="table table-hover table-bordered align-middle  custom-table">
+                        <thead>
+                            <tr>
                                 <th style="width: 33%; align-items:start">CreatedDate</th>
                                 <th style="width:34%">Amount</th>
-                            <th style="width:33%"> View payslip</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                          @if ( employeePayrollPayments.Any())
-                          {
-
-                            @foreach (var payrollPayment in employeePayrollPayments)
-                        {
-                            <tr>
-                                    <td>@payrollPayment.CreatedDate</td>
-                                    <td>@payrollPayment.Amount</td>
-                                    <td>@payrollPayment.ShapePaymentId</td>
-
-                               
+                                <th style="width:33%"> View payslip</th>
                             </tr>
+                        </thead>
+
+                        <tbody>
+                            @if (employeePayrollPayments.Any())
+                            {
+                                @foreach (var payrollPayment in employeePayrollPayments)
+                                {
+                                    <tr>
+                                        <td>@payrollPayment.CreatedDate</td>
+                                        <td>@payrollPayment.Amount</td>
+                                        <td>@payrollPayment.ShapePaymentId</td>
+                                    </tr>
                                 }
                             }
                             else
                             {
                             <td colspan="5" class="text-center">No Payslip found.</td>
-                            }
+                        }
                         </tbody>
 
-                </table>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div class="col-8">
+            <div class="col-8">
                 <!--Other Pay Data-->
                 <div class="selfService-heading mt-3">Other Pay Data</div>
 
-            <div class="mt-2 table-responsive custom-table-wrapper">
-                <table class="table table-hover table-bordered align-middle  custom-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 20%; align-items:start">Created date</th>
-                            <th style="width:20%">Financial Year</th>
-                            <th style="width:20%"> Generate Document</th>
-                        </tr>
-                    </thead>
+                <div class="mt-2 table-responsive custom-table-wrapper">
+                    <table class="table table-hover table-bordered align-middle  custom-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%; align-items:start">Created date</th>
+                                <th style="width:20%">Financial Year</th>
+                                <th style="width:50%"> Generate Document</th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                    
-                        <td colspan="5" class="text-center">No Pay data found.</td>
-                    </tbody>
+                        <tbody>
+                            @if (employeePayrollDocument.Any())
+                            {
+                                @foreach (var payrollDocument in employeePayrollDocument)
+                                {
+                                    <tr>
+                                        <td>@payrollDocument.DocumentDisplay</td>
+                                        <td>
+                                            <div class="input-select">
+                                                <select class="form-select form-select-sm"
+                                                        @bind="payrollDocument.SelectedYear">
+                                                    @foreach (var year in payrollDocument.Years)
+                                                    {
+                                                        <option value="@year">@year</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </td>
 
-                </table>
+                                        <td>
+                                            <button class="btn"
+                                                    @onclick="() => CheckP60(payrollDocument.DocumentDisplay)"
+                                                    title="Generate">
+                                                <i class="fa fa-file-pdf text-danger"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 
 </div>
 
 @code {
-    private WeeklySummary? Today =>
-    weeklySummaries?.FirstOrDefault(x => x.ShiftDate?.Date == selectedDate.Date);
-    private string TodayClockIn =>
-    Today?.StartTime?.ToString("hh:mm tt") ?? "--";
-    private string TodayClockOut =>
-    Today?.EndTime?.ToString("hh:mm tt") ?? "--";
-    private string TodayWorked =>
-    Today != null ? Today.HoursDisplay : "--";
-    private string TodayStatus =>
-    Today?.EndTime == null && Today?.StartTime != null
-    ? "Clocked In"
-    : Today?.EndTime != null
-    ? "Clocked Out"
-    : "Not Started";
-
-    private string StatusClass =>
-    TodayStatus == "Clocked In" ? "status-in" : "status-out";
-
-    private string GetStatusClass(int status)
-    {
-        return status switch
-        {
-            10 => "status-requested",
-            20 => "status-declined",
-            _ => "status-authorised"
-        };
-    }
-
-
     private List<UserSelfServiceAccess> selfServiceAccess = new();
     private Employee employee;
     private List<Activity> ActivityList;
@@ -988,18 +1194,40 @@
     private int Absencepercentage;
     private EmployeeWorkflowProgress? employeeWorkflowProgress;
 
-    private DateTime selectedDate; 
+    private DateTime selectedDate;
     //private string startDate = DateTime.Now.ToString("dd/MM/yyyy");
     private List<WeeklySummary> weeklySummaries = new();
     private List<AbsenteeRecord> employeeHolidays = new();
     private List<EmployeeAnnouncement> employeeAnnouncements = new();
     private List<EmployeeShiftNotification> employeeShiftNotifications = new();
     private List<ShapePayment> employeePayrollPayments = new();
+    private List<SelfServiceEmployeePayrollDocuments> employeePayrollDocument = new();
 
     private int userId;
     private int companyId;
     private int employeeId;
     // private int employeeId = 36331;
+
+    // Today Summary
+    private WeeklySummary? Today =>
+   weeklySummaries?.FirstOrDefault(x => x.ShiftDate?.Date == selectedDate.Date);
+    private string TodayClockIn =>
+    Today?.StartTime?.ToString("hh:mm tt") ?? "--";
+    private string TodayClockOut =>
+    Today?.EndTime?.ToString("hh:mm tt") ?? "--";
+
+    private string TodayWorked =>
+    Today != null ? Today.HoursDisplay : "--";
+
+    private string TodayStatus =>
+    Today?.EndTime == null && Today?.StartTime != null
+    ? "Clocked In"
+    : Today?.EndTime != null
+    ? "Clocked Out"
+    : "Not Started";
+
+    private string StatusClass =>
+    TodayStatus == "Clocked In" ? "status-in" : "status-out";
 
     protected override async Task OnInitializedAsync()
     {
@@ -1083,7 +1311,7 @@
         employeeAnnouncements = await SelfServices.GetEmployeeAnnouncements(employeeId);
         employeeShiftNotifications = await SelfServices.GetEmployeeShiftNotificationsAsync(employeeId);
         employeePayrollPayments = await SelfServices.GetEmployeePayrollPaymentsAsync(employeeId, companyId);
-
+        employeePayrollDocument = await SelfServices.GetEmployeePayrollDocumentsAsync(companyId);
     }
 
     <!-- TimeSheet Date Chnge-->
@@ -1099,6 +1327,15 @@
             await LoadDataAsync();
             SpinnerService.Hide();
         }
+    }
+    private string GetStatusClass(int status)
+    {
+        return status switch
+        {
+            10 => "status-requested",
+            20 => "status-declined",
+            _ => "status-authorised"
+        };
     }
 
     <!--ClockedIn and clocked out -->
@@ -1134,6 +1371,7 @@
         }
     }
 
+    <!--Start break and End break -->
     private async Task OnClickStartBreak()
     {
         try
@@ -1149,7 +1387,6 @@
             SpinnerService.Hide();
         }
     }
-
     private async Task OnClickEndBreak()
     {
         try
@@ -1166,6 +1403,7 @@
         }
     }
 
+    <!--Change activity and cost centre  -->
     private async Task OnClickChangeActivity()
     {
         try
@@ -1180,7 +1418,6 @@
             SpinnerService.Hide();
         }
     }
-
     private async Task OnClickChangeCostCentre()
     {
         try
@@ -1196,304 +1433,51 @@
         }
     }
 
-}
+    //Download P60 and PBIK 
+    private bool? result;
+    private async Task CheckP60(string type)
+    {
+        if (type == "P60")
+        {
+            string payrollDocumentYear = employeePayrollDocument[0].SelectedYear.Substring(0, 4);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@*     <!-- Profile Card -->
-    <div class="profile-card">     
-        <div class="profile-left">
-            @if (employee != null)
+            result = await SelfServices.CheckPayrollP60Async(companyId, employeeId, Convert.ToInt32(payrollDocumentYear));
+            if (result == true)
             {
-            <img src="@(string.IsNullOrEmpty(employee?.PhotoBase64) ? "/avtar.png" : $"data:image/png;base64,{employee.PhotoBase64}")" class="profile-img" />     
-            <div class="align-content-center">
-               <p class="profile-name">@employee?.FullName</p>
-               <p class="jobTitle">@employee?.JobTitle</p>
-               <a href="/employee" class="profile-link">Go to Profile</a>
-            </div>
+                var bytes = await SelfServices.GetPayrollP60(companyId, employeeId, Convert.ToInt32(payrollDocumentYear));
+
+                if (bytes != null)
+                {
+                    string base64 = Convert.ToBase64String(bytes);
+                    await JS.InvokeVoidAsync("downloadFile", base64, "P60.pdf");
+                }
             }
-        </div>
-        
+            else if (result == false)
+            {
+                await JS.InvokeVoidAsync("alert", " No data available for the selected year.");
+            }
+        }
+        else if (type == "PBIK")
+        {
+            string payrollDocumentYear = employeePayrollDocument[1].SelectedYear.Substring(0, 4);
 
-        <div class="profile-actions">
-            <button class="btn btn-clockin" @onclick="OnClickClockedIn"> Clock-In</button>
-           
-            <button class="btn btn-gray" @onclick="OnClickStartBreak"> Start Break</button>
-           
-            <button class="btn btn-gray" @onclick="OnClickChangeActivity"> Activity</button>
-           
-            <button class="btn btn-gray" @onclick="OnClickChangeCostCentre"> Cost Centre</button>
-            <button class="btn btn-clockout" @onclick="OnClickClockOut"> Clock-Out</button>
-            <button class="btn btn-gray" @onclick="OnClickEndBreak"> End Break</button>
-            <div class="input-select">
-                <InputSelect  @bind-Value="activityListId">
-                    @if (ActivityList != null)
-                    {
-                        @foreach (var activity in ActivityList)
-                        {
-                            <option value="@activity.Id">@activity.Name</option>
-                        }
-                    }
-                </InputSelect>
-            </div>
+            result = await SelfServices.CheckPayrollPBIKAsync(companyId, employeeId, Convert.ToInt32(payrollDocumentYear));
+            if (result == true)
+            {
+                var bytes = await SelfServices.GetPayrollPBIK(companyId, employeeId, Convert.ToInt32(payrollDocumentYear));
 
-            <div class="input-select">
-                <InputSelect @bind-Value="selectedCostCentreId">
-                    @if (CostCentresList != null)
-                    {
-                        @foreach (var costCentre in CostCentresList)
-                        {
-                            <option value="@costCentre.Id">@costCentre.Name</option>
-                        }
-                    }
-                </InputSelect>
-            </div>
-            
-        </div>
-    </div>
-
-    <!-- Stats + Actions -->
-    <div class="dashboard ">
-        <div class="row">
-            <!-- Left: Stats -->
-            <div class="col-md-9">
-                <div class="row stats">
-                    <div class="col-md-4">
-                        <div class="stat-card holiday">
-                            <p>Holiday</p>
-                            <h1>@Holidaybooked/@Holidaytotal</h1>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="stat-card sick">
-                            <p>Sick</p>
-                            <h1>@Sickbooked/@Sicktotal</h1>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="stat-card absence">
-                            <p>Absence</p>
-                            <h1>@Absencebooked/@Absencetotal</h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Quick actions -->
-            <div class="col-md-3 quick-actions">
-   
-                    <button class="action-btn"> Organisation Chart</button>
-                    <button class="action-btn"> Request Holiday / Absence</button>
-                    <button class="action-btn"> Visitors / Contractors</button>
-            
-            </div>
-        </div>
-    </div> *@
-@* 
-<style>
-    .selfservice-container {
-        padding: 10px;
-    }
-
-    .welcome-text {
-        font-weight: 600;
-        margin-bottom: 20px;
-        font-size: 22px;
-        margin-top: -8px;
-    }
-
-    /* Profile Card */
-    .profile-card {
-        display: flex;
-        justify-content: space-between;
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 20px;
-    }
-
-    .profile-left {
-        display: flex;
-        gap: 15px;
-    }
-
-    .profile-img {
-        margin-top: 4px;
-        width: 70px;
-        height: 74px;
-        border-radius: 50%;
-        border: 2px solid gray;
-    }
-
-    .jobTitle {
-        color: gray;
-        margin: 0;
-    }
-
-    .profile-link {
-        color: orange;
-        font-weight: 600;
-        font-size: 14px;
-        text-decoration: none;
-    }
-
-    .profile-link:hover {
-        text-decoration: none;
-            color: darkorange;
+                if (bytes != null)
+                {
+                    string base64 = Convert.ToBase64String(bytes);
+                    await JS.InvokeVoidAsync("downloadFile", base64, "PBIK.pdf");
+                }
+            }
+            else if (result == false)
+            {
+                await JS.InvokeVoidAsync("alert", " No data available for the selected year.");
+            }
         }
 
-    .profile-name{
-         accent-color: black;
-            font-size: 19px;           
-        margin: 0;  
-        font-weight: 600;
     }
 
-    /* Buttons */
-    .profile-actions {
-        display: grid;
-        grid-template-columns: repeat(4, auto);
-        gap: 10px;
-    }
-
-    .btn {
-        padding: 5px 14px !important;
-        border-radius: 8px !important;
-        cursor: pointer !important;
-        height: 35px !important;
-        text-align: center !important;
-    }
-
-    .btn-clockin {
-        background: #28a745;
-        color: white;
-        border: 1px solid transparent;
-    }
-
-    .btn-clockin:hover {
-            color: #28a745;
-            border-color: black;
-        }
-
-    .btn-clockout {
-        background: #c82333;
-        color: white;
-        border: 1px solid transparent;
-    }
-
-    .btn-clockout:hover {
-            color: #c82333;
-            border-color: black;
-        }
-
-    .btn-gray {
-        background: #e0e0e0;
-        color: black;
-        border: 1px solid transparent;
-    }
-    .btn-gray:hover {
-            color: black;
-            border-color: black;
-        }
-
-
-        .input-select select {
-            border: 1px solid #ccc;
-        padding: 5px 14px;
-        border-radius: 8px;
-        height: 35px !important;
-        text-align: center !important;
-
-        }
-        .input-select select:focus {
-            outline: none;
-            border-color: black;
-        }
-
-    .stat-card {
-        position: relative;
-        height: 100%;
-        background: #fff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
-
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 55px;
-            height: calc(100% - 30px);
-            border-radius: 8px;
-        }
-
-        .stat-card h1 {
-            font-size: 32px;
-            margin-top: -10px;
-            font-weight: 600;
-        }
-
-    /* Borders */
-    /* .holiday {
-        border-left: 8px solid yellow;
-    }
-
-    .sick {
-        border-left: 8px solid cyan;
-    }
-
-    .absence {
-        border-left: 8px solid magenta;
-    } */
-        .stat-card.holiday::after {
-            background-color: yellow;
-        }
-
-    .sick::after {
-        background: cyan;
-    }
-
-    .absence::after {
-        background: magenta;
-    }
-
-
-    /* Buttons */
-    .quick-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .action-btn {
-        background: #f08c3a;
-        color: white;
-        padding: 5px 14px !important;
-        border-radius: 8px !important;
-        border: none !important;
-        cursor: pointer !important;
-        height: 35px !important;
-        text-align: center !important;
-       
-    }
-</style> *@
+}
