@@ -21,6 +21,7 @@ public static class LoginEndpoint
                 new Claim("CompanyId", model.CompanyId),
                  new Claim("EmployeeId", model.EmployeeId),
                  new Claim("Payroll", model.Payroll),
+                 new Claim("RoleTypeId", model.RoleTypeId),
         new Claim("XeroPayroll", model.XeroPayroll),
         new Claim("Region", model.Region),
                 new Claim(ClaimTypes.Role, model.Role),

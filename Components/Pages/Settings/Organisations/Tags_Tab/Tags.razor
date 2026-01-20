@@ -1,0 +1,403 @@
+﻿@page "/tags"
+
+<div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
+    <!-- Page title -->
+    <div class="page-title"> Tags </div>
+
+    <!-- Search input  -->
+    <div class="flex-grow-1 mx-3 d-flex justify-content-center">
+        <div class="search-group">
+            <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
+                   @bind="searchText"
+                   @bind:event="oninput"
+                   @bind:after="ResetPage" />
+
+            @if (string.IsNullOrWhiteSpace(searchText))
+            {
+                <i class="fa fa-search search-icon"></i>
+            }
+            else
+            {
+                <i class="fa fa-times clear-icon " style="cursor:pointer" @onclick="ClearSearch"></i>
+            }
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group" role="group">
+        <button class="btn icon-btn bg-brand-100" @onclick="CreateTag" type="button">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" @onclick="RefreshGrid" title="Refresh" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Checkbox Selected Bar -->
+<div class="top-bar">
+    @if (selectedTags.Any())
+    {
+        <div class="col-12">
+            <div class="selectedBar">
+                <div class="selectedBar_container">
+                    <span class="selectedCount">@selectedTags.Count</span>
+                    <span class="selectedText">Selected</span>
+                </div>
+                <div class="selectedBar_container">
+                    @if (selectedTags.Count == 1)
+                    {
+                        <div class="selectedBar_deleteButton">
+                            <i class="fa-regular fa-pen-to-square" style="color: #FFD43B; padding:3px"></i>
+                            <span>Edit</span>
+                        </div>
+                    }
+                    <div class="selectedBar_deleteButton">
+                        <img src="icons/Close.svg" class="selectedBar_closeIcon" />
+                        <span>Delete</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+<!-- Table -->
+<div class="table-responsive custom-table-wrapper">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+                <th style="width:5%">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           @bind="IsAllSelected"
+                           @bind:event="onchange" />
+
+                </th>
+                <th style="width:10%;">Id</th>
+                <th style="width:30%">Name</th>
+                <th style="width:35%"> Descreption</th>
+                <th style="width:10%">Sequence</th>
+                <th style="width:15%">Archived</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (PagedTag.Any())
+            {
+                @foreach (var tag in PagedTag)
+                {
+                    <tr>
+                        @* @ondblclick="@(() => EditEmployee(tag))" *@
+                        <td>
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@selectedTags.Contains(tag.Id)"
+                                   @onchange="() => ToggleRow(tag.Id)" />
+                        </td>
+                        <td>@tag.Id</td>
+                        <td>@tag.Name</td>
+                        <td>@tag.Description</td>
+                        <td>@tag.Sequence</td>
+                        <td>@tag.Archived</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No employees found
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination + Page Size -->
+<!-- Table Footer Bar -->
+<div class="table-footer-bar">
+
+    <!-- Paze Size -->
+    <div class="footer-pagesize">
+        <span>Rows:</span>
+        <select class="form-select form-select-sm"
+                @bind="pageSize"
+                @bind:after="ResetPage"
+                style=" border-radius: 6px !important; border: 1px solid #CBD5E1 !important; padding: 5px !important; font-size: 13px;">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="0">All</option>
+        </select>
+    </div>
+
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedTag.Count()</strong> of
+        <strong>@FilteredTags.Count()</strong> employees
+    </div>
+
+    <!-- Previous Next Button -->
+    <nav>
+        <ul class="pagination mb-0 custom-pagination">
+
+            <!-- First -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(1)">
+                    &laquo;
+                </button>
+            </li>
+
+            <!-- Previous -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PreviousPage">
+                    &lsaquo;
+                </button>
+            </li>
+
+            <!-- Page Numbers -->
+            @foreach (var pageNumber in VisiblePages)
+            {
+                if (pageNumber == -1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(pageNumber)">
+                            @pageNumber
+                        </button>
+                    </li>
+                }
+            }
+
+            <!-- Next -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">
+                    &rsaquo;
+                </button>
+            </li>
+
+            <!-- Last -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(totalPages)">
+                    &raquo;
+                </button>
+            </li>
+
+        </ul>
+    </nav>
+</div>
+
+<CreateEditTagModel @ref=tagModelRef isSubmitting="@isSubmitting"  />
+
+@code {
+    public CreateEditTagViewModel createEditTagModel = new();
+    public CreateEditTagModel? tagModelRef;
+    public bool isSubmitting { get; set; }
+
+    private List<Tag> tags = new();
+    private List<Tag> selectedTag = new List<Tag>();
+    private int companyId;
+    private int userId;
+    private int roleTypeId;
+
+    private string searchText = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private HashSet<int> selectedTags = new();
+
+    private IEnumerable<Tag> FilteredTags => tags.Where(e =>
+     string.IsNullOrWhiteSpace(searchText) ||
+     (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (e.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (e.Sequence.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)));
+
+    private int totalPages => (int)Math.Ceiling(FilteredTags.Count() / (double)pageSize);
+
+    private IEnumerable<Tag> PagedTag =>
+    pageSize == 0
+    ? FilteredTags
+    : FilteredTags
+    .Skip((currentPage - 1) * pageSize)
+    .Take(pageSize);
+
+    private bool IsAllSelected
+    {
+        get => PagedTag.Any() && PagedTag.All(e => selectedTags.Contains(e.Id));
+        set
+        {
+            if (value)
+            {
+                foreach (var tag in PagedTag)
+                    selectedTags.Add(tag.Id);
+            }
+            else
+            {
+                foreach (var tag in PagedTag)
+                    selectedTags.Remove(tag.Id);
+            }
+        }
+    }
+
+    void ClearSearch()
+    {
+        searchText = string.Empty;
+        ResetPage();
+    }
+
+    <!-- Checkbox Selection -->
+    private void ToggleRow(int id)
+    {
+        if (!selectedTags.Add(id))
+            selectedTags.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = e.Value?.ToString() == "true";
+
+        foreach (var user in PagedTag)
+        {
+            if (isChecked)
+                selectedTags.Add(user.Id);
+            else
+                selectedTags.Remove(user.Id);
+        }
+    }
+
+    <!-- Pagination-->
+    int maxVisiblePages = 5;
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+            currentPage++;
+    }
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+    private void ResetPage()
+    {
+        currentPage = 1;
+    }
+    List<int> VisiblePages
+    {
+        get
+        {
+            var pages = new List<int>();
+
+            if (totalPages <= maxVisiblePages)
+            {
+                for (int i = 1; i <= totalPages; i++)
+                    pages.Add(i);
+            }
+            else
+            {
+                int start = Math.Max(1, currentPage - 2);
+                int end = Math.Min(totalPages, currentPage + 2);
+
+                if (start > 1)
+                {
+                    pages.Add(1);
+                    pages.Add(-1); // ellipsis
+                }
+
+                for (int i = start; i <= end; i++)
+                    pages.Add(i);
+
+                if (end < totalPages)
+                {
+                    pages.Add(-1); // ellipsis
+                    pages.Add(totalPages);
+                }
+            }
+
+            return pages;
+        }
+    }
+
+    void GoToPage(int page)
+    {
+        if (page < 1 || page > totalPages)
+            return;
+
+        currentPage = page;
+    }
+
+    private async Task RefreshGrid()
+    {
+        SpinnerService.Show();
+        await Task.Delay(1000);
+        StateHasChanged();
+        try
+        {
+            searchText = "";
+            selectedTags.Clear();
+            currentPage = 1;
+            pageSize = 10;
+            await LoadTagsAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            SpinnerService.Show();
+            await InitializeUserContextAsync();
+            await LoadTagsAsync();
+        }
+
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing Tags component: {ex.Message}");          
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+
+    }
+
+    private async Task InitializeUserContextAsync()
+    {
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        var claims = await UserContextService.GetUserClaimsAsync(AuthenticationStateProvider);
+        roleTypeId = int.TryParse(claims.RoleTypeId, out int parsedRoleTypeId) ? parsedRoleTypeId : 0;
+    }
+
+    private async Task LoadTagsAsync()
+    {       
+        tags = await TagsService.GetTagsWithArchived(companyId, userId, roleTypeId);
+    }
+
+    private async Task CreateTag()
+    {
+        createEditTagModel = new CreateEditTagViewModel
+        {
+            Id = 0,
+            
+        };
+        if (tagModelRef != null)
+        {
+            await tagModelRef.ShowModal(createEditTagModel);
+        }
+    }
+}
