@@ -90,5 +90,7 @@
 
         public bool StaffologyPayroll { get; set; }
         public bool CalendarSyncEnabled { get; set; }
+
+        public bool AssignShiftsToTags { get; set; }
     }
 }

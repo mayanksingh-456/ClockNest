@@ -53,10 +53,18 @@
                             <span>Edit</span>
                         </div>
                     }
-                    <div class="selectedBar_deleteButton">
+                   @*  <div class="selectedBar_deleteButton" >
+                      
                         <img src="icons/Close.svg" class="selectedBar_closeIcon" />
                         <span>Delete</span>
-                    </div>
+                    </div> *@
+
+                    <div class="selectedBar_deleteButton" @onclick="DeleteSelectedTagsAsync">
+                            <img src="icons/Close.svg" class="selectedBar_closeIcon" />
+                            <span>Delete</span>
+                        </div>
+                    
+
                 </div>
             </div>
         </div>
@@ -89,8 +97,7 @@
             {
                 @foreach (var tag in PagedTag)
                 {
-                    <tr>
-                        @* @ondblclick="@(() => EditEmployee(tag))" *@
+                    <tr @ondblclick="@(() => EditTag(tag))">
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
@@ -196,7 +203,7 @@
     </nav>
 </div>
 
-<CreateEditTagModel @ref=tagModelRef isSubmitting="@isSubmitting"  />
+<CreateEditTagModel @ref=tagModelRef isSubmitting="@isSubmitting" OnSubmit="SaveTags" />
 
 @code {
     public CreateEditTagViewModel createEditTagModel = new();
@@ -390,14 +397,132 @@
 
     private async Task CreateTag()
     {
-        createEditTagModel = new CreateEditTagViewModel
-        {
-            Id = 0,
-            
-        };
+        SpinnerService.Show();
+        createEditTagModel = await TagsService.GetTagsAsync(companyId);
+        createEditTagModel.Id = 0;
+
         if (tagModelRef != null)
         {
             await tagModelRef.ShowModal(createEditTagModel);
         }
+        SpinnerService.Hide();
     }
+
+    private async Task EditTag(Tag? tags = null)
+    {
+        var tagToEdit = tags ?? selectedTag.FirstOrDefault();
+        if (tagToEdit == null) return;
+
+        SpinnerService.Show();
+
+        try
+        {
+            createEditTagModel = await TagsService.GetTagsAsync(companyId);
+
+            createEditTagModel.Id = tagToEdit.Id;
+            createEditTagModel.Name = tagToEdit.Name;
+            createEditTagModel.Description = tagToEdit.Description;
+            createEditTagModel.BudgetPlanId = tagToEdit.BudgetPlanId;
+            createEditTagModel.HolidayThresholdId = tagToEdit.HolidayThresholdId;
+            createEditTagModel.Sequence = tagToEdit.Sequence;
+            createEditTagModel.IsForVisitorModule = tagToEdit?.IsForVisitorModule ?? false;
+            createEditTagModel.Archived = tagToEdit.Archived;
+
+            if (tagModelRef != null)
+            {
+                await tagModelRef.ShowModal(createEditTagModel);
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task SaveTags(CreateEditTagViewModel model)
+    {
+        isSubmitting = true;
+        SpinnerService.Show();
+        try
+        {
+            var tag = new Tag
+            {
+                Id = model.Id ?? 0,
+                Name = model.Name,
+                Description = model.Description,
+                BudgetPlanId = model.BudgetPlanId,
+                HolidayThresholdId = model.HolidayThresholdId,
+                Sequence = model.Sequence,
+                IsForVisitorModule = model.IsForVisitorModule,
+                Archived = model.Archived,
+
+                CompanyId = companyId,
+                UpdatedByUserId = userId,
+                UpdatedDate = Helper.GetDateTimeNow()
+            };
+
+            // Create specific
+            if (model.Id == null || model.Id == 0)
+            {
+                tag.CreatedByUserId = userId;
+                tag.CreatedDate = Helper.GetDateTimeNow();
+            }
+
+            bool success = await TagsService.SaveTagAsync(tag);
+            if(success == true)
+            {
+                await JS.InvokeVoidAsync("hideModal", "tagModal");
+                await LoadTagsAsync();
+                await JS.InvokeVoidAsync("alert", "Tag saved successfully");
+
+            } 
+
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving tag: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", "Failed to save tag");
+        }
+        finally
+        {
+            SpinnerService.Hide();
+            isSubmitting = false;
+        }
+    }
+    
+    private async Task DeleteSelectedTagsAsync()
+    {
+        if (selectedTags.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one tag to delete");
+            return;
+        }
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {selectedTags.Count} tag(s)?");
+        if (!confirmed) return;
+
+        SpinnerService.Show();
+        try
+        {
+            // selectedTags is HashSet<int> of selected IDs
+            var tagsToDelete = tags
+                .Where(t => selectedTags.Contains(t.Id))
+                .ToList();
+
+            var success = await TagsService.DeleteTagAsync(tagsToDelete);
+
+            if (success)
+            {
+                tags.RemoveAll(t => selectedTags.Contains(t.Id));
+                selectedTags.Clear();
+                await JS.InvokeVoidAsync("alert", "Selected tags deleted successfully");
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
 }
