@@ -8,6 +8,7 @@ using ClockNest.ViewModels.Parameter_List;
 using ClockNest.ViewModels.TagViewModel;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
 
 namespace ClockNest.Services.TagsService
 {
@@ -143,7 +144,38 @@ namespace ClockNest.Services.TagsService
             throw new Exception($"Failed to delete tag: {response.StatusCode} - {errorContent}");
         }
 
+        //Get access tag list
+        public async Task<List<Tag>> GetAccessTagsAsync(bool isSelfService = false)
+        {
+            var authState = await _auth.GetAuthenticationStateAsync();
+            var user = authState.User;
 
+            if (!user.Identity.IsAuthenticated)
+                return new List<Tag>();
+
+            int companyId = int.Parse(user.Claims.First(c => c.Type == "CompanyId").Value);
+            int userId = int.Parse(user.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+            int roleTypeId = isSelfService
+                ? 1
+                : int.Parse(user.Claims.First(c => c.Type == "RoleTypeId").Value);
+
+            var parameterList = new ParameterList
+            {
+                CompanyId = companyId,
+                UserId = userId,
+                RoleTypeId = roleTypeId
+            };
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/setup/organisation/tags/get", parameterList);
+            if (!response.IsSuccessStatusCode)
+                return new List<Tag>();
+
+            var tags = await response.Content.ReadFromJsonAsync<List<Tag>>();
+
+            return tags;
+        }
 
     }
 }

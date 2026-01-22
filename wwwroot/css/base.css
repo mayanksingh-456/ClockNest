@@ -291,7 +291,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 3px 10px;
-    margin-right: -8px;
+    margin-right: -14px;
+    margin-left: -5px;
 }
 
 .page-title {

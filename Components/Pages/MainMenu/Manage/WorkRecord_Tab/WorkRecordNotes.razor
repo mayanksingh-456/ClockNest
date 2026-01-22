@@ -1,0 +1,506 @@
+﻿@page "/workRecord"
+
+<div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
+    <!-- Page title -->
+    <div class="page-title">Notes</div>
+
+    <!-- Search input  -->
+    <div class="flex-grow-1 mx-3 d-flex justify-content-center">
+        <div class="search-group">
+            <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
+                   @bind="searchText"
+                   @bind:event="oninput"
+                   @bind:after="ResetPage" />
+
+            @if (string.IsNullOrWhiteSpace(searchText))
+            {
+                <i class="fa fa-search search-icon"></i>
+            }
+            else
+            {
+                <i class="fa fa-times clear-icon " style="cursor:pointer" @onclick="ClearSearch"></i>
+            }
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group" role="group">
+        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button" @onclick="RefreshGrid">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+
+  @*   <div class="row g-3 align-items-end mb-4" style="padding: 3px 10px;">
+
+    <div class="col-md-3">
+        <label class="form-label body-medium">Tag</label>
+        <InputSelect @bind-Value="selectedTagId" @bind-Value:after="OnStatusChange" class="form-sele ct form-control-lg body-medium  no-outline">
+            @foreach (var titles in tagList)
+            {
+                <option value="@titles.Id">@titles.Name</option>
+            }
+        </InputSelect>
+    </div>
+    
+
+    <div class="col-md-2 ">
+        <label class="form-label body-medium">Start Date</label>
+        <InputText type="date"
+                   class="form-control"
+                   @bind-Value="startDate"
+                   @bind-Value:after="OnStatusChange" />
+
+    </div>
+    <div class="col-md-2">
+        <label class="form-label body-medium">End Date</label>
+        <InputText type="date"
+                   class="form-control"
+                   @bind-Value="endDate"
+                   @bind-Value:after="OnStatusChange" />
+
+    </div>
+</div> *@
+<div class="row g-3 align-items-end mb-2" style="padding: -1px 10px;">
+    <div class="col-md-2 ">
+        <label class="form-label body-medium">Start Date</label>
+        <InputText type="date"
+                   class="form-control"
+                   @bind-Value="startDate"
+                   @bind-Value:after="OnStatusChange" />
+
+    </div>
+    <div class="col-md-2">
+        <label class="form-label body-medium">End Date</label>
+        <InputText type="date"
+                   class="form-control"
+                   @bind-Value="endDate"
+                   @bind-Value:after="OnStatusChange" />
+
+    </div>
+
+    <div class="col-md-3 ms-auto d-flex gap-3">
+        <div class="flex-fill">
+            <label class="form-label body-medium">Tag</label>
+            <InputSelect @bind-Value="selectedTagId"
+                         @bind-Value:after="OnStatusChange"
+                         class="form-select form-control-lg body-medium no-outline">
+                @foreach (var titles in tagList)
+                {
+                    <option value="@titles.Id">@titles.Name</option>
+                }
+            </InputSelect>
+        </div>
+
+       @*  <div class="flex-fill">
+            <label class="form-label body-medium">End Date</label>
+            <InputText type="date"
+                       class="form-control"
+                       @bind-Value="endDate"
+                       @bind-Value:after="OnStatusChange" />
+        </div> *@
+    </div>
+
+</div>
+
+
+<!-- Checkbox Selected Bar -->
+@* <div class="top-bar">
+    @if (selectedWorkRecordNotes.Any())
+    {
+        <div class="col-12">
+            <div class="selectedBar">
+                <div class="selectedBar_container">
+                    <span class="selectedCount">@selectedWorkRecordNotes.Count</span>
+                    <span class="selectedText">Selected</span>
+                </div>
+                <div class="selectedBar_container">
+                    @if (selectedWorkRecordNotes.Count == 1)
+                    {
+                        <div class="selectedBar_deleteButton">
+                            <i class="fa-regular fa-pen-to-square" style="color: #FFD43B; padding:3px"></i>
+                            <span>Edit</span>
+                        </div>
+                    }
+
+                    <div class="selectedBar_deleteButton" >
+                        <img src="icons/Close.svg" class="selectedBar_closeIcon" />
+                        <span>Delete</span>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    }
+
+</div> *@
+
+<div class="table-responsive custom-table-wrapper">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+               @*  <th style="width:5%">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           @bind="IsAllSelected"
+                           @bind:event="onchange" />
+
+                </th> *@
+                <th style="width:5%;">Id</th>
+                <th style="width:10%">Employee Id</th>
+                <th style="width:28%"> Employee name</th>
+                <th style="width:15%">Note Created Date</th>
+                <th style="width:15%">Shift Date</th>
+                <th style="width:22%">Notes</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (PagedWorkRecordNotes.Any())
+            {
+                @foreach (var workRecordNote in PagedWorkRecordNotes)
+                {
+                    <tr @ondblclick="@(() => EditWorkRecordNote(workRecordNote))">
+                       @*  *@
+                       @*  <td>
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@selectedWorkRecordNotes.Contains(workRecordNote.Id)"
+                                   @onchange="() => ToggleRow(workRecordNote.Id)" />
+                        </td> *@
+                        <td>@workRecordNote.Id</td>
+                        <td>@workRecordNote.EmployeeId</td>
+                        <td>@workRecordNote.EmployeeName</td>
+                        <td>@workRecordNote.CreatedDateDisplay</td>
+                        <td>@workRecordNote.ShiftDateDisplay</td>
+                        <td>@workRecordNote.Notes</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No work record notes found
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination + Page Size -->
+<!-- Table Footer Bar -->
+<div class="table-footer-bar">
+
+    <!-- Paze Size -->
+    <div class="footer-pagesize">
+        <span>Rows:</span>
+        <select class="form-select form-select-sm"
+                @bind="pageSize"
+                @bind:after="ResetPage"
+                style=" border-radius: 6px !important; border: 1px solid #CBD5E1 !important; padding: 5px !important; font-size: 13px;">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="0">All</option>
+        </select>
+    </div>
+
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedWorkRecordNotes.Count()</strong> of
+        <strong>@FilteredWorkRecordNotes.Count()</strong> employees
+    </div>
+
+    <!-- Previous Next Button -->
+    <nav>
+        <ul class="pagination mb-0 custom-pagination">
+
+            <!-- First -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(1)">
+                    &laquo;
+                </button>
+            </li>
+
+            <!-- Previous -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PreviousPage">
+                    &lsaquo;
+                </button>
+            </li>
+
+            <!-- Page Numbers -->
+            @foreach (var pageNumber in VisiblePages)
+            {
+                if (pageNumber == -1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(pageNumber)">
+                            @pageNumber
+                        </button>
+                    </li>
+                }
+            }
+
+            <!-- Next -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">
+                    &rsaquo;
+                </button>
+            </li>
+
+            <!-- Last -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(totalPages)">
+                    &raquo;
+                </button>
+            </li>
+
+        </ul>
+    </nav>
+</div>
+
+@code {
+
+    private List<WorkRecordNoteDetail> workRecordNoteList = new();
+    private List<WorkRecordNoteDetail> selectedWorkRecordNote = new List<WorkRecordNoteDetail>();
+    private List<Tag> tagList = new();
+    private int companyId;
+    private int selectedTagId;
+    // private string startDate = DateTime.Now.AddDays(-30).ToString("dd-MM-yyyy");
+    // private string endDate = DateTime.Now.ToString("dd-MM-yyyy");
+    private string startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
+    private string endDate = DateTime.Now.ToString("yyyy-MM-dd");
+
+
+    private string searchText = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private HashSet<int> selectedWorkRecordNotes = new();
+
+    private IEnumerable<WorkRecordNoteDetail> FilteredWorkRecordNotes => workRecordNoteList.Where(e =>
+     string.IsNullOrWhiteSpace(searchText) ||
+     (!string.IsNullOrEmpty(e.EmployeeName) && e.EmployeeName.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (!string.IsNullOrEmpty(e.Notes) && e.Notes.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (e.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (e.EmployeeId.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)));
+
+    private int totalPages => (int)Math.Ceiling(FilteredWorkRecordNotes.Count() / (double)pageSize);
+
+    private IEnumerable<WorkRecordNoteDetail> PagedWorkRecordNotes =>
+    pageSize == 0
+    ? FilteredWorkRecordNotes
+    : FilteredWorkRecordNotes
+    .Skip((currentPage - 1) * pageSize)
+    .Take(pageSize);
+
+    private bool IsAllSelected
+    {
+        get => PagedWorkRecordNotes.Any() && PagedWorkRecordNotes.All(e => selectedWorkRecordNotes.Contains(e.Id));
+        set
+        {
+            if (value)
+            {
+                foreach (var tag in PagedWorkRecordNotes)
+                    selectedWorkRecordNotes.Add(tag.Id);
+            }
+            else
+            {
+                foreach (var tag in PagedWorkRecordNotes)
+                    selectedWorkRecordNotes.Remove(tag.Id);
+            }
+        }
+    }
+
+    void ClearSearch()
+    {
+        searchText = string.Empty;
+        ResetPage();
+    }
+
+    <!-- Checkbox Selection -->
+    private void ToggleRow(int id)
+    {
+        if (!selectedWorkRecordNotes.Add(id))
+            selectedWorkRecordNotes.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = e.Value?.ToString() == "true";
+
+        foreach (var user in PagedWorkRecordNotes)
+        {
+            if (isChecked)
+                selectedWorkRecordNotes.Add(user.Id);
+            else
+                selectedWorkRecordNotes.Remove(user.Id);
+        }
+    }
+
+    <!-- Pagination-->
+    int maxVisiblePages = 5;
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+            currentPage++;
+    }
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+    private void ResetPage()
+    {
+        currentPage = 1;
+    }
+    List<int> VisiblePages
+    {
+        get
+        {
+            var pages = new List<int>();
+
+            if (totalPages <= maxVisiblePages)
+            {
+                for (int i = 1; i <= totalPages; i++)
+                    pages.Add(i);
+            }
+            else
+            {
+                int start = Math.Max(1, currentPage - 2);
+                int end = Math.Min(totalPages, currentPage + 2);
+
+                if (start > 1)
+                {
+                    pages.Add(1);
+                    pages.Add(-1); // ellipsis
+                }
+
+                for (int i = start; i <= end; i++)
+                    pages.Add(i);
+
+                if (end < totalPages)
+                {
+                    pages.Add(-1); // ellipsis
+                    pages.Add(totalPages);
+                }
+            }
+
+            return pages;
+        }
+    }
+
+    void GoToPage(int page)
+    {
+        if (page < 1 || page > totalPages)
+            return;
+
+        currentPage = page;
+    }
+
+    private async Task RefreshGrid()
+    {
+        SpinnerService.Show();
+        await Task.Delay(1000);
+        StateHasChanged();
+        try
+        {
+            searchText = "";
+            selectedWorkRecordNotes.Clear();
+            currentPage = 1;
+            pageSize = 10;
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinnerService.Show();
+        try
+        {         
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+
+    }
+
+    private async Task LoadDataAsync()
+    {
+        tagList = await TagsService.GetAccessTagsAsync(false);
+        int tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+        DateTime date = string.IsNullOrEmpty(startDate) ? Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+        DateTime endDates = string.IsNullOrEmpty(endDate) ? Helper.GetDateTimeNow() : DateTime.Parse(endDate);
+        var parameterList = new ParameterList
+        {
+            TagId = tagId,
+            CompanyId = companyId,
+            StartDate = date,
+            EndDate = endDates
+        };
+        workRecordNoteList = await WorkRecordNotesService.GetWorkRecordNotesAsync(parameterList);
+    }
+
+    private async Task OnStatusChange()
+    {
+        SpinnerService.Show();
+        try
+        {
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private Company? company = new();
+    public List<Employee> employees = new();
+    private int selectedEmployeeId;
+    private async Task EditWorkRecordNote(WorkRecordNoteDetail? workRecordNoteDetail = null)
+    {
+        var editWorkRecordNote = workRecordNoteDetail ?? selectedWorkRecordNote.FirstOrDefault();
+        if (editWorkRecordNote == null) return;
+
+        SpinnerService.Show();
+        try
+        {
+            tagList = await TagsService.GetAccessTagsAsync(false);
+            int tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+
+            company = await WorkRecordNotesService.GetCompanyAsync(companyId);
+            selectedEmployeeId = editWorkRecordNote.EmployeeId;
+            var parameterList = new ParameterList
+            {
+                TagId = tagId,
+                CompanyId = companyId,
+                EmployeeId = selectedEmployeeId
+            };
+            employees = await WorkRecordNotesService.GetEmployeeByTag2Async(parameterList);
+
+ 
+        }
+        finally
+        {
+            
+        }
+    }
+}

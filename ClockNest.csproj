@@ -20,8 +20,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Pages\MainMenu\Manage\WorkRecord_Tab\" />
-  </ItemGroup>
-
 </Project>
