@@ -1,5 +1,14 @@
 ﻿@page "/workRecord"
 
+<style>
+    .notes-cell {
+       
+        word-wrap: break-word; /* long words break */
+        word-break: break-word; /* extra safety */
+    }
+
+</style>
+
 <div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
     <!-- Page title -->
     <div class="page-title">Notes</div>
@@ -148,11 +157,11 @@
 
                 </th> *@
                 <th style="width:5%;">Id</th>
-                <th style="width:10%">Employee Id</th>
-                <th style="width:28%"> Employee name</th>
-                <th style="width:15%">Note Created Date</th>
+                <th style="width:12%">Employee Id</th>
+                <th style="width:22%"> Employee name</th>
+                <th style="width:16%">Note Created Date</th>
                 <th style="width:15%">Shift Date</th>
-                <th style="width:22%">Notes</th>
+                <th style="width:30%">Notes</th>
             </tr>
         </thead>
 
@@ -174,7 +183,7 @@
                         <td>@workRecordNote.EmployeeName</td>
                         <td>@workRecordNote.CreatedDateDisplay</td>
                         <td>@workRecordNote.ShiftDateDisplay</td>
-                        <td>@workRecordNote.Notes</td>
+                        <td class="notes-cell">@workRecordNote.Notes</td>
                     </tr>
                 }
             }
@@ -269,13 +278,20 @@
     </nav>
 </div>
 
+
+<CreateEditWorkRecordNotesModel @ref=workRecordNoteModelRef  employees="employees" tagList="tagList" selectedTagId="selectedTagId" />
+
+
 @code {
+    public CreateEditWorkRecordNotesViewModel createEditWorkRecordsNotesModel { get; set; } = new();
+    private CreateEditWorkRecordNotesModel workRecordNoteModelRef = new();
 
     private List<WorkRecordNoteDetail> workRecordNoteList = new();
     private List<WorkRecordNoteDetail> selectedWorkRecordNote = new List<WorkRecordNoteDetail>();
     private List<Tag> tagList = new();
     private int companyId;
     private int selectedTagId;
+    private int userId;
     // private string startDate = DateTime.Now.AddDays(-30).ToString("dd-MM-yyyy");
     // private string endDate = DateTime.Now.ToString("dd-MM-yyyy");
     private string startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
@@ -434,6 +450,7 @@
         try
         {         
             companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
             await LoadDataAsync();
         }
         finally
@@ -475,6 +492,9 @@
     private Company? company = new();
     public List<Employee> employees = new();
     private int selectedEmployeeId;
+    private int employeeShiftId;
+    public bool hideCosts;
+    private WorkRecordAllDetails workRecordAllDetails = new();
     private async Task EditWorkRecordNote(WorkRecordNoteDetail? workRecordNoteDetail = null)
     {
         var editWorkRecordNote = workRecordNoteDetail ?? selectedWorkRecordNote.FirstOrDefault();
@@ -494,13 +514,26 @@
                 CompanyId = companyId,
                 EmployeeId = selectedEmployeeId
             };
+            DateTime date = string.IsNullOrEmpty(startDate) ? Helper.GetDateTimeNow() : DateTime.Parse(startDate);
             employees = await WorkRecordNotesService.GetEmployeeByTag2Async(parameterList);
+            workRecordAllDetails = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(editWorkRecordNote.EmployeeId, employeeShiftId, editWorkRecordNote.ShiftDate);
+            hideCosts = await WorkRecordNotesService.HideCosts(userId);
 
+            var workRecordNoteModel = new CreateEditWorkRecordNotesViewModel
+            {
+                Id = editWorkRecordNote.Id,
+                EmployeeId = editWorkRecordNote.EmployeeId,
+                ShiftDate = editWorkRecordNote.ShiftDate,
+                Notes = editWorkRecordNote.Notes,
+                     
+                WorkDetails = workRecordAllDetails,
+            };
+            await workRecordNoteModelRef.ShowModal(workRecordNoteModel);
  
         }
         finally
         {
-            
+            SpinnerService.Hide();
         }
     }
 }

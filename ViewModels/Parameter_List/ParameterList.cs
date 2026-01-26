@@ -9,6 +9,7 @@
         public int UserId { get; set; }
 
         public int RoleTypeId { get; set; }
+        public int EmployeeShiftId { get; set; }
 
         public DateTime Date { get; set; }
         public DateTime StartDate { get; set; }

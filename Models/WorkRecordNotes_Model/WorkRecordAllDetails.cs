@@ -15,7 +15,18 @@ namespace ClockNest.Models.WorkRecordNotes_Model
 
         public byte[] EmployeePhoto { get; set; }
 
-        public string EmployeePhotoBase64 => Convert.ToBase64String(EmployeePhoto);
+        //public string EmployeePhotoBase64 => Convert.ToBase64String(EmployeePhoto);
+        public string EmployeePhotoBase64
+        {
+            get
+            {
+                if (EmployeePhoto == null || EmployeePhoto.Length == 0)
+                    return string.Empty;
+
+                return Convert.ToBase64String(EmployeePhoto);
+            }
+        }
+
 
         public int EmployeeShiftId { get; set; }
 

@@ -1,5 +1,406 @@
-﻿<h3>CreateEditWorkRecordNotesModel</h3>
+﻿
+<style>
+    .nav-tabs .nav-link {
+        color: #333 !important;
+        font-weight: 500;
+        border: none !important;
+    }
+
+        .nav-tabs .nav-link.active {
+            color: #008d94 !important;
+            border-bottom: 2px solid #008d94 !important;
+            background: transparent !important;
+        }
+</style>
+
+<style>
+    /* ===== LAYOUT ===== */
+    .workrecord-wrapper {
+        display: flex;
+        gap: 16px;
+        width: 100%;
+        align-items: stretch;
+    }
+
+    /* ===== COMMON CARD ===== */
+    .wr-card {
+        background: #f6f6f6;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ===== WIDTH CONTROL ===== */
+    .wr-profile {
+        flex: 1.4;
+    }
+
+    .wr-tag {
+        flex: 1.0;
+    }
+
+    .wr-shift {
+        flex: 1.6;
+    }
+
+    /* ===== HEIGHT CONTROL ===== */
+    .wr-profile,
+    .wr-tag,
+    .wr-shift {
+        min-height: 130px;
+        
+    }
+
+    /* ===== PROFILE ===== */
+    .wr-profile {
+        flex-direction: row;
+        gap: 14px;
+        align-items: center;
+    }
+
+    .wr-avatar {
+        width: 74px;
+        height: 74px;
+        border-radius: 50%;
+        border: 3px solid #dfd6ff;
+    }
+
+    .wr-profile-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .wr-name {
+        font-weight: 600;
+    }
+
+    .wr-date {
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    /* note container */
+    .wr-notes-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        max-width: 400px;
+    }
+
+    /* Static Notes label */
+    .notes-label {
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    /* Scrollable content container */
+    .notes-content-wrapper {
+        max-height: 45px;
+        overflow-y: auto;
+        flex-grow: 1;
+        font-size: 13px;
+    }
+
+    /* Actual notes text */
+    .notes-text {
+        word-break: break-word;
+        white-space: pre-wrap; 
+        margin-top: 4px;
+    }
+
+        /* Placeholder styling */
+        .notes-text.placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+    /* Pencil icon */
+    .wr-icon-btn {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: 5px;
+        align-self: flex-start;
+    }
+
+
+
+    /* ===== TAG / EMPLOYEE ===== */
+    .wr-label {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .wr-select {
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+
+    /* ===== SHIFT ===== */
+    .wr-shift-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* .wr-title {
+        font-weight: 600;
+    }
+
+    .wr-add {
+        background: #f4b400;
+        border: none;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .wr-delete {
+        background: #e57373;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+    .wr-check {
+        margin-top: 8px;
+        font-size: 14px;
+    }
+
+        .wr-check.muted {
+            color: #6c757d;
+        } */
+
+    /* ===== MOBILE ===== */
+    @@media (max-width: 992px) {
+        .workrecord-wrapper {
+            flex-direction: column;
+        }
+    }
+</style>
+<style>
+    .input-select select {
+        padding: 8px 12px !important;
+        height: 35px !important;
+        width: 100% !important;
+    }
+</style>
+
+<div class="modal fade right" id="workRecordNotesModel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:85vw">
+        <div class="modal-content h-100 border-0">
+
+            <EditForm Model="@createEditWorkRecordsNotesModel" class="d-flex flex-column h-100">
+                <DataAnnotationsValidator />
+
+                <!-- Header-->
+                <div class="modal-header border-0">
+                    <h5> @((createEditWorkRecordsNotesModel.Id == 0) ? "Create Work Record" : "Edit Work Record") </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body-->
+                <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
+
+                    <div class="workrecord-wrapper">
+
+                        <!-- PROFILE -->
+                        <div class="wr-card wr-profile">
+                            <div class="wr-avatar">
+                                <img src="@GetEmployeeImage()" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </div>
+
+                            <div class="wr-profile-content">
+                                <div class="wr-name">@createEditWorkRecordsNotesModel.WorkDetails.EmployeeName</div>
+                                <div class="wr-date">@createEditWorkRecordsNotesModel?.WorkDetails?.ShiftDateDisplay</div>
+
+                                <div class="wr-notes-wrapper">
+                                    <span class="notes-label">Notes:</span>
+
+                                    <div class="notes-content-wrapper">
+                                        @if (!string.IsNullOrWhiteSpace(createEditWorkRecordsNotesModel?.Notes))
+                                        {
+                                            <div class="notes-text">@createEditWorkRecordsNotesModel.Notes</div>
+                                        }      
+                                    </div>
+
+                                    <button class="wr-icon-btn">✏️</button>
+                                </div>
+
+                           </div>
+                        </div>
+
+                        <!-- TAG & EMPLOYEE dropdown-->
+                        <div class="wr-card wr-tag">
+
+                            <div class="input-select">
+                                <label class="form-label body-medium">Tag</label>
+                                <InputSelect @bind-Value="selectedTagId" class="form-select form-control-lg body-medium  no-outline">
+                                    @foreach (var tag in tagList)
+                                    {
+                                        <option value="@tag.Id">@tag.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="input-select">
+                                <label class="form-label body-medium mt-2">Employee</label>
+                                <InputSelect @bind-Value="EmployeeId" class="form-select form-control-lg body-medium  no-outline">
+                                    @foreach (var employee in employees)
+                                    {
+                                        <option value="@employee.Id">@employee.FullName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                        </div>
+
+                        <!-- SHIFT -->
+                        <div class="wr-card wr-shift" style="background: none; padding:0;">
+                            <div class="wr-shift-header">
+                               
+                            </div>
+                            <CreateEditWorkRecordShiftTab employeeShift="createEditWorkRecordsNotesModel?.WorkDetails.EmployeeShifts"/>                     
+                        </div>
+
+                    </div>
+
+
+                    <div class=" p-1 pt-4 body-medium">
+                        <ul class="nav nav-tabs mb-3">
+
+                            <li class="nav-item">
+                                <a class="nav-link @(activeTab == "workRecordsTab" ? "active" : "")" href="#workRecordsTab" data-bs-toggle="tab" @onclick="@(() => OnTabClick("workRecordsTab"))">Work Record</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(activeTab == "overtimeTab" ? "active" : "")" href="#overtimeTab" data-bs-toggle="tab" @onclick="@(() => OnTabClick("overtimeTab"))">Overtime</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(activeTab == "absenceTab" ? "active" : "")" href="#absenceTab" data-bs-toggle="tab" @onclick="@(() => OnTabClick("absenceTab"))">Absence</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(activeTab == "exceptionTab" ? "active" : "")" href="#exceptionTab" data-bs-toggle="tab" @onclick="@(() => OnTabClick("exceptionTab"))">Exceptions</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(activeTab == "exceptionalItemTab" ? "active" : "")" href="#exceptionalItemTab" data-bs-toggle="tab" @onclick="@(() => OnTabClick("exceptionalItemTab"))">Exceptional Item</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(activeTab == "accessMovementTab" ? "active" : "")" href="#accessMovementTab" data-bs-toggle="tab" @onclick="@(() => OnTabClick("accessMovementTab"))">Access Movement Records</a>
+                            </li>
+
+                        </ul>
+
+                        <div class="tab-content p-0 bg-transparent">
+
+                            <div class="tab-pane fade @(activeTab == "workRecordsTab" ? "show active" : "")" id="workRecordsTab">
+                                <CreateEditWorkRecordsTab workRecords="createEditWorkRecordsNotesModel?.WorkDetails.WorkRecords" />
+                                <div class="mt-3">
+                                    <CreateEditRealClockingTab realClockings="createEditWorkRecordsNotesModel?.WorkDetails.RealClockings" />
+                                </div>
+                            </div>
+                            <div class="tab-pane fade @(activeTab == "overtimeTab" ? "show active" : "")" id="overtimeTab">
+                                <CreateEditWorkRecordOvertimeTab overtime="createEditWorkRecordsNotesModel?.WorkDetails.Overtime" />
+                            </div>
+
+                            <div class="tab-pane fade @(activeTab == "absenceTab" ? "show active" : "")" id="absenceTab"> 
+                                <CreateEditWorkRecordAbsenceTab absenteeRecord="createEditWorkRecordsNotesModel?.WorkDetails.Absence" />
+                            </div>
+
+                            <div class="tab-pane fade @(activeTab == "exceptionTab" ? "show active" : "")" id="exceptionTab">
+                                <CreateEditWorkRecordExceptionsTab exceptions="createEditWorkRecordsNotesModel?.WorkDetails.Exceptions" />
+                            </div>
+
+                            <div class="tab-pane fade @(activeTab == "exceptionalItemTab" ? "show active" : "")" id="exceptionalItemTab">
+                                <CreateEdirWorkRecordExceptionalItemsTab exceptionalItem="createEditWorkRecordsNotesModel?.WorkDetails.ExceptionalItems" />
+                            </div>
+
+                            <div class="tab-pane fade @(activeTab == "accessMovementTab" ? "show active" : "")" id="accessMovementTab">
+                                <CreateEditWorkRecordAccessMovementTab employeeAccessControlSwipes="employeeAccessControlSwipes"
+                                                                       EmployeeId="EmployeeId" ShiftDate="ShiftDate" />
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+                <!-- Footer-->
+                <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
+                    <button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
+                    @*  <button type="submit"
+                            class="btn_modal-success_save title-h4-semi-bold"
+                            disabled="@isSubmitting"
+                            style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
+                        @if (isSubmitting)
+                        {
+                            <span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button> *@
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
 
 @code {
+    public List<EmployeeAccessControlSwipes> employeeAccessControlSwipes { get; set; } = new();
+    public int EmployeeId;
+    public DateTime ShiftDate;
+    [Parameter] public int selectedTagId { get; set; } = new();
+    [Parameter] public List<Employee> employees { get; set; } = new();
+    [Parameter] public List<Tag> tagList { get; set; } = new();
 
+    //[Parameter] public bool isSubmitting { get; set; }
+    //[Parameter] public CreateEditWorkRecordNotesViewModel createEditWorkRecordsNotesModel { get; set; } = new();
+    private CreateEditWorkRecordNotesViewModel createEditWorkRecordsNotesModel = new()
+    {
+        WorkDetails = new WorkRecordAllDetails() 
+    };
+    [Parameter] public EventCallback<CreateEditWorkRecordNotesViewModel> OnSubmit { get; set; }
+
+    private string? activeTab;
+    private void OnTabClick(string workRecordsTab)
+    {
+        activeTab = workRecordsTab;
+    }
+
+    public async Task ShowModal(CreateEditWorkRecordNotesViewModel model)
+    {
+        createEditWorkRecordsNotesModel = model;
+        EmployeeId = model.EmployeeId;
+        ShiftDate = model.ShiftDate;
+
+        activeTab = "workRecordsTab";
+        await JS.InvokeVoidAsync("showModal", "workRecordNotesModel");
+        StateHasChanged();
+    }
+
+    // public async Task HandelValidSubmit()
+    // {
+    //     await OnSubmit.InvokeAsync(createEditWorkRecordsNotesModel);
+    // }
+
+    private string GetEmployeeImage()
+    {
+        var base64 = createEditWorkRecordsNotesModel?.WorkDetails?.EmployeePhotoBase64;
+
+        if (!string.IsNullOrWhiteSpace(base64))
+            return $"data:image/png;base64,{base64}";
+
+        return "avtar.png";
+    }
 }

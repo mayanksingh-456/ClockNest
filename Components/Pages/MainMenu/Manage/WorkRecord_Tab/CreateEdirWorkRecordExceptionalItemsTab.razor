@@ -1,0 +1,107 @@
+﻿
+<div class=" modal-header border-0 mb-2" style="padding: 0">
+    <h5> ExceptionalItem </h5>
+    <!-- Buttons -->
+    <div class="btn-group" role="group">
+        <button class="btn icon-btn bg-brand-100" type="button">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+<!-- Table -->
+<div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+                <th style="width:3%">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           checked="@IsAllSelected"
+                           @onchange="ToggleSelectAll" /> @* *@
+
+                </th>
+                <th style="width:28%;">Exceptional item</th>
+                <th style="width:25%">Cost centre</th>
+                <th style="width:15%">Count</th>
+                <th style="width:15%">Duration</th>
+                <th style="width:15%"> Cost</th>
+              
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (exceptionalItem == null || !exceptionalItem.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        No matching records found
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var record in exceptionalItem)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@selectedWorkRecords.Contains(record.Id)"
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
+                        </td>
+                        <td>@record.ExceptionalItemTypeDisplay</td>
+                        <td>@record.CostCentreDisplay</td>
+                        <td>@record.Count</td>
+                       
+                        <td>@record.DurationDisplay</td>
+                        <td>@record.Cost</td>
+
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+</div>
+@code {
+
+    [Parameter] public List<ExceptionalItem> exceptionalItem { get; set; } = new();
+
+    private HashSet<int> selectedWorkRecords = new();
+
+    private bool IsAllSelected =>
+        exceptionalItem.Any() &&
+        exceptionalItem.All(r => selectedWorkRecords.Contains(r.Id));
+
+    private void ToggleSelection(int id, bool isChecked)
+    {
+        if (isChecked)
+            selectedWorkRecords.Add(id);
+        else
+            selectedWorkRecords.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = (bool)e.Value!;
+
+        if (isChecked)
+        {
+            selectedWorkRecords = exceptionalItem
+                .Select(r => r.Id)
+                .ToHashSet();
+        }
+        else
+        {
+            selectedWorkRecords.Clear();
+        }
+    }
+
+}
+
+
+

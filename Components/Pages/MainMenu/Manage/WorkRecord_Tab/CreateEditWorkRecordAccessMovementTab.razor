@@ -1,0 +1,70 @@
+﻿@using static System.Runtime.InteropServices.JavaScript.JSType
+
+<div class=" modal-header border-0 mb-2" style="padding: 0">
+ 
+</div>
+<!-- Table -->
+<div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+
+                <th style="width:25%;">Reader</th>
+                <th style="width:25%">Zone</th>
+                <th style="width:25%">  Access granted</th>
+                <th style="width:25%">Swipped at</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (employeeAccessControlSwipes == null || !employeeAccessControlSwipes.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        No matching records found
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var record in employeeAccessControlSwipes)
+                {
+                    <tr>
+                        <td>@record.ReaderName</td>
+                        <td>@record.ZoneName</td>
+                        <td>@record.AccessGrantedDisplay</td>
+                        <td>@record.SwipedAtDisplay</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+
+    [Parameter] public List<EmployeeAccessControlSwipes> employeeAccessControlSwipes { get; set; } = new();
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime ShiftDate { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinnerService.Show();
+        try
+        {
+            var parameterList = new ParameterList
+            {
+                EmployeeId = EmployeeId,
+                Date = ShiftDate
+            };
+            employeeAccessControlSwipes = await WorkRecordNotesService.GetEmployeeAccessControlSwipesAsync(parameterList);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+
+}

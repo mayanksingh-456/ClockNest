@@ -1,0 +1,52 @@
+﻿<h5 class="mb-3">Real Clockings</h5>
+<!-- Table -->
+<div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+                <th style="width:5%">
+                    <input type="checkbox"
+                           class="form-check-input" /> @* @bind="IsAllSelected"
+                    @bind:event="onchange" *@
+
+                </th>
+                <th style="width:15%;">Time</th>
+                <th style="width:20%">Date</th>
+                <th style="width:30%"> Type</th>
+                <th style="width:30%">Device</th>               
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (realClockings == null || !realClockings.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        No real clocking found
+                    </td>
+                </tr>
+            }
+            else
+            {
+            @foreach (var tag in realClockings)
+            {
+                <tr>
+                    <td>
+                        <input type="checkbox"
+                               class="form-check-input" />
+                    </td>
+                    <td>@tag.ClockingTimeOnly</td>
+                    <td>@tag.ClockingDate</td>
+                    <td>@tag.ClockingTypeDisplay</td>
+                    <td>@tag.ClockingDeviceDisplay</td>                   
+                </tr>
+            }
+            }
+            
+        </tbody>
+    </table>
+</div>
+@code {
+
+    [Parameter] public List<RealClocking> realClockings { get; set; } = new();
+}

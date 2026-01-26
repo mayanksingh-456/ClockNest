@@ -1,14 +1,11 @@
-﻿using Azure;
-using ClockNest.Components.Pages.Settings.Employees.Employee_Tab;
+﻿
 using ClockNest.Models.Employee_Model;
 using ClockNest.Models.User_Model;
 using ClockNest.Models.WorkRecordNotes_Model;
 using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using System.ComponentModel.Design;
+
 
 namespace ClockNest.Services.WorkRecordNotes_Service
 {
@@ -39,7 +36,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                 return data;
             }
             return new List<WorkRecordNoteDetail>();
-            
+
         }
 
         //Get company
@@ -86,6 +83,65 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                 return employees;
             }
             return new List<Employee>();
+        }
+
+        //Get work record all details
+        public async Task<WorkRecordAllDetails> GetWorkRecordAllDetailsAsync(int employeeId, int? employeeShiftId, DateTime date)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var parameterList = new ParameterList
+            {
+                EmployeeId = employeeId,
+                EmployeeShiftId = employeeShiftId.GetValueOrDefault(0),
+                Date = date
+            };
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordalldetails/get", parameterList).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadFromJsonAsync<WorkRecordAllDetails>().ConfigureAwait(false);
+                if (data == null)
+                    throw new Exception("Work record all details not found.");
+                return data;
+            }
+            return null;
+        }
+
+        //hide cost
+        public async Task<bool> HideCosts(int userId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/setup/organisation/user/get", userId).ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var savedUser = await response.Content.ReadFromJsonAsync<User>().ConfigureAwait(false);
+
+                if (savedUser?.UserValueAccess.Where(x => x.ValueAccessTypeId == 1).Count() > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false; // default
+        }
+
+        //Get Access Movement
+
+        public async Task<List<EmployeeAccessControlSwipes>> GetEmployeeAccessControlSwipesAsync(ParameterList parameterList)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/accesscontrol/employeeaccesscontrolswipes/get", parameterList).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadFromJsonAsync<List<EmployeeAccessControlSwipes>>().ConfigureAwait(false);
+                if (data == null)
+                    throw new Exception("Employee access control swipes not found.");
+                return data;
+            }
+            return new List<EmployeeAccessControlSwipes>();
         }
     }
 }

@@ -1,0 +1,109 @@
+﻿
+<div class=" modal-header border-0 mb-2" style="padding: 0">
+    <h5> AbsenteeRecord </h5>
+    <!-- Buttons -->
+    <div class="btn-group" role="group">
+        <button class="btn icon-btn bg-brand-100" type="button">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+<!-- Table -->
+<div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+                <th style="width:3%">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           checked="@IsAllSelected"
+                           @onchange="ToggleSelectAll" /> @* *@
+
+                </th>
+                <th style="width:8%;">Start</th>
+                <th style="width:8%">Finish</th>
+                <th style="width:20%"> Absence type</th>
+                <th style="width:10%">Paid</th>
+                <th style="width:10%">Hourly Rate</th>
+                <th style="width:12%">Total Amount</th>
+                <th style="width:20%">User</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (absenteeRecord == null || !absenteeRecord.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        No matching records found
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var record in absenteeRecord)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@selectedWorkRecords.Contains(record.Id)"
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(record.StartTimeDisplay) ? "-" : record.StartTimeDisplay)</td>
+                        <td>@(string.IsNullOrWhiteSpace(record.FinishTimeDisplay) ? "-" : record.FinishTimeDisplay)</td>
+                        <td>@record.AbsenceName</td>
+                        <td>@(string.IsNullOrWhiteSpace(record.PaidDisplay) ? "-" : record.PaidDisplay)</td>
+                        <td>@(string.IsNullOrWhiteSpace(record.HourlyRateDisplay) ? "-" : record.HourlyRateDisplay)</td>
+     
+                        <td>@record.TotalAmountDisplay</td>
+                        <td>@record.UsernameDisplay</td>
+
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+</div>
+@code {
+
+    [Parameter] public List<AbsenteeRecord> absenteeRecord { get; set; } = new();
+
+    private HashSet<int> selectedWorkRecords = new();
+
+    private bool IsAllSelected =>
+        absenteeRecord.Any() &&
+        absenteeRecord.All(r => selectedWorkRecords.Contains(r.Id));
+
+    private void ToggleSelection(int id, bool isChecked)
+    {
+        if (isChecked)
+            selectedWorkRecords.Add(id);
+        else
+            selectedWorkRecords.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = (bool)e.Value!;
+
+        if (isChecked)
+        {
+            selectedWorkRecords = absenteeRecord
+                .Select(r => r.Id)
+                .ToHashSet();
+        }
+        else
+        {
+            selectedWorkRecords.Clear();
+        }
+    }
+
+}
+
+
