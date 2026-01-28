@@ -3,12 +3,18 @@
     <h5> EmployeeShift </h5>
     <!-- Buttons -->
     <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100" type="button">
+        @if (employeeShift == null || !employeeShift.Any())
+        {
+            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateDefaultShiftAsync">
+                @* <i class="fa fa-plus"></i> *@Create Default Shift
+        </button>
+        }
+        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateEmployeeShift">
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button">
-            <i class="fa-solid fa-rotate-right"></i>
+        <button class="btn icon-btn btn-danger" title="Refresh" type="button" @onclick="DeleteSelectedRecords">
+            <i class="fa-solid fa-trash"></i>
         </button>
     </div>
 </div>
@@ -45,7 +51,7 @@
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@selectedWorkRecords.Contains(record.Id)"
+                                   checked="@selectedEmployeeShifts.Contains(record.Id)"
                                    @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
                         </td>
                        
@@ -58,22 +64,35 @@
         </tbody>
     </table>
 </div>
+<CreateEditWorkRecordShiftTabModel @ref=createEditWorkRecordShiftTabModelRef isSubmitting="@isSubmitting" OnSubmit="SaveEmployeeShift" />
 @code {
 
+    [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
+
+    private CreateEditWorkRecordShiftTabModel? createEditWorkRecordShiftTabModelRef;
+    public CreateEditWorkRecordShiftViewModel createEditWorkRecordShiftModel { get; set; } = new();
+    public bool isSubmitting { get; set; }
+    private List<EmployeeShift> selectedEmployeeShift = new();
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public int employeeShiftId { get; set; }
+
+    private int companyId;
+    private int  userId;
     [Parameter] public List<EmployeeShift> employeeShift { get; set; } = new();
 
-    private HashSet<int> selectedWorkRecords = new();
+    private HashSet<int> selectedEmployeeShifts = new();
 
     private bool IsAllSelected =>
         employeeShift.Any() &&
-        employeeShift.All(r => selectedWorkRecords.Contains(r.Id));
+        employeeShift.All(r => selectedEmployeeShifts.Contains(r.Id));
 
     private void ToggleSelection(int id, bool isChecked)
     {
         if (isChecked)
-            selectedWorkRecords.Add(id);
+            selectedEmployeeShifts.Add(id);
         else
-            selectedWorkRecords.Remove(id);
+            selectedEmployeeShifts.Remove(id);
     }
 
     private void ToggleSelectAll(ChangeEventArgs e)
@@ -82,16 +101,249 @@
 
         if (isChecked)
         {
-            selectedWorkRecords = employeeShift
+            selectedEmployeeShifts = employeeShift
                 .Select(r => r.Id)
                 .ToHashSet();
         }
         else
         {
-            selectedWorkRecords.Clear();
+            selectedEmployeeShifts.Clear();
         }
     }
 
+    private async Task CreateEmployeeShift()
+    {
+         companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+         userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        var shifts = await WorkRecordNotesService.GetWorkRecordShiftAsync(companyId);
+
+        var shiftSelectList = shifts?.Select(s =>
+            new SelectListItem
+            {
+                Value = s.Id.ToString(),
+                Text = s.Name
+            }).ToList()
+            ?? new List<SelectListItem>();
+
+        var createEditWorkRecord = new CreateEditWorkRecordShiftViewModel
+        {
+            ShiftsSelect = shiftSelectList,
+            ShiftDate = shiftDate,
+            EmployeeId = EmployeeId,
+            ShiftId = employeeShiftId,
+            AutoGenerateWorkRecord = true
+        };
+
+        createEditWorkRecordShiftTabModelRef?.ShowModal(createEditWorkRecord);
+    }
+
+
+    private async Task CreateDefaultShiftAsync()
+    {
+        SpinnerService.Show();
+
+        try
+        {
+            int companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+            var scheduledShifts = await WorkRecordNotesService.GetRosterScheduledShiftsAsync(new ParameterList
+            {
+                //CompanyId = companyId,
+                EmployeeId = EmployeeId,
+                StartDate = shiftDate,
+                EndDate = shiftDate
+            });
+
+            if (scheduledShifts != null && scheduledShifts.Any())
+            {
+                var shift = scheduledShifts[0];
+                int? shiftId = shift.ScheduledShiftId ?? shift.RosterShiftId;
+
+                if (shiftId.HasValue)
+                {
+                    var isScheduled = shift.ScheduledShiftId.HasValue;
+
+                    var parameters = new ParameterList
+                    {
+                        EmployeeId = EmployeeId,
+                        Date = shiftDate,
+                        ShiftId = shiftId.Value,
+                        CreateDefaultDay = true,
+                        CompanyId = companyId,
+                        UserId = userId,
+                        Flag = isScheduled
+                    };
+
+                    var created = await WorkRecordNotesService.CreateDefaultDayAsync(parameters);
+                    if (created)
+                    {
+                        var details = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(EmployeeId, employeeShiftId, shiftDate);
+                        if (details != null)
+                        {
+                            await ReloadWorkRecordAsync.InvokeAsync();
+                            await JS.InvokeVoidAsync("alert", "Default shift created successfully.", "success");
+                        }
+                        else
+                        {
+                            await JS.InvokeVoidAsync("alert", "Default shift created but failed to load details.", "warning");
+                        }
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("alert", "Failed to create default shift.", "danger");
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("alert", "No valid shift found in scheduled shifts.", "warning");
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "No scheduled shift available for this date.", "warning");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in CreateDefaultShiftAsync: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", "An error occurred while creating default shift.", "danger");
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task SaveEmployeeShift(CreateEditWorkRecordShiftViewModel model)
+    {
+        isSubmitting = true;
+        try
+        {
+            int companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+            if (model.AutoGenerateWorkRecord && model.ShiftId == 0)
+            {
+                await CreateDefaultShiftAsync();
+                isSubmitting = false;
+                return;
+            }
+
+
+            var employeeShift = new EmployeeShift
+            {
+                ShiftId = model.ShiftId,
+                ShiftDate = shiftDate,
+                EmployeeId = EmployeeId,
+                CompanyId = companyId,
+                UpdatedByUserId = userId,
+                UpdatedDate = Helper.GetDateTimeNow() != default ? Helper.GetDateTimeNow() : DateTime.UtcNow,
+                CreatedByUserId = userId,
+                CreatedDate = Helper.GetDateTimeNow() != default ? Helper.GetDateTimeNow() : DateTime.UtcNow
+            };
+
+            var parameters = new ParameterList
+            {
+                EmployeeId = EmployeeId,
+                Date = shiftDate,
+                ShiftId = model.ShiftId,
+                CreateDefaultDay = true,
+                CompanyId = companyId,
+                UserId = userId
+            };
+
+            if (model.AutoGenerateWorkRecord)
+            {
+                bool defaultDayCreated = await WorkRecordNotesService.CreateDefaultDayAsync(parameters);
+                if (!defaultDayCreated)
+                {
+                    await JS.InvokeVoidAsync("alert", "Failed to create default day.", "danger");
+                    isSubmitting = false;
+                    return;
+                }
+            }
+            else
+            {
+                var savedShift = await WorkRecordNotesService.SetEmployeeShiftAsync(employeeShift, userId);
+                if (savedShift == null)
+                {
+                    await JS.InvokeVoidAsync("alert", "Failed to save employee shift.", "danger");
+                    isSubmitting = false;
+                    return;
+                }
+                parameters.EmployeeShiftId = savedShift.Id;
+            }
+
+            var workRecordAllDetails = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(
+                parameters.EmployeeId,
+                parameters.EmployeeShiftId,
+                parameters.Date
+            );
+
+            if (workRecordAllDetails != null)
+            {
+                await JS.InvokeVoidAsync("hideModal", "shiftModel");
+                await JS.InvokeVoidAsync("alert", "Shift saved successfully!", "success");
+                if (ReloadWorkRecordAsync.HasDelegate)
+                {
+                    await ReloadWorkRecordAsync.InvokeAsync();
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Failed to load updated work record details.", "danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error saving employee shift: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", "An error occurred while saving the shift.", "danger");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task DeleteSelectedRecords()
+    {
+        if (selectedEmployeeShifts.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one shift to delete");
+            return;
+        }
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {selectedEmployeeShifts.Count} workRecord(s)?");
+        if (!confirmed) return;
+
+        SpinnerService.Show();
+        try
+        {
+            // selectedTags is HashSet<int> of selected IDs
+            var employeeShifttoDelete = employeeShift
+                .Where(t => selectedEmployeeShifts.Contains(t.Id))
+                .ToList();
+
+            var success = await WorkRecordNotesService.DeleteEmployeeShiftAsync(employeeShifttoDelete, userId);
+
+            if (success)
+            {
+                employeeShift.RemoveAll(t => selectedEmployeeShifts.Contains(t.Id));
+                selectedEmployeeShifts.Clear();
+                await JS.InvokeVoidAsync("alert", "Selected shift deleted successfully");
+            }
+
+           
+            await ReloadWorkRecordAsync.InvokeAsync();
+            
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
 }
 
 

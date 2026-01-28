@@ -200,7 +200,16 @@
                 <!-- Header-->
                 <div class="modal-header border-0">
                     <h5> @((createEditWorkRecordsNotesModel.Id == 0) ? "Create Work Record" : "Edit Work Record") </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <button class="btn" @onclick="PreviousDay">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                        <button class="btn" @onclick="Today">Today</button>
+                        <button class="btn" @onclick="NextDay" style="margin-right: -15px; ">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" style="margin-right: -20px; "></button>
+                    </div>
                 </div>
 
                 <!-- Body-->
@@ -231,6 +240,12 @@
                                     <button class="wr-icon-btn">✏️</button>
                                 </div>
 
+                               <div class="align-bottom col-md-12">
+                                   <div class="col-6">
+
+                                   </div>
+                               </div>
+
                            </div>
                         </div>
 
@@ -239,22 +254,22 @@
 
                             <div class="input-select">
                                 <label class="form-label body-medium">Tag</label>
-                                <InputSelect @bind-Value="selectedTagId" class="form-select form-control-lg body-medium  no-outline">
+                                <select value="@tagId" @onchange="OnTagChanged" class="form-select form-control-lg body-medium  no-outline">
                                     @foreach (var tag in tagList)
                                     {
                                         <option value="@tag.Id">@tag.Name</option>
                                     }
-                                </InputSelect>
+                                </select>
                             </div>
 
                             <div class="input-select">
                                 <label class="form-label body-medium mt-2">Employee</label>
-                                <InputSelect @bind-Value="EmployeeId" class="form-select form-control-lg body-medium  no-outline">
+                                <select value="@EmployeeId" @onchange="OnEmployeeChanged" class="form-select form-control-lg body-medium  no-outline">
                                     @foreach (var employee in employees)
                                     {
                                         <option value="@employee.Id">@employee.FullName</option>
                                     }
-                                </InputSelect>
+                                </select>
                             </div>
 
                         </div>
@@ -264,7 +279,9 @@
                             <div class="wr-shift-header">
                                
                             </div>
-                            <CreateEditWorkRecordShiftTab employeeShift="createEditWorkRecordsNotesModel?.WorkDetails.EmployeeShifts"/>                     
+                            <CreateEditWorkRecordShiftTab employeeShift="createEditWorkRecordsNotesModel?.WorkDetails.EmployeeShifts"
+                                                          EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
+                                                          ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
                         </div>
 
                     </div>
@@ -301,7 +318,9 @@
                         <div class="tab-content p-0 bg-transparent">
 
                             <div class="tab-pane fade @(activeTab == "workRecordsTab" ? "show active" : "")" id="workRecordsTab">
-                                <CreateEditWorkRecordsTab workRecords="createEditWorkRecordsNotesModel?.WorkDetails.WorkRecords" />
+                                <CreateEditWorkRecordsTab workRecords="createEditWorkRecordsNotesModel?.WorkDetails.WorkRecords"
+                                                          EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
+                                                          ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
                                 <div class="mt-3">
                                     <CreateEditRealClockingTab realClockings="createEditWorkRecordsNotesModel?.WorkDetails.RealClockings" />
                                 </div>
@@ -324,7 +343,7 @@
 
                             <div class="tab-pane fade @(activeTab == "accessMovementTab" ? "show active" : "")" id="accessMovementTab">
                                 <CreateEditWorkRecordAccessMovementTab employeeAccessControlSwipes="employeeAccessControlSwipes"
-                                                                       EmployeeId="EmployeeId" ShiftDate="ShiftDate" />
+                                                                       EmployeeId="EmployeeId" shiftDate="shiftDate" />
 
                             </div>
                         </div>
@@ -336,19 +355,6 @@
                 <!-- Footer-->
                 <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
                     <button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
-                    @*  <button type="submit"
-                            class="btn_modal-success_save title-h4-semi-bold"
-                            disabled="@isSubmitting"
-                            style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
-                        @if (isSubmitting)
-                        {
-                            <span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
-                        }
-                        else
-                        {
-                            <span>Save</span>
-                        }
-                    </button> *@
                 </div>
 
             </EditForm>
@@ -359,18 +365,17 @@
 @code {
     public List<EmployeeAccessControlSwipes> employeeAccessControlSwipes { get; set; } = new();
     public int EmployeeId;
-    public DateTime ShiftDate;
-    [Parameter] public int selectedTagId { get; set; } = new();
+    public DateTime shiftDate;
+    public int employeeShiftId;
+    [Parameter] public int tagId { get; set; } = new();
     [Parameter] public List<Employee> employees { get; set; } = new();
     [Parameter] public List<Tag> tagList { get; set; } = new();
 
-    //[Parameter] public bool isSubmitting { get; set; }
-    //[Parameter] public CreateEditWorkRecordNotesViewModel createEditWorkRecordsNotesModel { get; set; } = new();
+
     private CreateEditWorkRecordNotesViewModel createEditWorkRecordsNotesModel = new()
     {
         WorkDetails = new WorkRecordAllDetails() 
     };
-    [Parameter] public EventCallback<CreateEditWorkRecordNotesViewModel> OnSubmit { get; set; }
 
     private string? activeTab;
     private void OnTabClick(string workRecordsTab)
@@ -382,17 +387,14 @@
     {
         createEditWorkRecordsNotesModel = model;
         EmployeeId = model.EmployeeId;
-        ShiftDate = model.ShiftDate;
+        shiftDate = model.ShiftDate;
+        employeeShiftId = model.WorkDetails.EmployeeShiftId;
 
         activeTab = "workRecordsTab";
         await JS.InvokeVoidAsync("showModal", "workRecordNotesModel");
         StateHasChanged();
     }
 
-    // public async Task HandelValidSubmit()
-    // {
-    //     await OnSubmit.InvokeAsync(createEditWorkRecordsNotesModel);
-    // }
 
     private string GetEmployeeImage()
     {
@@ -403,4 +405,80 @@
 
         return "avtar.png";
     }
+
+    <!-- Tag change -->
+    private async Task OnTagChanged(ChangeEventArgs e)
+    {
+        int companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        tagId = int.Parse(e.Value!.ToString()!);
+
+        //reload employees based on tag
+        employees = await WorkRecordNotesService.GetEmployeeByTag2Async(new ParameterList
+            {
+                TagId = tagId,
+                CompanyId = companyId
+            });
+
+        EmployeeId = employees.FirstOrDefault()?.Id ?? 0;
+
+        await ReloadWorkRecordAsync();
+    }
+
+    <!-- Employee change -->
+    private async Task OnEmployeeChanged(ChangeEventArgs e)
+    {
+        EmployeeId = int.Parse(e.Value!.ToString()!);
+
+        await ReloadWorkRecordAsync();
+    }
+
+    private async Task ReloadWorkRecordAsync()
+    {
+        SpinnerService.Show();
+        try
+        {
+            var newWorkRecordDetails = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(EmployeeId, 0, shiftDate);
+
+            createEditWorkRecordsNotesModel.WorkDetails = newWorkRecordDetails;
+
+            createEditWorkRecordsNotesModel.WorkDetails.WorkRecords = newWorkRecordDetails.WorkRecords.ToList();
+            createEditWorkRecordsNotesModel.WorkDetails.RealClockings = newWorkRecordDetails.RealClockings.ToList();
+            createEditWorkRecordsNotesModel.WorkDetails.EmployeeShifts = newWorkRecordDetails.EmployeeShifts.ToList();
+            createEditWorkRecordsNotesModel.WorkDetails.Overtime = newWorkRecordDetails.Overtime.ToList();
+            createEditWorkRecordsNotesModel.WorkDetails.Absence = newWorkRecordDetails.Absence.ToList();
+            createEditWorkRecordsNotesModel.WorkDetails.Exceptions = newWorkRecordDetails.Exceptions.ToList();
+            createEditWorkRecordsNotesModel.WorkDetails.ExceptionalItems = newWorkRecordDetails.ExceptionalItems.ToList();
+
+            employeeShiftId = newWorkRecordDetails.EmployeeShiftId;
+            //shiftDate = newWorkRecordDetails.ShiftDate;
+            EmployeeId = newWorkRecordDetails.EmployeeId;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+<!-- Previous next nad today button -->
+    private async Task PreviousDay()
+    {
+        shiftDate = shiftDate.AddDays(-1);
+        await ReloadWorkRecordAsync();
+    }
+
+    private async Task NextDay()
+    {
+        shiftDate = shiftDate.AddDays(1);
+        await ReloadWorkRecordAsync();
+    }
+
+    private async Task Today()
+    {
+        shiftDate = DateTime.UtcNow.Date;
+        await ReloadWorkRecordAsync();
+    }
+
+
 }

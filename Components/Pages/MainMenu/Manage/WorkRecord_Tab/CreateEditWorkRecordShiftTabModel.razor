@@ -1,0 +1,80 @@
+﻿@using ClockNest.Components.Pages.CommonPages
+
+<div class="modal fade right" id="shiftModel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:30vw">
+        <div class="modal-content h-100 border-0">
+
+            <EditForm Model="@createEditWorkRecordShiftModel" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
+                <DataAnnotationsValidator />
+
+                <!-- Header-->
+                <div class="modal-header border-0">
+                    <h5>  Create Shift </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body-->
+                <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
+
+                    <!-- Shift -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Shift</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditWorkRecordShiftModel.ShiftId">
+                            @foreach (var shift in createEditWorkRecordShiftModel.ShiftsSelect)
+                            {
+                                <option value="@shift.Value">@shift.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <!-- Checkbox for AutoGenerateWorkRecord -->
+
+                    <div class="mb-2 form-check form-switch d-flex align-items-center">
+                        <input type="checkbox" class="form-check-input me-2" @bind="createEditWorkRecordShiftModel.AutoGenerateWorkRecord" />
+                        <label class="form-label body-medium mb-0">Auto-generate work record </label>
+                    </div>
+                </div>
+                <!-- Footer-->
+                <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
+                    <button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"
+                            class="btn_modal-success_save title-h4-semi-bold"
+                            disabled="@isSubmitting"
+                            style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
+                        @if (isSubmitting)
+                        {
+                            <span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+
+
+    [Parameter] public bool isSubmitting { get; set; }
+    [Parameter] public CreateEditWorkRecordShiftViewModel createEditWorkRecordShiftModel { get; set; } = new();
+    [Parameter] public EventCallback<CreateEditWorkRecordShiftViewModel> OnSubmit { get; set; }
+
+    public async Task ShowModal(CreateEditWorkRecordShiftViewModel model)
+    {
+        createEditWorkRecordShiftModel = model;
+        await JS.InvokeVoidAsync("showModal", "shiftModel");
+        StateHasChanged();
+    }
+
+    public async Task HandelValidSubmit()
+    {
+        await OnSubmit.InvokeAsync(createEditWorkRecordShiftModel);
+    }
+
+}

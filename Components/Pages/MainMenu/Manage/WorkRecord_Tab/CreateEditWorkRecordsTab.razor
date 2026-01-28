@@ -1,14 +1,13 @@
-﻿@* <h5 class="mb-3">Work Records</h5> *@
-<div class=" modal-header border-0 mb-2" style="padding: 0">
+﻿<div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> Work Records </h5>   
     <!-- Buttons -->
     <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100"  type="button">
+        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateWorkRecord">
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn clockNest-bg-secondary"  title="Refresh" type="button">
-            <i class="fa-solid fa-rotate-right"></i>
+        <button class="btn icon-btn btn-danger" title="Refresh" type="button" @onclick="DeleteSelectedRecords">
+            <i class="fa-solid fa-trash"></i>
         </button>
     </div>
 </div>
@@ -21,7 +20,7 @@
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" /> @* *@
+                           @onchange="ToggleSelectAll" />
 
                 </th>
                 <th style="width:10%;">Start</th>
@@ -48,7 +47,7 @@
             {
             @foreach (var record in workRecords)
                 {
-                    <tr >
+                    <tr @ondblclick="@(() => EditWorkRecord(record))">
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
@@ -66,11 +65,21 @@
                     </tr>
                 }
            }
-           
+          
         </tbody>
     </table>
 </div>
+
+<CreateEditWorkRecordTabModel @ref=createEditWorkRecordTabModelRef isSubmitting="@isSubmitting" OnSubmit="SaveWorkRecordAsync" />
 @code {
+    [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
+
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public int employeeShiftId { get; set; }
+    private int companyId;
+    public bool isSubmitting { get; set; }
+    private List<Overtime>? OvertimeRecords { get; set; } = new();
 
     [Parameter] public List<WorkRecord> workRecords { get; set; } = new();
 
@@ -104,4 +113,273 @@
         }
     }
 
+    private CreateEditWorkRecordTabModel createEditWorkRecordTabModelRef;
+    public CreateEditWorkRecordViewModel createEditWorkRecordNoteModel { get; set; } = new();
+    private List<WorkRecord> selectedWorkRecord = new();
+
+    private List<Activity> activities = new();
+    private List<CostCentre> costCentres = new();
+
+    public async Task CreateWorkRecord()
+    {
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+
+        activities = await WorkRecordNotesService.GetActivitiesAsync(companyId);
+
+        costCentres = await WorkRecordNotesService.GetCostCentresAsync(companyId);
+
+        var createWorkRecordModel = new CreateEditWorkRecordViewModel
+        {
+            Id = 0, 
+            StartTime = shiftDate,
+            EndTime = shiftDate,
+            EmployeeShiftId = employeeShiftId,
+            StartTimeSpan = TimeSpan.Zero,
+            EndTimeSpan = TimeSpan.Zero
+        };
+
+        createWorkRecordModel.ActivitySelect = activities
+            .Select(a => new SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.Name
+            }).ToList();
+
+        createWorkRecordModel.ActivitySelect.Insert(0,
+            new SelectListItem { Value = "", Text = "Select" });
+
+        createWorkRecordModel.CostCentreSelect = costCentres
+            .Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name
+            }).ToList();
+
+        createWorkRecordModel.CostCentreSelect.Insert(0,
+            new SelectListItem { Value = "", Text = "Select" });
+
+        await createEditWorkRecordTabModelRef
+            .ShowModal(createWorkRecordModel);
+    }
+
+    public async Task EditWorkRecord(WorkRecord workRecord)
+    {
+        if (workRecord == null) return;
+
+        try
+        {
+            SpinnerService.Show();
+
+            // Get company activities/cost centres
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            activities = await WorkRecordNotesService.GetActivitiesAsync(companyId);
+            costCentres = await WorkRecordNotesService.GetCostCentresAsync(companyId);
+
+            // Map WorkRecord to your modal ViewModel
+            createEditWorkRecordNoteModel = new CreateEditWorkRecordViewModel
+            {
+                Id = workRecord.Id,
+                StartTime = workRecord.StartTime ?? shiftDate,
+                EndTime = workRecord.EndTime ?? workRecord.StartTime ?? shiftDate,
+                StartTimeSpan = (workRecord.StartTime ?? shiftDate).TimeOfDay,
+                EndTimeSpan = workRecord.EndTime?.TimeOfDay ?? TimeSpan.Zero,
+                EmployeeShiftId = employeeShiftId,
+                ActivityId = workRecord.ActivityId ?? 0,
+                CostCentreId = workRecord.CostCentreId ?? 0,
+                ActivitySelect = activities
+                    .Select(a => new SelectListItem
+                    {
+                        Value = a.Id.ToString(),
+                        Text = a.Name
+                    }).ToList(),
+                CostCentreSelect = costCentres
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    }).ToList()
+            };
+
+            // Open the modal
+            await createEditWorkRecordTabModelRef.ShowModal(createEditWorkRecordNoteModel);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    public async Task SaveWorkRecordAsync(CreateEditWorkRecordViewModel model)
+    {
+        isSubmitting = true;
+        try
+        {
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+            DateTime startTime = model.StartTime;
+            DateTime endTime = model.EndTime;
+            var workRecord = new WorkRecord
+            {
+                Id = model.Id ?? 0,
+                EmployeeShiftId = employeeShiftId,
+                ActivityId = model.ActivityId,
+                CostCentreId = model.CostCentreId,
+                StartTime = startTime,
+                EndTime = endTime,
+                CompanyId = companyId,
+                UpdatedByUserId = userId,
+                UpdatedDate = Helper.GetDateTimeNow() != default ? Helper.GetDateTimeNow() : DateTime.UtcNow
+            };
+
+            if (!model.Id.HasValue || model.Id == 0)
+            {
+                workRecord.CreatedByUserId = userId;
+                workRecord.CreatedDate = Helper.GetDateTimeNow() != default ? Helper.GetDateTimeNow() : DateTime.UtcNow;
+            }
+            else
+            {
+                workRecord.CreatedByUserId = userId;
+                workRecord.CreatedDate = Helper.GetDateTimeNow() != default ? Helper.GetDateTimeNow() : DateTime.UtcNow;
+            }
+
+            if (workRecord.ActivityId == 0)
+            {
+                await JS.InvokeVoidAsync("alert", "You must select an activity.");
+                return;
+            }
+
+            if (endTime < startTime)
+            {
+                bool isActive = await WorkRecordNotesService.IsWorkRecordActive(model.Id ?? 0);
+
+                if (!isActive)
+                {
+                    await JS.InvokeVoidAsync("alert", "The end time cannot be less than the start time!");
+                    isSubmitting = false;
+                    return;
+                }
+                workRecord.EndTime = null;
+                workRecord.Duration = null;
+            }
+
+            var savedWorkRecords = await WorkRecordNotesService.SaveWorkRecordAsync(workRecord);
+
+
+
+            if (savedWorkRecords != null)
+            {
+                await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
+                await JS.InvokeVoidAsync("alert", "Work record saved successfully!");
+            }
+
+            //Recalculate overtime
+            var parameterList = new ParameterList
+            {
+                EmployeeId = EmployeeId,
+                EmployeeShiftId = employeeShiftId,
+                Date = shiftDate,
+                CompanyId = companyId,
+                UserId = userId
+            };
+
+            if (savedWorkRecords != null)
+            {
+                // await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
+                // await JS.InvokeVoidAsync("alert", "Work record saved successfully!");
+
+
+                var overtimeList = await WorkRecordNotesService.RecalculateOvertimeAsync(parameterList);
+
+                if (overtimeList != null)
+                {
+                    OvertimeRecords = overtimeList;
+                    StateHasChanged();
+                }
+
+                if (ReloadWorkRecordAsync.HasDelegate)
+                {
+                    await ReloadWorkRecordAsync.InvokeAsync();
+                }
+            }
+
+            else
+            {
+                await JS.InvokeVoidAsync("showToast", "Failed to save work record.", "danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", "An error occurred while saving.", "danger");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+  
+
+    private async Task DeleteSelectedRecords()
+    {
+        if (selectedWorkRecords.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one work record to delete");
+            return;
+        }
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {selectedWorkRecords.Count} workRecord(s)?");
+        if (!confirmed) return;
+
+        SpinnerService.Show();
+        try
+        {
+            // selectedTags is HashSet<int> of selected IDs
+            var workrecordToDelete = workRecords
+                .Where(t => selectedWorkRecords.Contains(t.Id))
+                .ToList();
+
+            var success = await WorkRecordNotesService.DeleteWorkRecordAsync(workrecordToDelete);
+
+            if (success)
+            {
+                workRecords.RemoveAll(t => selectedWorkRecords.Contains(t.Id));
+                selectedWorkRecords.Clear();
+                await JS.InvokeVoidAsync("alert", "Selected workRecord deleted successfully");
+                //await ReloadWorkRecordAsync.InvokeAsync();
+            }
+
+            //Recalculate overtime
+            var parameterList = new ParameterList
+            {
+                EmployeeId = EmployeeId,
+                EmployeeShiftId = employeeShiftId,
+                Date = shiftDate,
+                CompanyId = companyId,
+                UserId = userId
+            };
+
+            if (success)
+            {
+                // await JS.InvokeVoidAsync("hideModal", "workRecordModal");
+                // await JS.InvokeVoidAsync("showToast", "Work record saved successfully!", "success");
+
+                var overtimeList = await WorkRecordNotesService.RecalculateOvertimeAsync( parameterList);
+
+                if (overtimeList != null)
+                {
+                    OvertimeRecords = overtimeList;
+                    StateHasChanged();
+                }
+                await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
+                //await ReloadWorkRecordAsync.InvokeAsync();
+            }
+        }
+        finally
+        {
+            await ReloadWorkRecordAsync.InvokeAsync();
+            SpinnerService.Hide();
+        }
+    }
 }

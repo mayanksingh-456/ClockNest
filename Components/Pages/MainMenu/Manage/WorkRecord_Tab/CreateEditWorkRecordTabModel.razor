@@ -1,0 +1,133 @@
+﻿@using ClockNest.Components.Pages.CommonPages
+
+<div class="modal fade right" id="workRecordViewModel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:40vw">
+        <div class="modal-content h-100 border-0">
+
+            <EditForm Model="@createEditWorkRecordNoteModel" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
+                <DataAnnotationsValidator />
+
+                <!-- Header-->
+                <div class="modal-header border-0">
+                    <h5> @((createEditWorkRecordNoteModel.Id == 0) ? "Create Work Record" : "Edit Work Record") </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body-->
+                <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
+
+                    <!-- START -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Start</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <InputDate class="form-control"
+                                           @bind-Value="StartDate" />
+                            </div>
+                            <div class="col-5">
+                                <TimePicker @bind-Value="StartTimeOnly" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- END -->
+                    @if (!HideEndTime)
+                    {
+                        <div class="form-group mb-3">
+                            <label class="body-medium">End</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <InputDate class="form-control"
+                                               @bind-Value="EndDate" />
+                                </div>
+                                <div class="col-6">
+                                    <TimePicker @bind-Value="EndTimeOnly" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- ACTIVITY -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Activity</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditWorkRecordNoteModel.ActivityId">
+                            @foreach (var activity in createEditWorkRecordNoteModel.ActivitySelect)
+                            {
+                                <option value="@activity.Value">@activity.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <!-- COST CENTRE -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Cost Centre</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditWorkRecordNoteModel.CostCentreId">
+                            @foreach (var cc in createEditWorkRecordNoteModel.CostCentreSelect)
+                            {
+                                <option value="@cc.Value">@cc.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+
+                </div>
+                <!-- Footer-->
+                <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
+                    <button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"
+                            class="btn_modal-success_save title-h4-semi-bold"
+                            disabled="@isSubmitting"
+                            style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
+                        @if (isSubmitting)
+                        {
+                            <span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+
+
+    [Parameter] public bool isSubmitting { get; set; }
+    [Parameter] public CreateEditWorkRecordViewModel createEditWorkRecordNoteModel { get; set; } = new();
+    [Parameter] public EventCallback<CreateEditWorkRecordViewModel> OnSubmit { get; set; }
+
+    public async Task ShowModal(CreateEditWorkRecordViewModel model)
+    {
+        createEditWorkRecordNoteModel = model;
+
+        StartDate = model.StartTime;
+        EndDate = model.EndTime;
+
+        StartTimeOnly = model.StartTimeSpan;
+        EndTimeOnly = model.EndTimeSpan;
+
+        await JS.InvokeVoidAsync("showModal", "workRecordViewModel");
+        StateHasChanged();
+    }
+
+    public async Task HandelValidSubmit()
+    {
+        await OnSubmit.InvokeAsync(createEditWorkRecordNoteModel);
+    }
+
+    [Parameter] public DateTime ShiftDate { get; set; }
+    [Parameter] public bool HideEndTime { get; set; }
+    private DateTime? StartDate;
+    private DateTime? EndDate;
+
+    private TimeSpan StartTimeOnly = TimeSpan.Zero;
+    private TimeSpan EndTimeOnly = TimeSpan.Zero;
+
+}

@@ -1,4 +1,6 @@
-﻿namespace ClockNest.ViewModels.Parameter_List
+﻿using ClockNest.Models.WorkRecordNotes_Model;
+
+namespace ClockNest.ViewModels.Parameter_List
 {
     public class ParameterList
     {
@@ -14,5 +16,12 @@
         public DateTime Date { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+
+        public bool Flag { get; set; }
+        public int ShiftId { get; set; }
+        public bool CreateDefaultDay { get; set; }
+
+        public EmployeeShift EmployeeShift { get; set; }
+        public List<EmployeeShift> EmployeeShifts { get; set; }
     }
 }

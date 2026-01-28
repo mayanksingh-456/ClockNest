@@ -279,7 +279,7 @@
 </div>
 
 
-<CreateEditWorkRecordNotesModel @ref=workRecordNoteModelRef  employees="employees" tagList="tagList" selectedTagId="selectedTagId" />
+<CreateEditWorkRecordNotesModel @ref=workRecordNoteModelRef employees="employees" tagList="tagList" tagId="tagId" />
 
 
 @code {
@@ -292,6 +292,7 @@
     private int companyId;
     private int selectedTagId;
     private int userId;
+    private int tagId;
     // private string startDate = DateTime.Now.AddDays(-30).ToString("dd-MM-yyyy");
     // private string endDate = DateTime.Now.ToString("dd-MM-yyyy");
     private string startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
@@ -463,7 +464,7 @@
     private async Task LoadDataAsync()
     {
         tagList = await TagsService.GetAccessTagsAsync(false);
-        int tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+         tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
         DateTime date = string.IsNullOrEmpty(startDate) ? Helper.GetDateTimeNow() : DateTime.Parse(startDate);
         DateTime endDates = string.IsNullOrEmpty(endDate) ? Helper.GetDateTimeNow() : DateTime.Parse(endDate);
         var parameterList = new ParameterList
@@ -504,7 +505,7 @@
         try
         {
             tagList = await TagsService.GetAccessTagsAsync(false);
-            int tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+             tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
 
             company = await WorkRecordNotesService.GetCompanyAsync(companyId);
             selectedEmployeeId = editWorkRecordNote.EmployeeId;

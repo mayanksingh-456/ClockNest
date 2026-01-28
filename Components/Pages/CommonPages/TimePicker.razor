@@ -1,0 +1,270 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+
+<div class="timepicker-container">
+  @*   <label class="body-medium">@Label</label> *@
+    <div class="input-group" tabindex="0"
+         @onclick="TogglePicker"
+         @onkeydown="HandleKeyDown">
+        <input class="form-control form-control-lg body-medium no-outline"
+               @bind="timeText"
+               @bind:event="oninput"
+               @onblur="OnInputBlur"
+               placeholder="HH:mm" />
+
+        <span class="input-icon">
+            <i class="fa-regular fa-clock" style="font-size:0.75rem;color:#0d6efd"></i>
+        </span>
+    </div>
+
+    <div class="clock-popup" style="display:@(showPicker ? "block" : "none")" @onclick:stopPropagation="true">
+        <div class="timepicker-wrapper">
+            <div class="timepicker-header">
+                <span class="timepicker-hour @(isSelectingHour ? "active" : "")"
+                      @onclick="() => isSelectingHour = true">
+                    @selectedHour.ToString("D2")
+                </span> :
+                <span class="timepicker-minute @(!isSelectingHour ? "active" : "")"
+                      @onclick="() => isSelectingHour = false">
+                    @selectedMinute.ToString("D2")
+                </span>
+            </div>
+
+            <div class="clock-face">
+                <div class="clock-center"></div>
+                <div class="@GetHandClass()" style="@($"transform: rotate({GetHandAngle()}deg);")"></div>
+
+                @foreach (var label in GetClockNumbers())
+                {
+                    <div class="clock-number @(label.IsActive ? "active" : "")"
+                         style="@($"left:{label.X}px; top:{label.Y}px")"
+                         @onclick="@(() => SelectValue(label.Value))">
+                        @label.Display
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timepicker-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .input-group {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        margin-left: -35px;
+        pointer-events: none;
+    }
+
+    .clock-popup {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        z-index: 999;
+    }
+
+    .timepicker-wrapper {
+        width: 240px;
+        background: #fff;
+        border: 1px solid #0d6efd;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .timepicker-header {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #555;
+    }
+
+    .timepicker-hour.active, .timepicker-minute.active {
+        color: #0d6efd;
+        cursor: pointer;
+    }
+
+    .clock-face {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: #f9f9f9;
+    }
+
+    .clock-number {
+        position: absolute;
+        transform: translate(-50%,-50%);
+        width: 34px;
+        height: 34px;
+        line-height: 34px;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #333;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .clock-number:hover, .clock-number.active {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+    .clock-center {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #0d6efd;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        z-index: 10;
+    }
+
+    .clock-hand-inner, .clock-hand-outer, .clock-hand-minute {
+        position: absolute;
+        width: 2px;
+        background: #0d6efd;
+        top: 50%;
+        left: 50%;
+        transform-origin: bottom center;
+        transition: transform 0.3s ease;
+    }
+
+    .clock-hand-inner {
+        height: 45px;
+    }
+
+    .clock-hand-outer {
+        height: 75px;
+    }
+
+    .clock-hand-minute {
+        height: 70px;
+        top: 15%;
+    }
+</style>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Time";
+    [Parameter] public TimeSpan Value { get; set; }
+    [Parameter] public EventCallback<TimeSpan> ValueChanged { get; set; }
+
+    private bool showPicker = false;
+    private bool isSelectingHour = true;
+    private int selectedHour;
+    private int selectedMinute;
+    private string timeText = "00:00";
+
+    private void TogglePicker()
+    {
+        showPicker = !showPicker;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            showPicker = false;
+    }
+
+    private double GetHandAngle()
+    {
+        return isSelectingHour ? (selectedHour % 24) * 15 : (selectedMinute / 60.0) * 360;
+    }
+
+    private string GetHandClass() => isSelectingHour
+        ? selectedHour <= 12 ? "clock-hand-inner" : "clock-hand-outer"
+        : "clock-hand-minute";
+
+    private record ClockLabel(double X, double Y, string Display, int Value, bool IsActive);
+
+    private List<ClockLabel> GetClockNumbers()
+    {
+        var labels = new List<ClockLabel>();
+        double center = 110;
+        double innerRadius = 55;
+        double outerRadius = 85;
+
+        if (isSelectingHour)
+        {
+            for (int i = 1; i <= 12; i++)
+            {
+                double angle = (Math.PI / 2) - (i * Math.PI / 6);
+                labels.Add(new ClockLabel(center + innerRadius * Math.Cos(angle), center - innerRadius * Math.Sin(angle), i.ToString("D2"), i, selectedHour == i));
+            }
+
+            for (int i = 13; i <= 24; i++)
+            {
+                int pos = i - 12;
+                double angle = (Math.PI / 2) - (pos * Math.PI / 6);
+                string display = i == 24 ? "00" : i.ToString("D2");
+                int value = i == 24 ? 0 : i;
+                labels.Add(new ClockLabel(center + outerRadius * Math.Cos(angle), center - outerRadius * Math.Sin(angle), display, value, selectedHour == value));
+            }
+        }
+        else
+        {
+            double radius = 85;
+            for (int i = 0; i < 60; i += 5)
+            {
+                double angle = (Math.PI / 2) - (i * Math.PI / 30);
+                labels.Add(new ClockLabel(center + radius * Math.Cos(angle), center - radius * Math.Sin(angle), i.ToString("D2"), i, selectedMinute == i));
+            }
+        }
+        return labels;
+    }
+
+    private void SelectValue(int value)
+    {
+        if (isSelectingHour)
+        {
+            selectedHour = value;
+            isSelectingHour = false;
+        }
+        else
+        {
+            selectedMinute = value;
+            showPicker = false;
+        }
+        UpdateTime();
+    }
+
+    private async void UpdateTime()
+    {
+        Value = new TimeSpan(selectedHour, selectedMinute, 0);
+        timeText = $"{selectedHour:D2}:{selectedMinute:D2}";
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    protected override void OnInitialized()
+    {
+        selectedHour = Value.Hours;
+        selectedMinute = Value.Minutes;
+        timeText = $"{selectedHour:D2}:{selectedMinute:D2}";
+    }
+
+    private async Task OnInputBlur()
+    {
+        if (TimeSpan.TryParse(timeText, out var parsed))
+        {
+            selectedHour = parsed.Hours;
+            selectedMinute = parsed.Minutes;
+            Value = parsed;
+            await ValueChanged.InvokeAsync(Value);
+        }
+        else
+        {
+            timeText = $"{selectedHour:D2}:{selectedMinute:D2}";
+        }
+    }
+}
