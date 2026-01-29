@@ -1,18 +1,31 @@
 ﻿
-
-
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> Overtime </h5>
     <!-- Buttons -->
     <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100" type="button">
+        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateOvertime">
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button">
-            <i class="fa-solid fa-rotate-right"></i>
+        <button class="btn icon-btn " type="button" @onclick="ToilWorkRecordOvertime" title="Mark as Toil" style="background-color:#FAB95B; color:#FFFFFF; ">
+            Toil
+        </button>
+
+        <button class="btn icon-btn " type="button" @onclick="AuthorizeOvertime" title="Mark as Authorize" style="background-color:#547792; color:#FFFFFF">
+            <i class="fa-solid fa-check" style="color: #ffff;"></i>
+        </button>
+
+        <button class="btn icon-btn clockNest-bg-secondary" title="Mark as Decline" type="button" @onclick="DeclineWorkRecordOvertime">
+            <i class="fa-solid fa-xmark" style="color: #ffff;"></i>
+        </button>
+
+        <button class="btn icon-btn btn-danger" type="button" title="Mark as Unpaid" @onclick="UnpaidWorkRecordOvertime">
+            <i class="fa-solid fa-xmark" style="color: #ffff;"></i>
+            <i class="fa-solid fa-xmark" style="color: #ffff;"></i>
         </button>
     </div>
+
+
 </div>
 <!-- Table -->
 <div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
@@ -52,11 +65,11 @@
             {
                 @foreach (var record in overtime)
                 {
-                    <tr>
+                    <tr @ondblclick="@(() => EditOvertime(record))">
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@selectedWorkRecords.Contains(record.Id)"
+                                   checked="@selectedOvertimeRecords.Contains(record.Id)"
                                    @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
                         </td>
                         <td>@(string.IsNullOrWhiteSpace(record.StartTimeDisplay) ? "-" : record.StartTimeDisplay)</td>
@@ -75,23 +88,40 @@
 
         </tbody>
     </table>
+
 </div>
+<CreateEditWorkRecordOvertimeTabModel @ref=createEditOvertimeTabModelRef isSubmitting="@isSubmitting" OnSubmit="OnOvertimeSaveAsync" />
+
 @code {
+
+  
+    [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
+
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public int employeeShiftId { get; set; }
+    private int companyId;
+    private int userId;
+
+    private CreateEditWorkRecordOvertimeTabModel? createEditOvertimeTabModelRef;
+    public CreateEditWorkRecordOvertimeViewModel createEditOvertimeModel { get; set; } = new();
+    public bool isSubmitting { get; set; }
+    private List<Overtime> selectedOvertimeRecord = new();
 
     [Parameter] public List<Overtime> overtime { get; set; } = new();
 
-    private HashSet<int> selectedWorkRecords = new();
+    private HashSet<int> selectedOvertimeRecords = new();
 
     private bool IsAllSelected =>
         overtime.Any() &&
-        overtime.All(r => selectedWorkRecords.Contains(r.Id));
+        overtime.All(r => selectedOvertimeRecords.Contains(r.Id));
 
     private void ToggleSelection(int id, bool isChecked)
     {
         if (isChecked)
-            selectedWorkRecords.Add(id);
+            selectedOvertimeRecords.Add(id);
         else
-            selectedWorkRecords.Remove(id);
+            selectedOvertimeRecords.Remove(id);
     }
 
     private void ToggleSelectAll(ChangeEventArgs e)
@@ -100,15 +130,278 @@
 
         if (isChecked)
         {
-            selectedWorkRecords = overtime
+            selectedOvertimeRecords = overtime
                 .Select(r => r.Id)
                 .ToHashSet();
         }
         else
         {
-            selectedWorkRecords.Clear();
+            selectedOvertimeRecords.Clear();
         }
     }
 
+    public async Task CreateOvertime()
+    {
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        if (companyId == 125) // Security Print
+        {
+            return;
+        }
+        var getOvertimeRecords = await WorkRecordNotesService.GetOvertimeRecordAsync(companyId);
+
+        var createOvertimeModel = new CreateEditWorkRecordOvertimeViewModel
+        {
+            OvertimeGroups = getOvertimeRecords,
+            ShiftDate = DateTime.Today,
+            OvertimeGroupId = 0
+
+        };
+        await createEditOvertimeTabModelRef!.ShowModal(createOvertimeModel);
+    }
+
+    public async Task EditOvertime(Overtime? overtime = null)
+    {
+        var editOvertime = overtime ?? selectedOvertimeRecord.FirstOrDefault();
+        if (editOvertime == null) return;
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        if (companyId == 125) // Security Print
+        {
+            return;
+        }
+        var getOvertimeRecords = await WorkRecordNotesService.GetOvertimeRecordAsync(companyId);
+
+        createEditOvertimeModel = new CreateEditWorkRecordOvertimeViewModel
+        {
+            Id = editOvertime.Id,
+            Duration = TimeSpan.FromMinutes(editOvertime.Duration ?? 0),
+            OvertimeGroupId = editOvertime.OvertimeGroupId ?? 0,
+            OvertimeStatusId = editOvertime.OvertimeStatusId ?? 0,
+            OvertimeGroups = getOvertimeRecords
+        };
+        await createEditOvertimeTabModelRef!.ShowModal(createEditOvertimeModel);
+    }
+
+    public async Task OnOvertimeSaveAsync(CreateEditWorkRecordOvertimeViewModel overtimeModel)
+    {
+        isSubmitting = true;
+        SpinnerService.Show();
+        try
+        {
+            var now = Helper.GetDateTimeNow() != default ? Helper.GetDateTimeNow() : DateTime.UtcNow;
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            int durationMinutes = (int)overtimeModel.Duration.TotalMinutes;
+
+            var workRecord = new WorkRecord
+            {
+                Id = overtimeModel.Id,
+                EmployeeShiftId = employeeShiftId,
+                Duration = durationMinutes,
+                OvertimeGroupId = overtimeModel.OvertimeGroupId,
+                CompanyId = companyId,
+                UpdatedByUserId = userId,
+                UpdatedDate = now,
+                OvertimeStatusId = 0
+            };
+            if (overtimeModel.Id == 0)
+            {
+                workRecord.CreatedByUserId = userId;
+                workRecord.CreatedDate = now;
+            }
+
+            var savedWorkRecords = await WorkRecordNotesService.SaveWorkRecordAsync(workRecord);
+
+            if (savedWorkRecords != null)
+            {
+                await JS.InvokeVoidAsync("hideModal", "overtimeModel");
+                await JS.InvokeVoidAsync("alert", "Overtime record saved successfully!", "success");
+
+                if (ReloadWorkRecordAsync.HasDelegate)
+                {
+                    await ReloadWorkRecordAsync.InvokeAsync();
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Failed to save overtime record.", "danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error saving overtime record: {ex.Message}");
+            await JS.InvokeVoidAsync("showToast", "An error occurred while saving the record.", "danger");
+        }
+        finally
+        {
+            SpinnerService.Hide();
+            isSubmitting = false;
+        }
+    }
+
+    <!-- On toil clicked -->
+    public async Task ToilWorkRecordOvertime()
+    {
+        if (selectedOvertimeRecords.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record for toil");
+            return;
+        }
+        SpinnerService.Show();
+        try
+        {
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            var selectedOvertime = overtime
+                          .Where(t => selectedOvertimeRecords.Contains(t.Id))
+                          .ToList();
+            var parameterList = new ParameterList
+            {
+                Overtime = selectedOvertime,
+                UserId = userId,
+            };
+            bool success = await WorkRecordNotesService.ToilOvertimeAsync(parameterList);
+            if (success)
+            {
+                await ReloadWorkRecordAsync.InvokeAsync();
+                selectedOvertimeRecords.Clear();
+                await JS.InvokeVoidAsync("alert", "Marked as toil successfully!", "success");
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to mark overtime as toil: {ex.Message}");
+        }
+
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    <!-- Authorize overtime -->
+    public async Task AuthorizeOvertime()
+    {
+        if (selectedOvertimeRecords.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record to authorize");
+            return;
+        }
+        SpinnerService.Show();
+        try
+        {
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            var selectedOvertime = overtime
+                          .Where(t => selectedOvertimeRecords.Contains(t.Id))
+                          .ToList();
+            var parameterList = new ParameterList
+            {
+                Overtime = selectedOvertime,
+                UserId = userId,
+            };
+            bool success = await WorkRecordNotesService.AuthorizeOvertimeAsync(parameterList);
+            if (success)
+            {
+              
+                await JS.InvokeVoidAsync("alert", "Marked as authorized successfully!", "success");
+                await ReloadWorkRecordAsync.InvokeAsync();
+                selectedOvertimeRecords.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to mark overtime as toil: {ex.Message}");
+        }
+
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    <!-- Decline overtime -->
+    public async Task DeclineWorkRecordOvertime()
+    {
+        if (selectedOvertimeRecords.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record to decline");
+            return;
+        }
+        SpinnerService.Show();
+        try
+        {
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            var selectedOvertime = overtime
+                          .Where(t => selectedOvertimeRecords.Contains(t.Id))
+                          .ToList();
+            var parameterList = new ParameterList
+            {
+                Overtime = selectedOvertime,
+                UserId = userId,
+            };
+            bool success = await WorkRecordNotesService.DeclineOvertimeAsync(parameterList);
+            if (success)
+            {
+
+                await JS.InvokeVoidAsync("alert", "Overtime declined successfully!", "success");
+                await ReloadWorkRecordAsync.InvokeAsync();
+                selectedOvertimeRecords.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to mark overtime as decline: {ex.Message}");
+        }
+
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    <!-- Unpaid overtime -->
+    public async Task UnpaidWorkRecordOvertime()
+    {
+        if (selectedOvertimeRecords.Count == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record to mark unpaid");
+            return;
+        }
+        SpinnerService.Show();
+        try
+        {
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            var selectedOvertime = overtime
+                          .Where(t => selectedOvertimeRecords.Contains(t.Id))
+                          .ToList();
+            var parameterList = new ParameterList
+            {
+                Overtime = selectedOvertime,
+                UserId = userId,
+            };
+            bool success = await WorkRecordNotesService.UnpaidOvertimeAsync(parameterList);
+            if (success)
+            {
+        
+                await ReloadWorkRecordAsync.InvokeAsync();
+                selectedOvertimeRecords.Clear();
+              
+                ToastService.Show("Marked overtime as unpaid successfully!", ToastType.Success);
+               
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to mark overtime as unpaid: {ex.Message}");
+        }
+
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
 }
 

@@ -326,7 +326,9 @@
                                 </div>
                             </div>
                             <div class="tab-pane fade @(activeTab == "overtimeTab" ? "show active" : "")" id="overtimeTab">
-                                <CreateEditWorkRecordOvertimeTab overtime="createEditWorkRecordsNotesModel?.WorkDetails.Overtime" />
+                                <CreateEditWorkRecordOvertimeTab overtime="createEditWorkRecordsNotesModel?.WorkDetails.Overtime"
+                                                                 EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
+                                                                 ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "absenceTab" ? "show active" : "")" id="absenceTab"> 

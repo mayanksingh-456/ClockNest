@@ -1,11 +1,13 @@
 ﻿
 using ClockNest.Models.Employee_Model;
+using ClockNest.Models.Overtime_Model;
 using ClockNest.Models.Tag_Modal;
 using ClockNest.Models.User_Model;
 using ClockNest.Models.WorkRecordNotes_Model;
 using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Net.Http;
 
 
@@ -336,6 +338,103 @@ namespace ClockNest.Services.WorkRecordNotes_Service
 
             var errorContent = await response.Content.ReadAsStringAsync();
             throw new Exception($"Failed to delete shift: {response.StatusCode} - {errorContent}");
+        }
+
+        //<!-- overtime-->
+        public async Task<List<SelectListItem>> GetOvertimeRecordAsync(int companyId)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+                var response = await client.PostAsJsonAsync("chronicle/setup/overtimerules/overtimegroups/get", companyId);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var getOvertimeRecords = await response.Content.ReadFromJsonAsync<List<OvertimeGroup>>();
+                    return getOvertimeRecords.Select(g => new SelectListItem
+                    {
+                        Value = g.Id.ToString(),
+                        Text = g.Name
+                    }).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching overtime groups: {ex.Message}");
+            }
+            return new List<SelectListItem>();
+        }
+
+        //<!-- overtime/ Toil-->
+        public async Task<bool> ToilOvertimeAsync(ParameterList parameterList)
+        {
+            if (parameterList == null || parameterList.Overtime == null)  throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/toilovertime/post", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to toil overtime: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+
+        //<!-- overtime/ authorize-->
+        public async Task<bool> AuthorizeOvertimeAsync(ParameterList parameterList)
+        {
+            if (parameterList == null || parameterList.Overtime == null) throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/authoriseovertime/post", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to authorize overtime: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+
+        //<!-- overtime/ decline-->
+        public async Task<bool> DeclineOvertimeAsync(ParameterList parameterList)
+        {
+            if (parameterList == null || parameterList.Overtime == null) throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/declineovertime/post", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to decline overtime: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+
+        //<!-- overtime/ unpaid-->
+        public async Task<bool> UnpaidOvertimeAsync(ParameterList parameterList)
+        {
+            if (parameterList == null || parameterList.Overtime == null) throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/unpaidovertime/post", parameterList);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to mark as unpaid overtime: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
         }
     }
 }

@@ -23,5 +23,6 @@ namespace ClockNest.ViewModels.Parameter_List
 
         public EmployeeShift EmployeeShift { get; set; }
         public List<EmployeeShift> EmployeeShifts { get; set; }
+        public List<Overtime> Overtime { get; set; }
     }
 }

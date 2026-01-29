@@ -1,3 +1,4 @@
+using ClockNest.Services.Toast_Service;
 using ClockNest.Components;
 using ClockNest.Endpoints;
 using ClockNest.Handler;
@@ -60,6 +61,7 @@ namespace ClockNest
             builder.Services.AddScoped<Security>();
             builder.Services.AddTransient<SecurityMessageHandler>();
             builder.Services.AddScoped<AuthService>();
+            builder.Services.AddSingleton<ToastService>();
             builder.Services.AddScoped<SpinnerService>();
 
             builder.Services.AddScoped<UserContext>();
@@ -68,6 +70,7 @@ namespace ClockNest
             builder.Services.AddScoped<SelfServices>();
             builder.Services.AddScoped<TagsService>();
             builder.Services.AddScoped<WorkRecordNotesService>();
+           
 
             var app = builder.Build();
 

@@ -1,51 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 
-<div class="timepicker-container">
-  @*   <label class="body-medium">@Label</label> *@
-    <div class="input-group" tabindex="0"
-         @onclick="TogglePicker"
-         @onkeydown="HandleKeyDown">
-        <input class="form-control form-control-lg body-medium no-outline"
-               @bind="timeText"
-               @bind:event="oninput"
-               @onblur="OnInputBlur"
-               placeholder="HH:mm" />
-
-        <span class="input-icon">
-            <i class="fa-regular fa-clock" style="font-size:0.75rem;color:#0d6efd"></i>
-        </span>
-    </div>
-
-    <div class="clock-popup" style="display:@(showPicker ? "block" : "none")" @onclick:stopPropagation="true">
-        <div class="timepicker-wrapper">
-            <div class="timepicker-header">
-                <span class="timepicker-hour @(isSelectingHour ? "active" : "")"
-                      @onclick="() => isSelectingHour = true">
-                    @selectedHour.ToString("D2")
-                </span> :
-                <span class="timepicker-minute @(!isSelectingHour ? "active" : "")"
-                      @onclick="() => isSelectingHour = false">
-                    @selectedMinute.ToString("D2")
-                </span>
-            </div>
-
-            <div class="clock-face">
-                <div class="clock-center"></div>
-                <div class="@GetHandClass()" style="@($"transform: rotate({GetHandAngle()}deg);")"></div>
-
-                @foreach (var label in GetClockNumbers())
-                {
-                    <div class="clock-number @(label.IsActive ? "active" : "")"
-                         style="@($"left:{label.X}px; top:{label.Y}px")"
-                         @onclick="@(() => SelectValue(label.Value))">
-                        @label.Display
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
     .timepicker-container {
         position: relative;
@@ -154,6 +108,54 @@
         top: 15%;
     }
 </style>
+
+<div class="timepicker-container">
+  @*   <label class="body-medium">@Label</label> *@
+    <div class="input-group" tabindex="0"
+         @onclick="TogglePicker"
+         @onkeydown="HandleKeyDown">
+        <input class="form-control form-control-lg body-medium no-outline"
+               @bind="timeText"
+               @bind:event="oninput"
+               @onblur="OnInputBlur"
+               placeholder="HH:mm" />
+
+        <span class="input-icon ms-1">
+            <i class="fa-regular fa-clock" style="font-size:0.75rem;color:#0d6efd"></i>
+        </span>
+    </div>
+
+    <div class="clock-popup" style="display:@(showPicker ? "block" : "none")" @onclick:stopPropagation="true">
+        <div class="timepicker-wrapper">
+            <div class="timepicker-header">
+                <span class="timepicker-hour @(isSelectingHour ? "active" : "")"
+                      @onclick="() => isSelectingHour = true">
+                    @selectedHour.ToString("D2")
+                </span> :
+                <span class="timepicker-minute @(!isSelectingHour ? "active" : "")"
+                      @onclick="() => isSelectingHour = false">
+                    @selectedMinute.ToString("D2")
+                </span>
+            </div>
+
+            <div class="clock-face">
+                <div class="clock-center"></div>
+                <div class="@GetHandClass()" style="@($"transform: rotate({GetHandAngle()}deg);")"></div>
+
+                @foreach (var label in GetClockNumbers())
+                {
+                    <div class="clock-number @(label.IsActive ? "active" : "")"
+                         style="@($"left:{label.X}px; top:{label.Y}px")"
+                         @onclick="@(() => SelectValue(label.Value))">
+                        @label.Display
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 @code {
     [Parameter] public string Label { get; set; } = "Time";

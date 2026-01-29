@@ -1,39 +1,41 @@
-﻿@using ClockNest.Components.Pages.CommonPages
-
-<div class="modal fade right" id="shiftModel" tabindex="-1" aria-hidden="true" style="background-color: rgba(0,0,0,0.3);">
+﻿
+<div class="modal fade right" id="overtimeModel" tabindex="-1" aria-hidden="true"  style="background-color: rgba(0,0,0,0.3);">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:30vw">
         <div class="modal-content h-100 border-0">
 
-            <EditForm Model="@createEditWorkRecordShiftModel" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
+            <EditForm Model="@createEditOvertimeModel" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
                 <DataAnnotationsValidator />
 
                 <!-- Header-->
                 <div class="modal-header border-0">
-                    <h5>  Create Shift </h5>
+                    <h5>  @((createEditOvertimeModel.Id == 0) ? "Create Overtime" : "Edit Overtime") </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <!-- Body-->
                 <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
 
-                    <!-- Shift -->
+                     <div class="form-group mb-3">
+                        <label class="">Duration</label>
+                  @*       <div class=" body-medium " >   *@                          
+                                <TimePicker @bind-Value="createEditOvertimeModel.Duration" />                               
+                       @*  </div> *@
+                    
+                    </div>
+
+                    <!-- Overtime -->
                     <div class="form-group mb-3">
                         <label class="body-medium">Shift</label>
                         <InputSelect class="form-select"
-                                     @bind-Value="createEditWorkRecordShiftModel.ShiftId">
-                            @foreach (var shift in createEditWorkRecordShiftModel.ShiftsSelect)
+                                     @bind-Value="createEditOvertimeModel.OvertimeGroupId">
+                            @foreach (var overtime in createEditOvertimeModel.OvertimeGroups)
                             {
-                                <option value="@shift.Value">@shift.Text</option>
+                                <option value="@overtime.Value">@overtime.Text</option>
                             }
                         </InputSelect>
                     </div>
 
-                    <!-- Checkbox for AutoGenerateWorkRecord -->
-
-                    <div class="mb-2 form-check form-switch d-flex align-items-center">
-                        <input type="checkbox" class="form-check-input me-2" @bind="createEditWorkRecordShiftModel.AutoGenerateWorkRecord" />
-                        <label class="form-label body-medium mb-0">Auto-generate work record </label>
-                    </div>
+                  
                 </div>
                 <!-- Footer-->
                 <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
@@ -62,19 +64,19 @@
 
 
     [Parameter] public bool isSubmitting { get; set; }
-    [Parameter] public CreateEditWorkRecordShiftViewModel createEditWorkRecordShiftModel { get; set; } = new();
-    [Parameter] public EventCallback<CreateEditWorkRecordShiftViewModel> OnSubmit { get; set; }
+    [Parameter] public CreateEditWorkRecordOvertimeViewModel createEditOvertimeModel { get; set; } = new();
+    [Parameter] public EventCallback<CreateEditWorkRecordOvertimeViewModel> OnSubmit { get; set; }
 
-    public async Task ShowModal(CreateEditWorkRecordShiftViewModel model)
+    public async Task ShowModal(CreateEditWorkRecordOvertimeViewModel model)
     {
-        createEditWorkRecordShiftModel = model;
-        await JS.InvokeVoidAsync("showModal", "shiftModel");
+        createEditOvertimeModel = model;
+        await JS.InvokeVoidAsync("showModal", "overtimeModel");
         StateHasChanged();
     }
 
     public async Task HandelValidSubmit()
     {
-        await OnSubmit.InvokeAsync(createEditWorkRecordShiftModel);
+        await OnSubmit.InvokeAsync(createEditOvertimeModel);
     }
 
 }

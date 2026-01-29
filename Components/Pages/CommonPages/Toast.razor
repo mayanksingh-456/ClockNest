@@ -1,0 +1,84 @@
+﻿
+<style>
+    .toast-overlay {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10000;
+        pointer-events: none;
+    }
+
+    .toast-box {
+        min-width: 240px;
+        padding: 14px 22px;
+        border-radius: 6px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .success {
+        background-color: #28a745;
+    }
+
+    .error {
+        background-color: #dc3545;
+    }
+
+    .warning {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .info {
+        background-color: #17a2b8;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+@if (visible)
+{
+    <div class="toast-overlay">
+        <div class="toast-box @cssClass">
+            @message
+        </div>
+    </div>
+}
+
+@code {
+    private bool visible;
+    private string? message;
+    private string cssClass = "info";
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += ShowToast;
+    }
+
+    async void ShowToast(string msg, ToastType type)
+    {
+        message = msg;
+        cssClass = type.ToString().ToLower();
+        visible = true;
+
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(3000);
+
+        visible = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}
