@@ -1,6 +1,8 @@
 ﻿
+using ClockNest.Enum;
 using ClockNest.Models.Employee_Model;
 using ClockNest.Models.Overtime_Model;
+using ClockNest.Models.SelfService_Model;
 using ClockNest.Models.Tag_Modal;
 using ClockNest.Models.User_Model;
 using ClockNest.Models.WorkRecordNotes_Model;
@@ -8,7 +10,7 @@ using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Net.Http;
+
 
 
 namespace ClockNest.Services.WorkRecordNotes_Service
@@ -128,7 +130,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                 }
             }
 
-            return false; 
+            return false;
         }
 
         //Get Access Movement
@@ -208,7 +210,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                 return savedWorkRecords;
             }
 
-            var errorMessage = await response.Content.ReadAsStringAsync();          
+            var errorMessage = await response.Content.ReadAsStringAsync();
             return null;
         }
 
@@ -299,7 +301,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
 
         public async Task<EmployeeShift> SetEmployeeShiftAsync(EmployeeShift employeeShift, int userId)
         {
-            var client = _httpClientFactory.CreateClient("ChronicleClient").AddDefaultHeader(_userContext);
+             var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
             var parameterList = new ParameterList
             {
                 EmployeeShift = employeeShift,
@@ -368,7 +370,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
         //<!-- overtime/ Toil-->
         public async Task<bool> ToilOvertimeAsync(ParameterList parameterList)
         {
-            if (parameterList == null || parameterList.Overtime == null)  throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
+            if (parameterList == null || parameterList.Overtime == null) throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
 
             var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
             var response = await client.PostAsJsonAsync("chronicle/timeattendance/toilovertime/post", parameterList);
@@ -434,6 +436,153 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Failed to mark as unpaid overtime: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+
+        //Get absence by type
+        public async Task<List<Absence>> GetAbsencesByTypeAsync(List<EnumAbsenceType> absenceTypes, int companyId)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+                HttpResponseMessage response;
+
+                if (absenceTypes.Contains(EnumAbsenceType.Holiday))
+                {
+                    response = await client.PostAsJsonAsync("chronicle/setup/hsa/nonarchivedholidays/get", companyId);
+                }
+                else if (absenceTypes.Contains(EnumAbsenceType.Sickness))
+                {
+                    response = await client.PostAsJsonAsync( "chronicle/setup/hsa/nonarchivedsicknesses/get", companyId);
+                }
+                else
+                {
+                    response = await client.PostAsJsonAsync("chronicle/setup/hsa/nonarchivedabsences/get", companyId);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<List<Absence>>();
+                return result ?? new List<Absence>();
+            }
+            catch
+            {
+                return new List<Absence>();
+            }
+
+        }
+
+        //public async Task<List<Absence>> GetNonArchivedHolidaysAsync(int companyId)
+        //{
+        //     var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+        //    var response = await client.PostAsJsonAsync("chronicle/setup/hsa/nonarchivedholidays/get", companyId);
+
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        throw new Exception($"Failed to fetch non-archived holidays. Status: {response.StatusCode}");
+        //    }
+
+        //    var result = await response.Content.ReadFromJsonAsync<List<Absence>>();
+
+        //    return result ?? new List<Absence>();
+        //}
+        //public async Task<List<Absence>> GetNonArchivedSicknessesAsync(int companyId)
+        //{
+        //     var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+        //    var response = await client.PostAsJsonAsync("chronicle/setup/hsa/nonarchivedsicknesses/get", companyId);
+
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        throw new Exception($"Failed to fetch non-archived sicknesses. Status: {response.StatusCode}");
+        //    }
+
+        //    var result = await response.Content.ReadFromJsonAsync<List<Absence>>();
+
+        //    return result ?? new List<Absence>();
+        //}
+        //public async Task<List<Absence>> GetNonArchivedAbsencesAsync(int companyId)
+        //{
+        //     var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+        //    var response = await client.PostAsJsonAsync("chronicle/setup/hsa/nonarchivedabsences/get", companyId);
+
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        throw new Exception($"Failed to fetch non-archived absences. Status: {response.StatusCode}");
+        //    }
+
+        //    var result = await response.Content.ReadFromJsonAsync<List<Absence>>();
+
+        //    return result ?? new List<Absence>();
+        //}
+        //public async Task<List<Absence>> GetAbsencesByTypeAsync(int absenceTypeId, int companyId)
+        //{
+        //    return absenceTypeId switch
+        //    {
+        //        (int)ClockNest.Enum.EnumAbsenceType.Holiday => await GetNonArchivedHolidaysAsync(companyId),
+        //        (int)ClockNest.Enum.EnumAbsenceType.Sickness => await GetNonArchivedSicknessesAsync(companyId),
+        //        _ => await GetNonArchivedAbsencesAsync(companyId),
+        //    };
+        //}
+
+
+        public class AbsenceSaveResponse
+        {
+            public bool Success { get; set; }
+            public string StatusCode { get; set; }
+            public string Message { get; set; }
+        }
+
+        public async Task<AbsenceSaveResponse> SetAbsenteeRecordAsync(AbsenteeRecord absenteeRecord)
+        {
+            if (absenteeRecord == null)
+                throw new ArgumentNullException(nameof(absenteeRecord), "Absentee record cannot be null.");
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+                var response = await client.PostAsJsonAsync("chronicle/timeattendance/absenteerecord/post", absenteeRecord);
+                var rawContent = (await response.Content.ReadAsStringAsync())?.Trim('"', ' ', '\r', '\n');
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Error response content: {rawContent}");
+                    return new AbsenceSaveResponse
+                    {
+                        Success = false,
+                        StatusCode = ((int)response.StatusCode).ToString(),
+                        Message = rawContent
+                    };
+                }
+
+                var knownFailureStatuses = new[]
+                {
+                    "EXCEEDED_TWO_ABSENCES",
+                    "MULTIPLE_ABSENCE_DAYS",
+                    "HOLIDAY_BLACKOUT",
+                    "THRESHOLD_EXCEEDED",
+                    "LOCKED",
+                    "HOLIDAY_REQUEST_BEYOND_LEAVE_DATE",
+                    "ENTITLEMENT_EXCEEDED",
+                    "INVALID_TIMES",
+                    "SSP_RULES_VIOLATED"
+                };
+
+                var isHalfdayInfo = rawContent == "HALFDAY_AVAILABLE";
+
+                return new AbsenceSaveResponse
+                {
+                    Success = rawContent == "OK" || isHalfdayInfo,
+                    StatusCode = ((int)response.StatusCode).ToString(),
+                    Message = rawContent
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex}");
+                return new AbsenceSaveResponse
+                {
+                    Success = false,
+                    StatusCode = "500",
+                    Message = ex.Message
+                };
             }
         }
     }

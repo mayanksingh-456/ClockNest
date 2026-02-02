@@ -1,0 +1,232 @@
+﻿
+
+<div class="modal fade right" id="absenteeRecordModel" tabindex="-1" aria-hidden="true" style="background-color: rgba(0,0,0,0.3);">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:30vw">
+        <div class="modal-content h-100 border-0">
+
+            <EditForm Model="@createEditAbsenceModel" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
+                <DataAnnotationsValidator />
+
+                <!-- Header-->
+                <div class="modal-header border-0">
+                    <h5>Create absence </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body-->
+                <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
+
+                    <!-- START -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">AbsenceDate</label>
+                        <div class="row">
+                            <div class="">
+                                <InputDate class="form-control"
+                                           @bind-Value="@createEditAbsenceModel.AbsenceDate" />
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- category -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Category</label>
+                        <InputSelect class="form-select"
+                                     Value="createEditAbsenceModel.CategoryId"
+                                     ValueChanged="@(async (int val) => await OnCategoryChanged(val))"
+                                     ValueExpression="() => createEditAbsenceModel.CategoryId">
+                            @foreach (var category in createEditAbsenceModel.CategorySelect)
+                            {
+                                <option value="@category.Value">@category.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <!-- Type -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Type</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditAbsenceModel.TypeId">
+                            @foreach (var type in createEditAbsenceModel.TypeSelect)
+                            {
+                                <option value="@type.Value">@type.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Duration</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditAbsenceModel.DurationId">
+                            @foreach (var duration in createEditAbsenceModel.DurationSelect)
+                            {
+                                <option value="@duration.Value">@duration.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    @if (createEditAbsenceModel.DurationId == 4)
+                    {
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class=" control-label mb-1">StartTime</label>
+
+                                    <TimePicker @bind-Value="createEditAbsenceModel.StartTimeSpan" />
+                             
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class=" control-label mb-1">EndTime</label>
+
+               
+                                    <TimePicker @bind-Value="createEditAbsenceModel.EndTimeSpan" />
+                      
+
+                            </div>
+                        </div>
+
+
+                    }
+              
+
+                </div>
+                <!-- Footer-->
+                <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
+                    <button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"
+                            class="btn_modal-success_save title-h4-semi-bold"
+                            disabled="@isSubmitting"
+                            style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
+                        @if (isSubmitting)
+                        {
+                            <span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public DateTime startTime { get; set; }
+    [Parameter] public DateTime endTime { get; set; }
+
+    [Parameter] public bool isSubmitting { get; set; }
+    [Parameter] public CreateEditWorkRecordAbsenceViewModel createEditAbsenceModel { get; set; } = new();
+    [Parameter] public EventCallback<CreateEditWorkRecordAbsenceViewModel> OnSubmit { get; set; }
+
+    public async Task ShowModal(CreateEditWorkRecordAbsenceViewModel model)
+    {
+        createEditAbsenceModel = model;
+        // createEditAbsenceModel = new CreateEditWorkRecordAbsenceViewModel
+        // {
+        //     Id = model.Id,
+        //     EmployeeId = model.EmployeeId,
+        //     CategoryId = model.CategoryId,
+        //     TypeId = model.TypeId,
+        //     DurationId = model.DurationId,
+        //     AbsenceDate = model.AbsenceDate != default ? model.AbsenceDate : DateTime.Now,
+        //     CategorySelect = model.CategorySelect,
+        //     TypeSelect = model.TypeSelect,
+        //     DurationSelect = model.DurationSelect,
+        //     //HideAbsenceDate = !showAbsenceDate,
+        //     StartTime = model.StartTime,
+        //     EndTime = model.EndTime,
+
+        //     StartTimeSpan = model.StartTimeSpan != default ? model.StartTimeSpan : DateTime.Now.TimeOfDay,
+        //     EndTimeSpan = model.EndTimeSpan != default ? model.EndTimeSpan : DateTime.Now.AddHours(1).TimeOfDay
+        // };
+
+        await JS.InvokeVoidAsync("showModal", "absenteeRecordModel");
+        StateHasChanged();
+    }
+
+    public async Task HandelValidSubmit()
+    {
+        await OnSubmit.InvokeAsync(createEditAbsenceModel);
+    }
+
+    // private async Task OnCategoryChanged(int selectedCategoryId)
+    // {
+    //     createEditAbsenceModel.CategoryId = selectedCategoryId;
+
+    //     if (selectedCategoryId > 0)
+    //     {
+    //         int companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+
+    //         List<Absence> absences;
+
+    //         // Map selectedCategoryId to AbsenceType
+    //         switch ((ClockNest.Enum.EnumAbsenceType)selectedCategoryId)
+    //         {
+    //             case ClockNest.Enum.EnumAbsenceType.Holiday:
+    //                 absences = await WorkRecordNotesService.GetNonArchivedHolidaysAsync(companyId);
+    //                 break;
+    //             case ClockNest.Enum.EnumAbsenceType.Sickness:
+    //                 absences = await WorkRecordNotesService.GetNonArchivedSicknessesAsync(companyId);
+    //                 break;
+    //             default:
+    //                 absences = await WorkRecordNotesService.GetNonArchivedAbsencesAsync(companyId);
+    //                 break;
+    //         }
+
+    //         // Map to SelectListItem
+    //         createEditAbsenceModel.TypeSelect = absences
+    //             .Select(a => new SelectListItem
+    //             {
+    //                 Value = a.Id.ToString(),
+    //                 Text = a.Name ?? "(No Name)"
+    //             })
+    //             .ToList();
+
+    //         // Add default "Select"
+    //         createEditAbsenceModel.TypeSelect.Insert(0, new SelectListItem { Value = "", Text = "Select" });
+
+    //         createEditAbsenceModel.TypeId = 0;
+    //     }
+    //     else
+    //     {
+    //         createEditAbsenceModel.TypeSelect = new List<SelectListItem> { new SelectListItem { Value = "", Text = "Select" } };
+    //         createEditAbsenceModel.TypeId = 0;
+    //     }
+
+    //     StateHasChanged();
+    // }
+
+
+    private async Task OnCategoryChanged(int categoryId)
+    {
+        createEditAbsenceModel.CategoryId = categoryId;
+
+        List<ClockNest.Enum.EnumAbsenceType> absenceTypes = categoryId switch
+        {
+            1 => new() { ClockNest.Enum.EnumAbsenceType.Holiday },
+            2 => new() { ClockNest.Enum.EnumAbsenceType.Sickness },
+            _ => new() { ClockNest.Enum.EnumAbsenceType.Absence }
+        };
+
+        int companyId = await UserContextService
+            .GetCompanyIdAsync(AuthenticationStateProvider);
+
+        var absences = await WorkRecordNotesService
+            .GetAbsencesByTypeAsync(absenceTypes, companyId);
+
+        createEditAbsenceModel.TypeSelect = absences.Select(a => new SelectListItem
+        {
+            Value = a.Id.ToString(),
+            Text = a.Name
+        }).ToList();
+
+        createEditAbsenceModel.TypeSelect.Insert(0,
+            new SelectListItem { Value = "", Text = "Select" });
+
+        createEditAbsenceModel.TypeId = 0;
+    }
+}

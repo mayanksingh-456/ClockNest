@@ -14,7 +14,7 @@ namespace ClockNest.Services.Toast_Service
     public enum ToastType
     {
         Success,
-        Error,
+        Danger,
         Warning,
         Info
     }

@@ -1,14 +1,48 @@
-﻿
+﻿@using ClockNest.Common
+@using ClockNest.Enum
+
+
+<style>
+    .custom-table tbody tr.bg-holidayrequest > td {
+        background-color: orange !important;
+    }
+
+    .custom-table tbody tr.bg-holidaydeclined > td {
+        background-color: coral !important;
+    }
+
+    .custom-table tbody tr.bg-bankholiday > td {
+        background-color: lightyellow !important;
+    }
+
+    .custom-table tbody tr.bg-holiday > td {
+        background-color: yellow !important;
+    }
+
+    .custom-table tbody tr.bg-sick > td {
+        background-color: cyan !important;
+    }
+
+    .custom-table tbody tr.bg-absence > td {
+        background-color: magenta !important;
+    }
+
+   /*  .custom-table.table-hover tbody tr.bg-holidayrequest:hover > td,
+    .custom-table.table-hover tbody tr.bg-holidayrequest > td {
+        background-color: orange !important;
+    } */
+
+</style>
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> AbsenteeRecord </h5>
     <!-- Buttons -->
     <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100" type="button">
+        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateAbsence">
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button">
-            <i class="fa-solid fa-rotate-right"></i>
+        <button class="btn icon-btn btn-danger" type="button">
+            <i class="fa-solid fa-trash"></i>
         </button>
     </div>
 </div>
@@ -47,7 +81,7 @@
             {
                 @foreach (var record in absenteeRecord)
                 {
-                    <tr>
+                    <tr class="@GetAbsenceRowClass(record)">
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
@@ -70,7 +104,21 @@
         </tbody>
     </table>
 </div>
+
+<CreateEditWorkRecordAbsenceTabModel @ref=createEditWorkRecordAbsenceTabModelRef isSubmitting="@isSubmitting" OnSubmit="OnAbsenceSaved" startTime="startTime" endTime="endTime" shiftDate=shiftDate />
 @code {
+    [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
+    private CreateEditWorkRecordAbsenceTabModel? createEditWorkRecordAbsenceTabModelRef;
+    public CreateEditWorkRecordAbsenceViewModel createEditAbsenceModel { get; set; } = new();
+    public bool isSubmitting { get; set; }
+
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public int employeeShiftId { get; set; }
+    private int companyId;
+    private int userId;
+    [Parameter] public DateTime startTime { get; set; }
+    [Parameter] public DateTime endTime { get; set; }
 
     [Parameter] public List<AbsenteeRecord> absenteeRecord { get; set; } = new();
 
@@ -104,6 +152,250 @@
         }
     }
 
+    <!-- Background color -->
+    private string GetAbsenceRowClass(AbsenteeRecord data)
+    {
+        if (data == null)
+            return string.Empty;
+
+        int absenceTypeId = data.AbsenceTypeId;
+        int status = data.Status;
+        int position = data.Position;
+
+        if (absenceTypeId == 1)
+        {
+            if (status == 10)
+                return "bg-holidayrequest";
+            else if (status == 20)
+                return "bg-holidaydeclined";
+            else if (position == 2)
+                return "bg-bankholiday";
+            else
+                return "bg-holiday";
+        }
+        else if (absenceTypeId == 2)
+        {
+            return "bg-sick";
+        }
+        else if (absenceTypeId == 3)
+        {
+            if (status == 10)
+                return "bg-holidayrequest";
+            else if (status == 20)
+                return "bg-holidaydeclined";
+            else
+                return "bg-absence";
+        }
+
+        return string.Empty;
+    }
+
+    public async Task CreateAbsence()
+    {
+        companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        SpinnerService.Show();
+        try
+        {
+            var categoryList = Enum.GetValues(typeof(ClockNest.Enum.EnumAbsenceType))
+           .Cast<ClockNest.Enum.EnumAbsenceType>()
+           .Select(e => new SelectListItem
+           {
+               Value = ((int)e).ToString(),
+               Text = e.GetDisplayString()
+           })
+           .ToList();
+
+            categoryList.Insert(0, new SelectListItem { Value = "", Text = "Select" });
+
+            var durationList = Enum.GetValues(typeof(ClockNest.Enum.DurationType))
+                .Cast<ClockNest.Enum.DurationType>()
+                .Select(e => new SelectListItem
+                {
+                    Value = ((int)e).ToString(),
+                    Text = e.GetDisplayString()
+                })
+                .ToList();
+
+            durationList.Insert(0, new SelectListItem { Value = "", Text = "Select" });
+
+            var newAbsenceModel = new CreateEditWorkRecordAbsenceViewModel
+            {
+                CategorySelect = categoryList,
+                TypeSelect = new List<SelectListItem> { new SelectListItem { Value = "", Text = "Select" } },
+                DurationSelect = durationList,
+                AbsenceDate = shiftDate,
+                StartTime = startTime,
+                 EndTime = endTime,
+                StartTimeSpan = DateTime.Now.TimeOfDay,
+                EndTimeSpan = DateTime.Now.AddHours(1).TimeOfDay,
+                EmployeeId = EmployeeId
+            };
+            await createEditWorkRecordAbsenceTabModelRef!.ShowModal(newAbsenceModel);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    public async Task OnAbsenceSaved(CreateEditWorkRecordAbsenceViewModel createEditAbsenceModel)
+    {
+        isSubmitting = true;
+        //SpinnerService.Show();
+        try
+        {
+             companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+             userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+            const int customDurationId = 4;
+
+            // Custom duration
+            if (createEditAbsenceModel.DurationId == 4)
+            {
+                createEditAbsenceModel.StartTime = createEditAbsenceModel.AbsenceDate.Add(createEditAbsenceModel.StartTimeSpan);
+                createEditAbsenceModel.EndTime = createEditAbsenceModel.AbsenceDate.Add(createEditAbsenceModel.EndTimeSpan);
+
+                if (createEditAbsenceModel.StartTime > createEditAbsenceModel.EndTime)
+                {
+                    createEditAbsenceModel.EndTime = createEditAbsenceModel.EndTime?.AddDays(1);
+                }
+            }
+
+            // Handle the “custom duration” logic: compute start & end DateTime
+            if (createEditAbsenceModel.DurationId == customDurationId)
+            {
+                createEditAbsenceModel.StartTime = createEditAbsenceModel.AbsenceDate.Add(createEditAbsenceModel.StartTimeSpan);
+                createEditAbsenceModel.EndTime = createEditAbsenceModel.AbsenceDate.Add(createEditAbsenceModel.EndTimeSpan);
+
+                if (createEditAbsenceModel.StartTime > createEditAbsenceModel.EndTime)
+                {
+                    createEditAbsenceModel.EndTime = createEditAbsenceModel.EndTime?.AddDays(1);
+                }
+            }
+
+            // Basic validation
+            if (createEditAbsenceModel.StartTime == null || createEditAbsenceModel.EndTime == null)
+            {
+               // await JS.InvokeVoidAsync("showToast", "Start and End time are required.", "danger");
+                ToastService.Show("Start and End time are required.", ToastType.Danger);
+                return;
+            }
+
+            if (createEditAbsenceModel.StartTime > createEditAbsenceModel.EndTime)
+            {
+                ToastService.Show("Start time cannot be later than End time.", ToastType.Danger);
+                return;
+            }
+
+            var allDetails = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(EmployeeId, 0, createEditAbsenceModel.AbsenceDate);
+
+            if (allDetails != null && allDetails.Absence != null)
+            {
+                var existingAbsences = allDetails.Absence;
+
+                bool isConflict = existingAbsences.Any(a =>
+                    a.AbsenceDate.Date == createEditAbsenceModel.AbsenceDate.Date &&
+
+                    a.Id != createEditAbsenceModel.Id
+                );
+
+                if (isConflict)
+                {
+                    ToastService.Show("Declined - Multiple absence days on the same day not allowed.", ToastType.Danger);
+                    return;
+                }
+            }
+
+            // Build AbsenteeRecord to send
+            var absenteeRecord = new AbsenteeRecord
+            {
+                Id = createEditAbsenceModel.Id ?? 0,
+                EmployeeId = EmployeeId,
+                AbsenceDate = createEditAbsenceModel.AbsenceDate,
+                AbsenceId = createEditAbsenceModel.TypeId,
+                AbsenceTypeId = createEditAbsenceModel.TypeId,
+                Start = createEditAbsenceModel.StartTime,
+                Finish = createEditAbsenceModel.EndTime,
+
+
+                //Duration = DurationType.Custom,
+                //DurationInDays = 0,
+
+                CompanyId = companyId,
+                UpdatedByUserId = userId,
+
+                UpdatedDate = DateTime.UtcNow,
+                CreatedByUserId = (createEditAbsenceModel.Id == null || createEditAbsenceModel.Id == 0) ? userId : 0,
+                CreatedDate = (createEditAbsenceModel.Id == null || createEditAbsenceModel.Id == 0) ? DateTime.UtcNow : default(DateTime),
+
+                DurationInDays = createEditAbsenceModel.DurationId switch
+                {
+                    1 => 1m,
+                    2 => 0.5m,
+                    3 => 0.5m,
+                    4 => 0m,
+                    _ => 1m
+                },
+                Duration = createEditAbsenceModel.DurationId switch
+                {
+                    1 => DurationType.FullDay,
+                    2 => DurationType.FirstHalf,
+                    3 => DurationType.SecondHalf,
+                    4 => DurationType.Custom,
+                    _ => DurationType.FullDay
+                },
+                DurationInMins = (createEditAbsenceModel.StartTime.HasValue && createEditAbsenceModel.EndTime.HasValue)
+                    ? (int)(createEditAbsenceModel.EndTime.Value - createEditAbsenceModel.StartTime.Value).TotalMinutes
+                    : (createEditAbsenceModel.DurationId switch
+                    {
+                        1 => 480,
+                        2 => 240,
+                        3 => 240,
+                        _ => 0
+                    }),
+                HourlyRate = 0,
+                Paid = false,
+            };
+
+            var response = await WorkRecordNotesService.SetAbsenteeRecordAsync(absenteeRecord);
+            if (response.Success)
+            {
+                if (response.Message == "HALFDAY_AVAILABLE")
+                ToastService.Show("Accepted - 1/2 day available.", ToastType.Info);
+                else
+                    await JS.InvokeVoidAsync("hideModal", "absenteeRecordModel");
+                ToastService.Show("Absence saved successfully.", ToastType.Success);
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+            else
+            {
+                var msg = response.Message switch
+                {
+                    "EXCEEDED_TWO_ABSENCES" => "Declined - Can only have two absences against a day.",
+                    "MULTIPLE_ABSENCE_DAYS" => "Declined - Multiple absence days on the same day not allowed.",
+                    "HOLIDAY_BLACKOUT" => "Declined - Holiday refused due to a request within a blackout period.",
+                    "THRESHOLD_EXCEEDED" => "Declined - Tag threshold exceeded.",
+                    "LOCKED" => "Declined - Day is currently locked.",
+                    "HOLIDAY_REQUEST_BEYOND_LEAVE_DATE" => "Declined - Holiday refused due to a request after leave period.",
+                    "ENTITLEMENT_EXCEEDED" => "Declined - Employee entitlement reached.",
+                    "INVALID_TIMES" => "Declined - Invalid start/end times.",
+                    "SSP_RULES_VIOLATED" => "Declined - SSP rules violated.",
+                    _ => "Failed to save absence."
+                };
+                ToastService.Show(msg, ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Danger saving absence: {ex}");
+            ToastService.Show("An error occurred while saving absence.", ToastType.Danger);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
 }
 
 
