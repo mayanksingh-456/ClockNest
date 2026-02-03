@@ -65,6 +65,8 @@
     </table>
 </div>
 <CreateEditWorkRecordShiftTabModel @ref=createEditWorkRecordShiftTabModelRef isSubmitting="@isSubmitting" OnSubmit="SaveEmployeeShift" />
+<DeleteConfirmationPage IsVisible="@showDeletePopup" Message="@popupDeleteMessage" OnDelete="ConfirmDelete" OnCancel="CloseDeletePopup" />
+
 @code {
 
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
@@ -182,32 +184,33 @@
                         if (details != null)
                         {
                             await ReloadWorkRecordAsync.InvokeAsync();
-                            await JS.InvokeVoidAsync("alert", "Default shift created successfully.", "success");
+                            ToastService.Show("Default shift created successfully.", ToastType.Success);
                         }
                         else
                         {
-                            await JS.InvokeVoidAsync("alert", "Default shift created but failed to load details.", "warning");
+                            await JS.InvokeVoidAsync("alert", "", "warning");
+                            ToastService.Show("Default shift created but failed to load details.", ToastType.Warning);
                         }
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("alert", "Failed to create default shift.", "danger");
+                        ToastService.Show("Failed to create default shift.", ToastType.Danger);
                     }
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("alert", "No valid shift found in scheduled shifts.", "warning");
+                    ToastService.Show("No valid shift found in scheduled shifts.", ToastType.Warning);
                 }
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", "No scheduled shift available for this date.", "warning");
+                ToastService.Show("No scheduled shift available for this date.", ToastType.Warning);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error in CreateDefaultShiftAsync: {ex.Message}");
-            await JS.InvokeVoidAsync("alert", "An error occurred while creating default shift.", "danger");
+            ToastService.Show("An error occurred while creating default shift", ToastType.Danger);
         }
         finally
         {
@@ -258,7 +261,7 @@
                 bool defaultDayCreated = await WorkRecordNotesService.CreateDefaultDayAsync(parameters);
                 if (!defaultDayCreated)
                 {
-                    await JS.InvokeVoidAsync("alert", "Failed to create default day.", "danger");
+                    ToastService.Show("Failed to create default day.", ToastType.Danger);
                     isSubmitting = false;
                     return;
                 }
@@ -268,7 +271,7 @@
                 var savedShift = await WorkRecordNotesService.SetEmployeeShiftAsync(employeeShift, userId);
                 if (savedShift == null)
                 {
-                    await JS.InvokeVoidAsync("alert", "Failed to save employee shift.", "danger");
+ToastService.Show("Failed to save employee shift.", ToastType.Danger);
                     isSubmitting = false;
                     return;
                 }
@@ -284,7 +287,7 @@
             if (workRecordAllDetails != null)
             {
                 await JS.InvokeVoidAsync("hideModal", "shiftModel");
-                await JS.InvokeVoidAsync("alert", "Shift saved successfully!", "success");
+                ToastService.Show("Shift saved successfully!", ToastType.Success);
                 if (ReloadWorkRecordAsync.HasDelegate)
                 {
                     await ReloadWorkRecordAsync.InvokeAsync();
@@ -292,13 +295,13 @@
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", "Failed to load updated work record details.", "danger");
+                ToastService.Show("Failed to load updated work record details.", ToastType.Danger);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error saving employee shift: {ex.Message}");
-            await JS.InvokeVoidAsync("alert", "An error occurred while saving the shift.", "danger");
+            ToastService.Show("An error occurred while saving the shift.", ToastType.Danger);
         }
         finally
         {
@@ -306,41 +309,89 @@
         }
     }
 
-    private async Task DeleteSelectedRecords()
+    // private async Task DeleteSelectedRecords()
+    // {
+    //     if (selectedEmployeeShifts.Count == 0)
+    //     {
+    //         await JS.InvokeVoidAsync("alert", "Please select at least one shift to delete");
+    //         return;
+    //     }
+    //     int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+    //     bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {selectedEmployeeShifts.Count} workRecord(s)?");
+    //     if (!confirmed) return;
+
+    //     SpinnerService.Show();
+    //     try
+    //     {
+    //         // selectedTags is HashSet<int> of selected IDs
+    //         var employeeShifttoDelete = employeeShift
+    //             .Where(t => selectedEmployeeShifts.Contains(t.Id))
+    //             .ToList();
+
+    //         var success = await WorkRecordNotesService.DeleteEmployeeShiftAsync(employeeShifttoDelete, userId);
+
+    //         if (success)
+    //         {
+    //             employeeShift.RemoveAll(t => selectedEmployeeShifts.Contains(t.Id));
+    //             selectedEmployeeShifts.Clear();
+    //             await JS.InvokeVoidAsync("alert", "Selected shift deleted successfully");
+    //         }
+
+           
+    //         await ReloadWorkRecordAsync.InvokeAsync();
+            
+    //     }
+    //     finally
+    //     {
+    //         SpinnerService.Hide();
+    //     }
+    // }
+
+    //DeleteLogic
+    bool showDeletePopup = false;
+    string popupDeleteMessage = "";
+
+    void CloseDeletePopup()
+    {
+        showDeletePopup = false;
+    }
+
+    public void DeleteSelectedRecords()
     {
         if (selectedEmployeeShifts.Count == 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please select at least one shift to delete");
+            ToastService.Show("Please select at least one shift to delete", ToastType.Warning);
             return;
         }
-        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        popupDeleteMessage = $"Are you sure you want to delete {selectedEmployeeShifts.Count} shift(s)?";
+        showDeletePopup = true;
+    }
 
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {selectedEmployeeShifts.Count} workRecord(s)?");
-        if (!confirmed) return;
+    private async Task ConfirmDelete()
+    {
+        showDeletePopup = false;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
 
         SpinnerService.Show();
         try
         {
-            // selectedTags is HashSet<int> of selected IDs
-            var employeeShifttoDelete = employeeShift
-                .Where(t => selectedEmployeeShifts.Contains(t.Id))
-                .ToList();
+            var employeeShifttoDelete = employeeShift.Where(t => selectedEmployeeShifts.Contains(t.Id)).ToList();
 
             var success = await WorkRecordNotesService.DeleteEmployeeShiftAsync(employeeShifttoDelete, userId);
+
 
             if (success)
             {
                 employeeShift.RemoveAll(t => selectedEmployeeShifts.Contains(t.Id));
                 selectedEmployeeShifts.Clear();
-                await JS.InvokeVoidAsync("alert", "Selected shift deleted successfully");
+                ToastService.Show("Selected shift deleted successfully", ToastType.Success);
             }
-
-           
-            await ReloadWorkRecordAsync.InvokeAsync();
-            
         }
         finally
         {
+            await ReloadWorkRecordAsync.InvokeAsync();
             SpinnerService.Hide();
         }
     }

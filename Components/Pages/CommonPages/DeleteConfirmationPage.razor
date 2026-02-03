@@ -1,0 +1,94 @@
+﻿
+<style>
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100vw;
+        background: rgba(0,0,0,0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+  
+
+    .modal-box {
+        background: white;
+        padding: 2px;
+        border-radius: 8px;
+        width: 444px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0);
+    }
+
+    .modal-header {
+        font-size: 19px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 8px;
+    }
+
+    .modal-body {
+        margin: 15px 0;
+        color: #444;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+</style>
+
+@if (IsVisible)
+{
+    <div class="modal-backdrop">
+        <div class="modal-box">
+
+            <!-- Header -->
+            <div class="modal-header">
+                Confirm Delete
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                @Message
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+               @*  <button class="btn btn-secondary" @onclick="OnCancelClick">
+                    Cancel
+                </button> *@
+                <button type="button" class="btn_modal-close body-medium" @onclick="OnCancelClick">Cancel</button>
+                <button  class="btn  btn-danger" type="button" @onclick="OnDeleteClick">
+                    Delete
+                </button>
+
+               @*  <button class="btn btn-danger" @onclick="OnDeleteClick">
+                    Delete
+                </button> *@
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Message { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task OnDeleteClick()
+    {
+        await OnDelete.InvokeAsync();
+    }
+
+    private async Task OnCancelClick()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

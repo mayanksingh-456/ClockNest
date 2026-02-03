@@ -342,7 +342,9 @@
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "exceptionalItemTab" ? "show active" : "")" id="exceptionalItemTab">
-                                <CreateEdirWorkRecordExceptionalItemsTab exceptionalItem="createEditWorkRecordsNotesModel?.WorkDetails.ExceptionalItems" />
+                                <CreateEdirWorkRecordExceptionalItemsTab exceptionalItem="createEditWorkRecordsNotesModel?.WorkDetails.ExceptionalItems"
+                                                                         EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
+                                                                         ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "accessMovementTab" ? "show active" : "")" id="accessMovementTab">

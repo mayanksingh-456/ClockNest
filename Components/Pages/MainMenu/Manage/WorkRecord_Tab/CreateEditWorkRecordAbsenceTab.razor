@@ -41,7 +41,7 @@
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn btn-danger" type="button">
+        <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteAbsenteeRecord">
             <i class="fa-solid fa-trash"></i>
         </button>
     </div>
@@ -85,7 +85,7 @@
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@selectedWorkRecords.Contains(record.Id)"
+                                   checked="@selectedAbsenteeRecords.Contains(record.Id)"
                                    @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
                         </td>
                         <td>@(string.IsNullOrWhiteSpace(record.StartTimeDisplay) ? "-" : record.StartTimeDisplay)</td>
@@ -106,6 +106,8 @@
 </div>
 
 <CreateEditWorkRecordAbsenceTabModel @ref=createEditWorkRecordAbsenceTabModelRef isSubmitting="@isSubmitting" OnSubmit="OnAbsenceSaved" startTime="startTime" endTime="endTime" shiftDate=shiftDate />
+<DeleteConfirmationPage IsVisible="@showDeletePopup" Message="@popupDeleteMessage" OnDelete="ConfirmDelete" OnCancel="CloseDeletePopup" />
+
 @code {
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
     private CreateEditWorkRecordAbsenceTabModel? createEditWorkRecordAbsenceTabModelRef;
@@ -122,18 +124,18 @@
 
     [Parameter] public List<AbsenteeRecord> absenteeRecord { get; set; } = new();
 
-    private HashSet<int> selectedWorkRecords = new();
+    private HashSet<int> selectedAbsenteeRecords = new();
 
     private bool IsAllSelected =>
         absenteeRecord.Any() &&
-        absenteeRecord.All(r => selectedWorkRecords.Contains(r.Id));
+        absenteeRecord.All(r => selectedAbsenteeRecords.Contains(r.Id));
 
     private void ToggleSelection(int id, bool isChecked)
     {
         if (isChecked)
-            selectedWorkRecords.Add(id);
+            selectedAbsenteeRecords.Add(id);
         else
-            selectedWorkRecords.Remove(id);
+            selectedAbsenteeRecords.Remove(id);
     }
 
     private void ToggleSelectAll(ChangeEventArgs e)
@@ -142,13 +144,13 @@
 
         if (isChecked)
         {
-            selectedWorkRecords = absenteeRecord
+            selectedAbsenteeRecords = absenteeRecord
                 .Select(r => r.Id)
                 .ToHashSet();
         }
         else
         {
-            selectedWorkRecords.Clear();
+            selectedAbsenteeRecords.Clear();
         }
     }
 
@@ -394,6 +396,53 @@
         finally
         {
             isSubmitting = false;
+        }
+    }
+
+    //DeleteLogic
+    bool showDeletePopup = false;
+    string popupDeleteMessage = "";
+
+    void CloseDeletePopup()
+    {
+        showDeletePopup = false;
+    }
+
+    public void DeleteAbsenteeRecord()
+    {
+        if (selectedAbsenteeRecords.Count == 0)
+        {
+            ToastService.Show("Please select at least one absence record to delete", ToastType.Warning);
+            return;
+        }
+        popupDeleteMessage = $"Are you sure you want to delete {selectedAbsenteeRecords.Count} absenceRecord(s)?";
+        showDeletePopup = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        showDeletePopup = false;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        SpinnerService.Show();
+        try
+        {
+            var absenteeRecordToDelete = absenteeRecord.Where(t => selectedAbsenteeRecords.Contains(t.Id)).ToList();
+
+            var success = await WorkRecordNotesService.DeleteAbsenteeRecordAsync(absenteeRecordToDelete);
+
+            if (success)
+            {
+                absenteeRecord.RemoveAll(t => selectedAbsenteeRecords.Contains(t.Id));
+                selectedAbsenteeRecords.Clear();
+                ToastService.Show("Selected absence record deleted successfully", ToastType.Success);
+            }
+        }
+        finally
+        {
+            await ReloadWorkRecordAsync.InvokeAsync();
+            SpinnerService.Hide();
         }
     }
 }

@@ -530,6 +530,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             public string Message { get; set; }
         }
 
+        //Absence Save
         public async Task<AbsenceSaveResponse> SetAbsenteeRecordAsync(AbsenteeRecord absenteeRecord)
         {
             if (absenteeRecord == null)
@@ -583,6 +584,76 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                     StatusCode = "500",
                     Message = ex.Message
                 };
+            }
+        }
+
+        //Delete Absence
+        public async Task<bool> DeleteAbsenteeRecordAsync(List<AbsenteeRecord> records)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);           
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/absenteerecordsdeletebyid/post", records);
+
+            if (response.IsSuccessStatusCode)
+            {
+                bool result = await response.Content.ReadFromJsonAsync<bool>();
+                return result;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"API call failed with status code {response.StatusCode}: {errorContent}");
+            }
+        }
+
+        //Get Exceptional Item
+        public async Task<List<ExceptionalItemType>> GetWorkRecordExceptionalItemAsync(int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/setup/employees/exceptionalitemtypes/get", companyId);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to fetch exceptional item types. Status: {response.StatusCode}, Error: {error}");
+            }
+            var result = await response.Content.ReadFromJsonAsync<List<ExceptionalItemType>>();
+            return result ?? new List<ExceptionalItemType>();
+        }
+
+        //Save exceptional item
+        public async Task<int> SetExceptionalItemAsync(ExceptionalItem exceptionalItem)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/exceptionalitem/post", exceptionalItem);
+        response.EnsureSuccessStatusCode();
+            var exceptionalItemId = await response.Content.ReadFromJsonAsync<int>();
+
+            if (exceptionalItemId == 0)
+            {
+                throw new Exception("API returned exceptionalItemId = 0. Save failed.");
+            }
+
+            return exceptionalItemId;
+        }
+
+        //delete exceptional item
+        public async Task<bool> DeleteExceptionalItemAsync(List<ExceptionalItem> exceptionalItems)
+        {
+            if (exceptionalItems == null || !exceptionalItems.Any())
+                throw new ArgumentException("List of exceptional items to delete cannot be empty.", nameof(exceptionalItems));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/exceptionalitemsdelete/post", exceptionalItems);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to delete exceptional items. Status: {response.StatusCode}, Error: {error}");
             }
         }
     }

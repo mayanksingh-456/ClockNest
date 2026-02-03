@@ -1,15 +1,19 @@
-﻿
+﻿@using ClockNest.Services.DeleteConfirmService
+@inject DeleteModalService DeleteModalService
+
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> ExceptionalItem </h5>
     <!-- Buttons -->
     <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100" type="button">
-            <i class="fa fa-plus"></i>
-        </button>
+        <div class="btn-group" role="group">
+            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateExceptionalItem">
+                <i class="fa fa-plus"></i>
+            </button>
 
-        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button">
-            <i class="fa-solid fa-rotate-right"></i>
-        </button>
+            <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteExceptionalItem">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
     </div>
 </div>
 <!-- Table -->
@@ -50,7 +54,7 @@
                         <td>
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@selectedWorkRecords.Contains(record.Id)"
+                                   checked="@selectedExceptionItems.Contains(record.Id)"
                                    @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
                         </td>
                         <td>@record.ExceptionalItemTypeDisplay</td>
@@ -67,22 +71,32 @@
         </tbody>
     </table>
 </div>
+<CreateEdirWorkRecordExceptionalItemsTabModel @ref=createEditWorkRecordExceptionalTabModelref isSubmitting="@isSubmitting" OnSubmit="OnExceptionalItemSaved" />
+ <DeleteConfirmationPage IsVisible="@showDeletePopup" Message="@popupDeleteMessage" OnDelete="ConfirmDelete" OnCancel="CloseDeletePopup" /> 
 @code {
+    [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public int employeeShiftId { get; set; }
+
+    CreateEdirWorkRecordExceptionalItemsTabModel? createEditWorkRecordExceptionalTabModelref;
+    public CreateEditWorkRecordExceptionalItemViewModel createEditExceptionalItemModel { get; set; } = new();
+    public bool isSubmitting { get; set; }
 
     [Parameter] public List<ExceptionalItem> exceptionalItem { get; set; } = new();
 
-    private HashSet<int> selectedWorkRecords = new();
+    private HashSet<int> selectedExceptionItems = new();
 
     private bool IsAllSelected =>
         exceptionalItem.Any() &&
-        exceptionalItem.All(r => selectedWorkRecords.Contains(r.Id));
+        exceptionalItem.All(r => selectedExceptionItems.Contains(r.Id));
 
     private void ToggleSelection(int id, bool isChecked)
     {
         if (isChecked)
-            selectedWorkRecords.Add(id);
+            selectedExceptionItems.Add(id);
         else
-            selectedWorkRecords.Remove(id);
+            selectedExceptionItems.Remove(id);
     }
 
     private void ToggleSelectAll(ChangeEventArgs e)
@@ -91,16 +105,167 @@
 
         if (isChecked)
         {
-            selectedWorkRecords = exceptionalItem
+            selectedExceptionItems = exceptionalItem
                 .Select(r => r.Id)
                 .ToHashSet();
         }
         else
         {
-            selectedWorkRecords.Clear();
+            selectedExceptionItems.Clear();
         }
     }
 
+    public async Task CreateExceptionalItem()
+    {
+        SpinnerService.Show();
+        int companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        try
+        {
+            var costCentres = await WorkRecordNotesService.GetCostCentresAsync(companyId);
+            var exceptionalItemType = await WorkRecordNotesService.GetWorkRecordExceptionalItemAsync(companyId);
+            var exceptionalItemModel = new CreateEditWorkRecordExceptionalItemViewModel
+            {
+                StartTime = DateTime.Now,
+                EndTime = DateTime.Now.AddHours(1),
+                StartTimeSpan = DateTime.Now.TimeOfDay,
+                EndTimeSpan = DateTime.Now.AddHours(1).TimeOfDay,
+
+                EmployeeId = EmployeeId
+            };
+
+            exceptionalItemModel.CostCentres = costCentres
+                      .Select(c => new SelectListItem
+                      {
+                          Value = c.Id.ToString(),
+                          Text = c.Name
+                      }).ToList();
+
+            exceptionalItemModel.CostCentres.Insert(0,
+                new SelectListItem { Value = "", Text = "Select" });
+
+            exceptionalItemModel.ExceptionalItemTypeSelect = exceptionalItemType
+                                 .Select(c => new SelectListItem
+                                 {
+                                     Value = c.Id.ToString(),
+                                     Text = c.Name
+                                 }).ToList();
+            await createEditWorkRecordExceptionalTabModelref!.ShowModal(exceptionalItemModel);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    public async Task OnExceptionalItemSaved(CreateEditWorkRecordExceptionalItemViewModel exceptionalItemViewModel)
+    {
+        isSubmitting = true;
+        SpinnerService.Show();
+        try
+        {
+            int companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+            int durationInMins = (int)(exceptionalItemViewModel.EndTime - exceptionalItemViewModel.StartTime)?.TotalMinutes;
+
+            var exceptionalItem = new ExceptionalItem
+            {
+                Id = exceptionalItemViewModel.Id ?? 0,
+                EmployeeId = EmployeeId,
+
+                ShiftDate = shiftDate,
+                ExceptionalItemTypeId = exceptionalItemViewModel.ExceptionalItemTypeId,
+                CostCentreId = exceptionalItemViewModel.CostCentreId,
+                Count = exceptionalItemViewModel.Count,
+                Cost = exceptionalItemViewModel.Cost,
+                Duration = durationInMins,
+                CompanyId = companyId,
+                UpdatedByUserId = userId,
+                UpdatedDate = Helpers.Helper.GetDateTimeNow()
+            };
+
+            if (exceptionalItem.Id == 0)
+            {
+                exceptionalItem.CreatedByUserId = userId;
+                exceptionalItem.CreatedDate = Helpers.Helper.GetDateTimeNow();
+            }
+
+            int savedId = await WorkRecordNotesService.SetExceptionalItemAsync(exceptionalItem);
+
+            await JS.InvokeVoidAsync("hideModal", "exceptionalItemModel");
+            await ReloadWorkRecordAsync.InvokeAsync();
+            ToastService.Show("Exceptional item saved successfully!.", ToastType.Success);
+        }
+        finally
+        {
+            isSubmitting = false;
+            SpinnerService.Hide();
+        }
+    }
+
+//DeleteLogic
+    bool showDeletePopup = false;
+    string popupDeleteMessage = "";
+
+    void CloseDeletePopup()
+    {
+        showDeletePopup = false;
+    }
+
+    void DeleteExceptionalItem()
+    {
+        if (selectedExceptionItems.Count == 0)
+        {
+            ToastService.Show("Please select at least one exceptional item record to delete", ToastType.Warning);
+            return;
+        }
+        popupDeleteMessage = $"Are you sure you want to delete {selectedExceptionItems.Count} exceptionalItem(s)?";
+        showDeletePopup = true;
+    }
+
+    // void DeleteExceptionalItem()
+    // {
+    //     if (selectedExceptionItems.Count == 0)
+    //     {
+    //         ToastService.Show("Please select at least one exceptional item", ToastType.Warning);
+    //         return;
+    //     }
+
+    //     DeleteModalService.Show(
+    //         $"Are you sure you want to delete {selectedExceptionItems.Count} exceptional item(s)?",
+    //         ConfirmDelete
+    //     );
+    // }
+
+
+
+    private async Task ConfirmDelete()
+    {
+        showDeletePopup = false;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        SpinnerService.Show();
+        try
+        {
+            var workrecordToDelete = exceptionalItem.Where(t => selectedExceptionItems.Contains(t.Id)).ToList();
+
+            var success = await WorkRecordNotesService.DeleteExceptionalItemAsync(workrecordToDelete);
+
+            if (success)
+            {
+                exceptionalItem.RemoveAll(t => selectedExceptionItems.Contains(t.Id));
+                selectedExceptionItems.Clear();               
+                ToastService.Show("Selected exceptionalItem deleted successfully", ToastType.Success);
+            }
+        }
+        finally
+        {
+            await ReloadWorkRecordAsync.InvokeAsync();
+            SpinnerService.Hide();
+        }
+    }
+    
 }
 
 

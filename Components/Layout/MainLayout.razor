@@ -1,5 +1,7 @@
 ﻿@using ClockNest.Components.Pages.CommonPages
 @using ClockNest.Models.User_Model
+@using ClockNest.Services.DeleteConfirmService
+@inject DeleteModalService DeleteModalService
 @inherits LayoutComponentBase
 
 @inject AuthenticationStateProvider AuthStateProvider
@@ -8,7 +10,10 @@
 <div class="layout-wrapper">
 
     <!-- LEFT SIDEBAR -->
-   
+    <DeleteConfirmationPage IsVisible="@DeleteModalService.IsVisible"
+                            Message="@DeleteModalService.Message"
+                            OnDelete="@DeleteModalService.Confirm"
+                            OnCancel="@DeleteModalService.Close" />
     <Spinner />
     <Toast />
     <NavMenu />
@@ -45,7 +50,14 @@
         UserContext.UserId =
             (await UserContextService.GetUserIdAsync(AuthStateProvider)).ToString();
 
+        DeleteModalService.OnChange += StateHasChanged;
         // UserContext.CompanyId =
         //     await UserContextService.GetCompanyIdAsync(AuthStateProvider);
+    }
+   
+
+    public void Dispose()
+    {
+        DeleteModalService.OnChange -= StateHasChanged;
     }
 }

@@ -1,0 +1,110 @@
+﻿<div class="modal fade right" id="exceptionalItemModel" tabindex="-1" aria-hidden="true" style="background-color: rgba(0,0,0,0.3);">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:30vw">
+        <div class="modal-content h-100 border-0">
+
+            <EditForm Model="@createEditExceptionalItemModel" OnSubmit="HandelValidSubmit" class="d-flex flex-column h-100">
+                <DataAnnotationsValidator />
+
+                <!-- Header-->
+                <div class="modal-header border-0">
+                    <h5>Create Exceptional Item </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body-->
+                <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
+
+                    <!-- Item type -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Item type</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditExceptionalItemModel.ExceptionalItemTypeId">
+                            @foreach (var cc in createEditExceptionalItemModel.ExceptionalItemTypeSelect)
+                            {
+                                <option value="@cc.Value">@cc.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <!-- COST CENTRE -->
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Cost Centre</label>
+                        <InputSelect class="form-select"
+                                     @bind-Value="createEditExceptionalItemModel.CostCentreId">
+                            @foreach (var cc in createEditExceptionalItemModel.CostCentres)
+                            {
+                                <option value="@cc.Value">@cc.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <!-- Count Input -->
+                    <div class="form-group mb-3">
+                        <label>Count</label>
+                        <InputNumber class="form-control" @bind-Value="createEditExceptionalItemModel.Count" step="0.01" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="body-medium">Start</label>
+                    
+                                <TimePicker @bind-Value="createEditExceptionalItemModel.Duration" />
+                          
+                    </div>
+
+
+                    <!-- Cost Input -->
+                    <div class="form-group mb-3">
+                        <label>Cost</label>
+                        <InputNumber class="form-control" @bind-Value="createEditExceptionalItemModel.Cost" step="0.01" />
+                    </div>
+
+
+
+                </div>
+                <!-- Footer-->
+                <div class="modal-footer bg-white mt-auto" style="padding-top: 1rem;">
+                    <button type="button" class="btn_modal-close body-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"
+                            class="btn_modal-success_save title-h4-semi-bold"
+                            disabled="@isSubmitting"
+                            style="@(isSubmitting ? "opacity: 0.6; pointer-events: none;" : null)">
+                        @if (isSubmitting)
+                        {
+                            <span><i class="spinner-border spinner-border-sm me-1"></i> Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+
+
+    [Parameter] public bool isSubmitting { get; set; }
+    [Parameter] public CreateEditWorkRecordExceptionalItemViewModel createEditExceptionalItemModel { get; set; } = new();
+    [Parameter] public EventCallback<CreateEditWorkRecordExceptionalItemViewModel> OnSubmit { get; set; }
+
+    public async Task ShowModal(CreateEditWorkRecordExceptionalItemViewModel model)
+    {
+        createEditExceptionalItemModel = model;
+
+        await JS.InvokeVoidAsync("showModal", "exceptionalItemModel");
+        StateHasChanged();
+    }
+
+    public async Task HandelValidSubmit()
+    {
+        await OnSubmit.InvokeAsync(createEditExceptionalItemModel);
+    }
+
+
+}
+
+
