@@ -1,4 +1,40 @@
-﻿<h5 class="mb-3">Real Clockings</h5>
+﻿@* <h5 class="mb-3">Real Clockings</h5> *@
+<div class=" modal-header border-0 mb-2" style="padding: 0">
+    <h5>Real Clockings</h5>
+    <!-- Buttons -->
+    
+    <div class="btn-group" role="group">
+
+        <div class="form-check form-switch d-flex align-items-center mb-0 me-4">
+           @*  <input class="form-check-input me-2" type="checkbox" checked="@verified" @onchange="OnVerifiedChanged" disabled="@(locked)"
+                   style="cursor:@(locked ? "not-allowed" : "pointer")" >
+            <label class="form-label body-medium mb-0 mt-1">
+                Verified
+            </label> *@
+            <label class="form-check form-switch d-flex align-items-center mb-0"
+                   style="cursor:@(locked ? "not-allowed" : "pointer")">
+
+                <input class="form-check-input me-2"
+                       type="checkbox"
+                       checked="@verified"
+                       @onchange="OnVerifiedChanged"
+                       disabled="@locked" style="cursor:@(locked ? "not-allowed" : "pointer")">
+
+                <span class="form-label body-medium mb-0">
+                    Show as late
+                </span>
+            </label>
+
+        </div>
+
+        <div class="form-check form-switch d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" checked="@locked" @onchange="OnLockChanged">
+            <label class="form-label body-medium mb-0 mt-1">
+               Locked
+            </label>
+        </div>
+    </div>
+</div>
 <!-- Table -->
 <div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
     <table class="table table-hover table-bordered align-middle  custom-table">
@@ -6,9 +42,7 @@
             <tr>
                 <th style="width:5%">
                     <input type="checkbox"
-                           class="form-check-input" /> @* @bind="IsAllSelected"
-                    @bind:event="onchange" *@
-
+                           class="form-check-input" /> 
                 </th>
                 <th style="width:15%;">Time</th>
                 <th style="width:20%">Date</th>
@@ -49,4 +83,78 @@
 @code {
 
     [Parameter] public List<RealClocking> realClockings { get; set; } = new();
+
+    [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
+    [Parameter] public int EmployeeId { get; set; }
+    [Parameter] public DateTime shiftDate { get; set; }
+    [Parameter] public int employeeShiftId { get; set; }
+    [Parameter] public bool verified { get; set; }
+    [Parameter] public bool locked { get; set; }
+
+    private async Task OnVerifiedChanged(ChangeEventArgs e)
+    {
+        verified = (bool)e.Value;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        var verifiedModel = new Verified
+        {
+            EmployeeId = EmployeeId,
+            ShiftDate = shiftDate,
+            CreatedByUserId = userId,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        try
+        {
+            if (verified)
+            {
+                await WorkRecordNotesService.SetWorkRecordVerifiedAsync(verifiedModel);
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+            else
+            {
+                await WorkRecordNotesService.DeleteWorkRecordVerifiedAsync(verifiedModel);
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to update Verified state: {ex.Message}");
+        }
+    }
+
+    //Locked
+    private async Task OnLockChanged(ChangeEventArgs e)
+    {
+        locked = (bool)e.Value;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        var lockedModel = new Locked
+        {
+            EmployeeId = EmployeeId,
+            ShiftDate = shiftDate,
+            CreatedByUserId = userId,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        try
+        {
+            if (locked)
+            {
+                await WorkRecordNotesService.SetWorkRecordLockedAsync(lockedModel);
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+            else
+            {
+                await WorkRecordNotesService.DeleteWorkRecordLockedAsync(lockedModel);
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to update Locked state: {ex.Message}");
+        }
+    }
 }

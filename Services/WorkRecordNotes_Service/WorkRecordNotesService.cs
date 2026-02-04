@@ -8,8 +8,10 @@ using ClockNest.Models.User_Model;
 using ClockNest.Models.WorkRecordNotes_Model;
 using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;
+using ClockNest.ViewModels.WorkRecordNotesViewModel;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text.Json;
 
 
 
@@ -654,6 +656,172 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             {
                 var error = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Failed to delete exceptional items. Status: {response.StatusCode}, Error: {error}");
+            }
+        }
+
+        //notes
+        //public async Task<CreateEditWorkRecordNotesViewModel> GetWorkRecordNotesAsync(int employeeId, DateTime shiftDate)
+        //{
+        //    var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+        //    var parameterList = new
+        //    {
+        //        EmployeeId = employeeId,
+        //        Date = shiftDate
+        //    };
+        //    var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordnotes/get",parameterList);
+
+        //    if (!response.IsSuccessStatusCode) throw new Exception($"API failed: {response.StatusCode}");
+
+        //    var json = await response.Content.ReadAsStringAsync();
+
+        //    var list = JsonSerializer.Deserialize<List<CreateEditWorkRecordNotesViewModel>>(json,
+        //        new JsonSerializerOptions
+        //        {
+        //            PropertyNameCaseInsensitive = true
+        //        });
+
+        //    if (list == null || list.Count == 0) throw new Exception("No notes found");
+
+        //    return list.First();
+        //}
+
+        public async Task<CreateEditWorkRecordNotesViewModel> GetWorkRecordNotesAsync(int employeeId, DateTime shiftDate)
+        {
+            if (employeeId == 0)  throw new ArgumentException("EmployeeId cannot be 0");
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var parameterList = new ParameterList
+            {
+                EmployeeId = employeeId,
+                Date = shiftDate
+            };
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordnotes/get", parameterList);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Failed to get work record notes: {response.StatusCode}");
+
+            var notes = await response.Content.ReadFromJsonAsync<List<WorkRecordNote>>();
+
+            var model = new CreateEditWorkRecordNotesViewModel
+            {
+                Id = notes?.FirstOrDefault()?.Id ?? 0,
+                EmployeeId = employeeId,
+                ShiftDate = shiftDate,
+                Notes = notes?.FirstOrDefault()?.Notes ?? string.Empty
+            };
+
+            return model;
+        }
+
+
+        //save notes
+        public async Task<bool> SaveWorkRecordNotesAsync(WorkRecordNote workRecordNote)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordnotes/post", workRecordNote);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            var error = await response.Content.ReadAsStringAsync();
+            return false;
+        }
+
+        //show as late
+        public async Task<bool> SaveWorkRecordShowAsLateAsync(ParameterList parameterList)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordshowaslate/post", parameterList);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<bool>();
+                return result;
+            }
+
+
+            var error = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error: {error}");
+            return false;
+        }
+
+        //verified toggle
+        public async Task<bool> SetWorkRecordVerifiedAsync(Verified verified)
+        {
+            if (verified == null) throw new ArgumentException("Verified payload cannot be null.", nameof(verified));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordverified/post", verified);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to verify work record: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+
+        //delete verified
+        public async Task<bool> DeleteWorkRecordVerifiedAsync(Verified verified)
+        {
+            if (verified == null) throw new ArgumentException("Verified payload cannot be null.", nameof(verified));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordverifieddelete/post", verified);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to delete verified work record: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+
+        //locked toggle
+        public async Task<bool> SetWorkRecordLockedAsync(Locked locked)
+        {
+            if (locked == null) throw new ArgumentException("Locked payload cannot be null.", nameof(locked));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordlocked/post", locked);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to lock work record: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+            }
+        }
+        public async Task<bool> DeleteWorkRecordLockedAsync(Locked locked)
+        {
+            if (locked == null) throw new ArgumentException("Locked payload cannot be null.", nameof(locked));
+
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordlockeddelete/post", locked);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<bool>();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to delete locked work record: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
             }
         }
     }

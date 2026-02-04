@@ -1,7 +1,14 @@
-﻿<div class=" modal-header border-0 mb-2" style="padding: 0">
+﻿@* <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> Work Records </h5>   
     <!-- Buttons -->
+    <div class="form-check form-switch d-flex align-items-center">
+        <input class="form-check-input me-2" type="checkbox" @bind="@late">
+        <label class="form-label body-medium mb-0">
+            Show as late
+        </label>
+    </div>
     <div class="btn-group" role="group">
+       
         <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateWorkRecord">
             <i class="fa fa-plus"></i>
         </button>
@@ -10,7 +17,43 @@
             <i class="fa-solid fa-trash"></i>
         </button>
     </div>
+</div> *@
+
+<div class="modal-header border-0 mb-2 d-flex align-items-center justify-content-between"
+     style="padding: 0">
+
+    <h5 class="mb-0">Work Records</h5>
+
+    <!-- RIGHT: Toggle + Buttons -->
+    <div class="d-flex align-items-center gap-3">
+
+        <div class="form-check form-switch d-flex align-items-center mb-0">
+            <input class="form-check-input me-2"
+                   type="checkbox"
+                   checked="@late"
+                   @onchange="OnLateChanged">
+
+            <label class="form-label body-medium mb-0 mt-1">
+                Show as late
+            </label>
+        </div>
+
+
+        <div class="btn-group" role="group">
+
+            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateWorkRecord">
+                <i class="fa fa-plus"></i>
+            </button>
+
+            <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteSelectedRecords">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+
+    </div>
 </div>
+
+
 <!-- Table -->
 <div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
     <table class="table table-hover table-bordered align-middle  custom-table">
@@ -73,7 +116,7 @@
 <CreateEditWorkRecordTabModel @ref=createEditWorkRecordTabModelRef isSubmitting="@isSubmitting" OnSubmit="SaveWorkRecordAsync" />
 @code {
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
-
+    [Parameter] public bool late { get; set;}
     [Parameter] public int EmployeeId { get; set; }
     [Parameter] public DateTime shiftDate { get; set; }
     [Parameter] public int employeeShiftId { get; set; }
@@ -380,6 +423,52 @@
         {
             await ReloadWorkRecordAsync.InvokeAsync();
             SpinnerService.Hide();
+        }
+    }
+
+    //Show as late toggle handler
+     private async Task OnLateChanged(ChangeEventArgs e)
+    {
+        if (e.Value is bool newValue)
+        {
+            late = newValue;
+            await ApplyLateFilter(late);
+        }
+    }
+
+    private async Task ApplyLateFilter(bool value)
+    {
+        try
+        {
+            isSubmitting = true;
+
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+            var parameterList = new ParameterList
+            {
+                UserId = userId,
+                EmployeeShift = new EmployeeShift
+                {
+                    Id = EmployeeId,
+                    Late = value,
+                    UpdatedByUserId = userId,
+                    UpdatedDate = DateTime.Now
+                }
+            };
+
+            var success = await WorkRecordNotesService.SaveWorkRecordShowAsLateAsync(parameterList);
+
+            // if (!success)
+            // {
+            //     // optional: revert toggle if save fails
+            //     late = !value;
+            //     ToastService.Show("Failed to update late status.", ToastType.Danger);
+            // }
+        }
+        finally
+        {
+            isSubmitting = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 }
