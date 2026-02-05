@@ -36,7 +36,7 @@
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" disabled="@locked" /> @* *@
+                           @onchange="ToggleSelectAll" disabled="@locked" />
 
                 </th>
                 <th style="width:6%;">Start</th>
@@ -81,7 +81,6 @@
                         <td>@record.OvertimeStatusDisplay</td>
                         <td>@record.HourlyRateDisplay</td>
                         <td>@record.TotalAmountDisplay</td>
-
                     </tr>
                 }
             }
@@ -93,7 +92,6 @@
 <CreateEditWorkRecordOvertimeTabModel @ref=createEditOvertimeTabModelRef isSubmitting="@isSubmitting" OnSubmit="OnOvertimeSaveAsync" />
 
 @code {
-
     [Parameter] public bool locked { get; set; }
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
 
@@ -165,7 +163,7 @@
         var editOvertime = overtime ?? selectedOvertimeRecord.FirstOrDefault();
         if (editOvertime == null) return;
         companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
-        if (companyId == 125) // Security Print
+        if (companyId == 125) 
         {
             return;
         }

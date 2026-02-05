@@ -371,7 +371,7 @@
                 if (start > 1)
                 {
                     pages.Add(1);
-                    pages.Add(-1); // ellipsis
+                    pages.Add(-1); 
                 }
 
                 for (int i = start; i <= end; i++)
@@ -379,7 +379,7 @@
 
                 if (end < totalPages)
                 {
-                    pages.Add(-1); // ellipsis
+                    pages.Add(-1); 
                     pages.Add(totalPages);
                 }
             }
@@ -466,6 +466,7 @@
     private int employeeShiftId;
     public bool hideCosts;
     private WorkRecordAllDetails workRecordAllDetails = new();
+
     private async Task EditWorkRecordNote(WorkRecordNoteDetail? workRecordNoteDetail = null)
     {
         var editWorkRecordNote = workRecordNoteDetail ?? selectedWorkRecordNote.FirstOrDefault();
@@ -507,4 +508,5 @@
             SpinnerService.Hide();
         }
     }
+
 }

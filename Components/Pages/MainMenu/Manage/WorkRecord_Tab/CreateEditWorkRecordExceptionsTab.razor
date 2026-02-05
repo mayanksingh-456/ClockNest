@@ -4,11 +4,11 @@
     <!-- Buttons -->
     <div class="btn-group" role="group" style="cursor:@(locked ? "not-allowed" : "pointer")">
         <button class="btn  bg-brand-100" type="button" @onclick="RaiseExceptions" disabled="@locked">
-           Raise
+            Raise
         </button>
 
         <button class="btn  btn-danger" type="button" @onclick="ClearException" disabled="@locked">
-           Clear
+            Clear
         </button>
     </div>
 </div>
@@ -17,7 +17,7 @@
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:3%; cursor:@(locked ? " not-allowed" : "pointer" )">
+                <th style="width:3%; cursor:@(locked ? " not-allowed" : "pointer")">
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
@@ -26,7 +26,7 @@
                 </th>
                 <th style="width:15%;">Exception name</th>
                 <th style="width:15%">Raised</th>
-              
+
                 <th style="width:67%"></th>
             </tr>
         </thead>
@@ -52,11 +52,10 @@
                                    @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" disabled="@locked" />
                         </td>
                         <td>@(string.IsNullOrWhiteSpace(record.ExceptionName) ? "-" : record.ExceptionName)</td>
-                        <td>@(string.IsNullOrWhiteSpace(record.Raised) ? "-" : record.Raised)</td>                      
+                        <td>@(string.IsNullOrWhiteSpace(record.Raised) ? "-" : record.Raised)</td>
                     </tr>
                 }
             }
-
         </tbody>
     </table>
 </div>
@@ -102,9 +101,10 @@
         }
     }
 
+    <!--Raise exceptions-->
     public async Task RaiseExceptions()
     {
-        
+
         if (selectedExceptions.Count == 0)
         {
             ToastService.Show("Please select atleast one exception to raise", ToastType.Warning);
@@ -114,8 +114,8 @@
         int userId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
         try
         {
-          var selectedException = exceptions.Where(t => selectedExceptions.Contains(t.Id)).ToList();
-          var result = await WorkRecordNotesService.RaiseWorkRecordExceptions(selectedException.Select(x => x.Id).ToList(), userId);
+            var selectedException = exceptions.Where(t => selectedExceptions.Contains(t.Id)).ToList();
+            var result = await WorkRecordNotesService.RaiseWorkRecordExceptions(selectedException.Select(x => x.Id).ToList(), userId);
             if (result)
             {
                 ToastService.Show("Selected exceptions raised successfully", ToastType.Success);
@@ -137,14 +137,16 @@
         }
     }
 
+    <!--Clear exceptions-->
     public async Task ClearException()
     {
-        SpinnerService.Show();
+
         if (selectedExceptions.Count == 0)
         {
-            ToastService.Show("Please select atleast one exception to cleat", ToastType.Warning);
+            ToastService.Show("Please select atleast one exception to clear", ToastType.Warning);
             return;
         }
+        SpinnerService.Show();
         int userId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
         try
         {
@@ -170,8 +172,6 @@
             SpinnerService.Hide();
         }
     }
-
-   
 }
 
 

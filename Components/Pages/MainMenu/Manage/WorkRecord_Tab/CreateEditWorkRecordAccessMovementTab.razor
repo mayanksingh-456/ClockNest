@@ -41,9 +41,7 @@
     </table>
 </div>
 
-
 @code {
-
     [Parameter] public List<EmployeeAccessControlSwipes> employeeAccessControlSwipes { get; set; } = new();
     [Parameter] public int EmployeeId { get; set; }
     [Parameter] public DateTime shiftDate { get; set; }
@@ -65,6 +63,4 @@
             SpinnerService.Hide();
         }
     }
-
-
 }

@@ -11,7 +11,7 @@ using ClockNest.ViewModels.Parameter_List;
 using ClockNest.ViewModels.WorkRecordNotesViewModel;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Text.Json;
+
 
 
 
@@ -344,7 +344,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             throw new Exception($"Failed to delete shift: {response.StatusCode} - {errorContent}");
         }
 
-        //<!-- overtime-->
+        // overtime
         public async Task<List<SelectListItem>> GetOvertimeRecordAsync(int companyId)
         {
             try
@@ -369,7 +369,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             return new List<SelectListItem>();
         }
 
-        //<!-- overtime/ Toil-->
+        // overtime/ Toil
         public async Task<bool> ToilOvertimeAsync(ParameterList parameterList)
         {
             if (parameterList == null || parameterList.Overtime == null) throw new ArgumentException("ParameterList or Overtime cannot be null.", nameof(parameterList));
@@ -659,32 +659,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             }
         }
 
-        //notes
-        //public async Task<CreateEditWorkRecordNotesViewModel> GetWorkRecordNotesAsync(int employeeId, DateTime shiftDate)
-        //{
-        //    var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
-        //    var parameterList = new
-        //    {
-        //        EmployeeId = employeeId,
-        //        Date = shiftDate
-        //    };
-        //    var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordnotes/get",parameterList);
-
-        //    if (!response.IsSuccessStatusCode) throw new Exception($"API failed: {response.StatusCode}");
-
-        //    var json = await response.Content.ReadAsStringAsync();
-
-        //    var list = JsonSerializer.Deserialize<List<CreateEditWorkRecordNotesViewModel>>(json,
-        //        new JsonSerializerOptions
-        //        {
-        //            PropertyNameCaseInsensitive = true
-        //        });
-
-        //    if (list == null || list.Count == 0) throw new Exception("No notes found");
-
-        //    return list.First();
-        //}
-
+        //notes       
         public async Task<CreateEditWorkRecordNotesViewModel> GetWorkRecordNotesAsync(int employeeId, DateTime shiftDate)
         {
             if (employeeId == 0)  throw new ArgumentException("EmployeeId cannot be 0");
@@ -728,24 +703,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
             var error = await response.Content.ReadAsStringAsync();
             return false;
         }
-
-        //show as late
-        //public async Task<bool> SaveWorkRecordShowAsLateAsync(ParameterList parameterList)
-        //{
-        //    var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
-        //    var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordshowaslate/post", parameterList);
-
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        var result = await response.Content.ReadFromJsonAsync<bool>();
-        //        return result;
-        //    }
-
-
-        //    var error = await response.Content.ReadAsStringAsync();
-        //    Console.WriteLine($"Error: {error}");
-        //    return false;
-        //}
+        
         public async Task<bool> SaveWorkRecordShowAsLateAsync(ParameterList parameterList)
         {
             try
@@ -753,7 +711,7 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                 var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
                 var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordshowaslate/post", parameterList);
 
-                response.EnsureSuccessStatusCode(); // throws if status is not 200-299
+                response.EnsureSuccessStatusCode();
 
                 var result = await response.Content.ReadFromJsonAsync<bool?>();
                 return result ?? false;

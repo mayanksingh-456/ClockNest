@@ -1,21 +1,20 @@
-﻿@* <style>
-    button:disabled {
-        cursor: not-allowed !important;      
-    }
-
-</style> *@
-
+﻿
 <div class="modal-header border-0 mb-2 d-flex align-items-center justify-content-between" style="padding: 0">
     <h5 class="mb-0">Work Records</h5>
     <!-- Toggle Buttons -->
     <div class="d-flex align-items-center gap-3">
 
         <div class="form-check form-switch d-flex align-items-center mb-0" style="cursor:@(locked ? "not-allowed" : "pointer")">
-            <input type="checkbox" class="form-check-input me-2"
+           @*  <input type="checkbox" class="form-check-input me-2"
                    @bind="late"
                    @bind:event="onchange"
                    @bind:after="OnLateChanged"
-                   disabled="@locked">
+                   disabled="@locked"> *@
+            <input type="checkbox"
+                   class="form-check-input me-2"
+                   @bind="_late"
+                   disabled="@(locked || _isSavingLate)"
+                   @bind:after="OnLateChanged" />
             <label class="form-label body-medium mb-0 mt-1">
                 Show as late
             </label>
@@ -288,9 +287,6 @@
             }
 
             var savedWorkRecords = await WorkRecordNotesService.SaveWorkRecordAsync(workRecord);
-
-
-
             if (savedWorkRecords != null)
             {
                 await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
@@ -309,10 +305,6 @@
 
             if (savedWorkRecords != null)
             {
-                // await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
-                // await JS.InvokeVoidAsync("alert", "Work record saved successfully!");
-
-
                 var overtimeList = await WorkRecordNotesService.RecalculateOvertimeAsync(parameterList);
 
                 if (overtimeList != null)
@@ -320,11 +312,6 @@
                     OvertimeRecords = overtimeList;
                     StateHasChanged();
                 }
-
-                // if (ReloadWorkRecordAsync.HasDelegate)
-                // {
-                //     await ReloadWorkRecordAsync.InvokeAsync();
-                // }
             }
 
             else
@@ -342,9 +329,6 @@
             await ReloadWorkRecordAsync.InvokeAsync();
         }
     }
-
-
-
    
     //DeleteLogic
     bool showDeletePopup = false;
@@ -404,7 +388,6 @@
                     OvertimeRecords = overtimeList;
                     StateHasChanged();
                 }
-               // await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
                 await ReloadWorkRecordAsync.InvokeAsync();
             }
         }
@@ -416,8 +399,18 @@
     }
 
     <!-- Late Logic -->
+    private bool _late;
+    private bool _isSavingLate;
+    protected override void OnParametersSet()
+    {
+        if (!_isSavingLate)
+            _late = late;
+    }
+
     private async Task OnLateChanged()
     {
+        _isSavingLate = true;
+
         int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
 
         var parameterList = new ParameterList
@@ -426,21 +419,20 @@
             EmployeeShift = new EmployeeShift
             {
                 Id = employeeShiftId,
-                Late = late,
+                Late = _late,
                 UpdatedByUserId = userId,
                 UpdatedDate = DateTime.Now
             }
         };
 
-        isSubmitting = true;
-        var success = await WorkRecordNotesService.SaveWorkRecordShowAsLateAsync(parameterList);
-        isSubmitting = false;
+        var success = await WorkRecordNotesService
+            .SaveWorkRecordShowAsLateAsync(parameterList);
+        await ReloadWorkRecordAsync.InvokeAsync();
 
         if (!success)
         {
-            late = !late;
+            _late = !_late;
         }
+        _isSavingLate = false;
     }
-
-
 }

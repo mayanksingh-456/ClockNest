@@ -53,11 +53,24 @@
     }
 
     /* ===== PROFILE ===== */
+/*     .wr-profile {
+        flex-direction: row;
+        gap: 14px;
+        align-items: center;
+    } */
     .wr-profile {
+        display: flex;
+        flex-direction: column; /* 🔥 row → column */
+        gap: 12px;
+    }
+
+    .wr-profile-top {
+        display: flex;
         flex-direction: row;
         gap: 14px;
         align-items: center;
     }
+
 
     .wr-avatar {
         width: 74px;
@@ -66,10 +79,15 @@
         border: 3px solid #dfd6ff;
     }
 
-    .wr-profile-content {
+   /*  .wr-profile-content {
         display: flex;
         flex-direction: column;
         gap: 4px;
+    } */
+    .wr-profile-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
 
     .wr-name {
@@ -99,7 +117,7 @@
     .notes-content-wrapper {
         max-height: 45px;
         overflow-y: auto;
-        flex-grow: 1;
+       /*  flex-grow: 1; */
         font-size: 13px;
     }
 
@@ -148,32 +166,6 @@
         align-items: center;
     }
 
-    /* .wr-title {
-        font-weight: 600;
-    }
-
-    .wr-add {
-        background: #f4b400;
-        border: none;
-        padding: 4px 10px;
-        border-radius: 6px;
-    }
-
-    .wr-delete {
-        background: #e57373;
-        border: none;
-        padding: 4px 8px;
-        border-radius: 6px;
-    }
-
-    .wr-check {
-        margin-top: 8px;
-        font-size: 14px;
-    }
-
-        .wr-check.muted {
-            color: #6c757d;
-        } */
 
     /* ===== MOBILE ===== */
     @@media (max-width: 992px) {
@@ -233,7 +225,7 @@
                     </h5>
 
                     <div class="d-flex align-items-center gap-2">
-                        <!-- Previous Button -->
+                  @*       <!-- Previous Button -->
                         <button class="btn btn-outline-secondary" @onclick="PreviousDay" title="Previous Day">
                             <i class="bi bi-chevron-left"></i>
                         </button>
@@ -246,7 +238,7 @@
                         <!-- Next Button -->
                         <button class="btn btn-outline-secondary " @onclick="NextDay" title="Next Day">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+                        </button> *@
 
                         <!-- Close Button -->
                         <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -260,7 +252,7 @@
                     <div class="workrecord-wrapper">
 
                         <!-- PROFILE -->
-                        <div class="wr-card wr-profile">
+                       @*  <div class="wr-card wr-profile">
                             <div class="wr-avatar">
                                 <img src="@GetEmployeeImage()" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover;" />
                             </div>
@@ -289,7 +281,67 @@
                                </div>
 
                            </div>
+                        </div> *@
+
+                        <div class="wr-card wr-profile">
+
+                            <!--  Avatar + Name + Notes -->
+                            <div class="wr-profile-top">
+
+                                <div class="wr-avatar">
+                                    <img src="@GetEmployeeImage()" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover;" />
+                                </div>
+
+                                <div class="wr-profile-content">
+                                    <div class="wr-name"> @createEditWorkRecordsNotesModel.WorkDetails.EmployeeName
+                                    </div>
+
+                                    <div class="wr-date">
+                                        @createEditWorkRecordsNotesModel?.WorkDetails?.ShiftDateDisplay
+                                    </div>
+                                
+                                    <div class="wr-notes-wrapper">
+                                        <span class="notes-label">Notes:</span>
+
+                                        <div class="notes-content-wrapper">
+                                            @if (!string.IsNullOrWhiteSpace(createEditWorkRecordsNotesModel?.Notes))
+                                            {
+                                                <div class="notes-text">@createEditWorkRecordsNotesModel.WorkDetails.Notes</div>
+                                            }
+                                        </div>
+
+                                        <button class="wr-icon-btn" title="Create/Edit Notes" @onclick="CreateEditNotes" disabled="@locked" style="cursor:@(locked ? "not-allowed" : "pointer")">✏️</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DAY NAV BUTTONS -->
+                            <div class="mt-auto" style="margin-bottom: -10px;">
+                                <div class="d-flex gap-2 justify-content-end">
+
+                                    <button class="btn btn-outline-secondary"
+                                            @onclick="PreviousDay"
+                                            title="Previous Day">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
+
+                                    <button class="btn btn-today"
+                                            @onclick="Today"
+                                            title="Today">
+                                        Today
+                                    </button>
+
+                                    <button class="btn btn-outline-secondary"
+                                            @onclick="NextDay"
+                                            title="Next Day">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+
+                                </div>
+                            </div>
+
                         </div>
+
 
                         <!-- TAG & EMPLOYEE dropdown-->
                         <div class="wr-card wr-tag">
