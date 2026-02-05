@@ -730,22 +730,41 @@ namespace ClockNest.Services.WorkRecordNotes_Service
         }
 
         //show as late
+        //public async Task<bool> SaveWorkRecordShowAsLateAsync(ParameterList parameterList)
+        //{
+        //    var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+        //    var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordshowaslate/post", parameterList);
+
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var result = await response.Content.ReadFromJsonAsync<bool>();
+        //        return result;
+        //    }
+
+
+        //    var error = await response.Content.ReadAsStringAsync();
+        //    Console.WriteLine($"Error: {error}");
+        //    return false;
+        //}
         public async Task<bool> SaveWorkRecordShowAsLateAsync(ParameterList parameterList)
         {
-            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
-            var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordshowaslate/post", parameterList);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var result = await response.Content.ReadFromJsonAsync<bool>();
-                return result;
+                var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+                var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordshowaslate/post", parameterList);
+
+                response.EnsureSuccessStatusCode(); // throws if status is not 200-299
+
+                var result = await response.Content.ReadFromJsonAsync<bool?>();
+                return result ?? false;
             }
-
-
-            var error = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Error: {error}");
-            return false;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SaveWorkRecordShowAsLateAsync failed: {ex}");
+                return false;
+            }
         }
+
 
         //verified toggle
         public async Task<bool> SetWorkRecordVerifiedAsync(Verified verified)
@@ -823,6 +842,36 @@ namespace ClockNest.Services.WorkRecordNotes_Service
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Failed to delete locked work record: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
             }
+        }
+
+        //Raise exception
+        public async Task<bool> RaiseWorkRecordExceptions(List<int> exceptionIds, int userId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var parameterList = new ParameterList
+            {
+                Ids = exceptionIds,
+                UserId = userId
+            };
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/raisealerts/post", parameterList);
+
+            return response.IsSuccessStatusCode &&
+            await response.Content.ReadFromJsonAsync<bool>();
+        }
+
+        // clear exception
+        public async Task<bool> ClearWorkRecordExceptions(List<int> exceptionIds, int userId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var parameterList = new ParameterList
+            {
+                Ids = exceptionIds,
+                UserId = userId
+            };
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/clearalerts/post", parameterList);
+
+            return response.IsSuccessStatusCode &&
+            await response.Content.ReadFromJsonAsync<bool>();
         }
     }
 }

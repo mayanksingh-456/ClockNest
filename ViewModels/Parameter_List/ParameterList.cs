@@ -9,7 +9,7 @@ namespace ClockNest.ViewModels.Parameter_List
         public int TagId { get; set; }
         public int Id { get; set; }
         public int UserId { get; set; }
-
+        public List<int> Ids { get; set; }
         public int RoleTypeId { get; set; }
         public int EmployeeShiftId { get; set; }
 

@@ -395,11 +395,16 @@ body {
     border-radius: 5px;
     font-weight: 500;
 }
+    .bg-brand-100:disabled,
+    .bg-brand-100[disabled] {
+        background-color: #2b4d83 !important;
+        color: #FFFFFF !important;
+    }
 
-    .bg-brand-100:hover,
-    .bg-brand-100:focus,
-    .bg-brand-100:active,
-    .bg-brand-100:focus-visible {
+button:disabled {
+    cursor: not-allowed !important;
+}
+        .bg-brand-100:hover, .bg-brand-100:focus, .bg-brand-100:active, .bg-brand-100:focus-visible {
         background-color: #24416f !important;
         color: #FFFFFF !important;
         box-shadow: none !important;

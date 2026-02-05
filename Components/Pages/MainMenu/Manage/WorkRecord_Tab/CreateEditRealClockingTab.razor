@@ -1,4 +1,4 @@
-﻿@* <h5 class="mb-3">Real Clockings</h5> *@
+﻿
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5>Real Clockings</h5>
     <!-- Buttons -->
@@ -6,24 +6,19 @@
     <div class="btn-group" role="group">
 
         <div class="form-check form-switch d-flex align-items-center mb-0 me-4">
-           @*  <input class="form-check-input me-2" type="checkbox" checked="@verified" @onchange="OnVerifiedChanged" disabled="@(locked)"
-                   style="cursor:@(locked ? "not-allowed" : "pointer")" >
-            <label class="form-label body-medium mb-0 mt-1">
-                Verified
-            </label> *@
-            <label class="form-check form-switch d-flex align-items-center mb-0"
-                   style="cursor:@(locked ? "not-allowed" : "pointer")">
-
+        
+            <div class="form-check form-switch d-flex align-items-center mb-0" style="cursor:@(locked ? "not-allowed" : "pointer")">
                 <input class="form-check-input me-2"
                        type="checkbox"
                        checked="@verified"
                        @onchange="OnVerifiedChanged"
-                       disabled="@locked" style="cursor:@(locked ? "not-allowed" : "pointer")">
+                       disabled="@locked" >
 
-                <span class="form-label body-medium mb-0">
-                    Show as late
-                </span>
-            </label>
+                <label class="form-label body-medium mb-0 mt-1">
+                    Verified
+                </label>
+            </div>
+            
 
         </div>
 
@@ -40,10 +35,10 @@
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:5%">
+                @* <th style="width:5%">
                     <input type="checkbox"
                            class="form-check-input" /> 
-                </th>
+                </th> *@
                 <th style="width:15%;">Time</th>
                 <th style="width:20%">Date</th>
                 <th style="width:30%"> Type</th>
@@ -65,10 +60,10 @@
             @foreach (var tag in realClockings)
             {
                 <tr>
-                    <td>
+                    @* <td>
                         <input type="checkbox"
                                class="form-check-input" />
-                    </td>
+                    </td> *@
                     <td>@tag.ClockingTimeOnly</td>
                     <td>@tag.ClockingDate</td>
                     <td>@tag.ClockingTypeDisplay</td>
@@ -124,6 +119,7 @@
         }
     }
 
+ 
     //Locked
     private async Task OnLockChanged(ChangeEventArgs e)
     {

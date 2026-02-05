@@ -2,24 +2,24 @@
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> Overtime </h5>
     <!-- Buttons -->
-    <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateOvertime">
+    <div class="btn-group" role="group" style="cursor:@(locked ? "not-allowed" : "pointer")">
+        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateOvertime" disabled="@locked">
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn " type="button" @onclick="ToilWorkRecordOvertime" title="Mark as Toil" style="background-color:#FAB95B; color:#FFFFFF; ">
+        <button class="btn icon-btn " type="button" @onclick="ToilWorkRecordOvertime" title="Mark as Toil" style="background-color:#FAB95B; color:#FFFFFF; " disabled="@locked">
             Toil
         </button>
 
-        <button class="btn icon-btn " type="button" @onclick="AuthorizeOvertime" title="Mark as Authorize" style="background-color:#547792; color:#FFFFFF">
+        <button class="btn icon-btn " type="button" @onclick="AuthorizeOvertime" title="Mark as Authorize" style="background-color:#547792; color:#FFFFFF" disabled="@locked">
             <i class="fa-solid fa-check" style="color: #ffff;"></i>
         </button>
 
-        <button class="btn icon-btn clockNest-bg-secondary" title="Mark as Decline" type="button" @onclick="DeclineWorkRecordOvertime">
+        <button class="btn icon-btn clockNest-bg-secondary" title="Mark as Decline" type="button" @onclick="DeclineWorkRecordOvertime" disabled="@locked">
             <i class="fa-solid fa-xmark" style="color: #ffff;"></i>
         </button>
 
-        <button class="btn icon-btn btn-danger" type="button" title="Mark as Unpaid" @onclick="UnpaidWorkRecordOvertime">
+        <button class="btn icon-btn btn-danger" type="button" title="Mark as Unpaid" @onclick="UnpaidWorkRecordOvertime" disabled="@locked">
             <i class="fa-solid fa-xmark" style="color: #ffff;"></i>
             <i class="fa-solid fa-xmark" style="color: #ffff;"></i>
         </button>
@@ -32,11 +32,11 @@
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:3%">
+                <th style="width:3%; cursor:@(locked ? " not-allowed" : "pointer" )">
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" /> @* *@
+                           @onchange="ToggleSelectAll" disabled="@locked" /> @* *@
 
                 </th>
                 <th style="width:6%;">Start</th>
@@ -66,11 +66,11 @@
                 @foreach (var record in overtime)
                 {
                     <tr @ondblclick="@(() => EditOvertime(record))">
-                        <td>
+                        <td style="cursor:@(locked ? "not-allowed" : "pointer")">
                             <input type="checkbox"
                                    class="form-check-input"
                                    checked="@selectedOvertimeRecords.Contains(record.Id)"
-                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" disabled="@locked" />
                         </td>
                         <td>@(string.IsNullOrWhiteSpace(record.StartTimeDisplay) ? "-" : record.StartTimeDisplay)</td>
                         <td>@(string.IsNullOrWhiteSpace(record.EndTimeDisplay) ? "-" : record.EndTimeDisplay)</td>
@@ -94,7 +94,7 @@
 
 @code {
 
-  
+    [Parameter] public bool locked { get; set; }
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
 
     [Parameter] public int EmployeeId { get; set; }
@@ -161,6 +161,7 @@
 
     public async Task EditOvertime(Overtime? overtime = null)
     {
+        if (locked) return;
         var editOvertime = overtime ?? selectedOvertimeRecord.FirstOrDefault();
         if (editOvertime == null) return;
         companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
@@ -214,7 +215,7 @@
             if (savedWorkRecords != null)
             {
                 await JS.InvokeVoidAsync("hideModal", "overtimeModel");
-                await JS.InvokeVoidAsync("alert", "Overtime record saved successfully!", "success");
+                ToastService.Show("Overtime record saved successfully!", ToastType.Success);
 
                 if (ReloadWorkRecordAsync.HasDelegate)
                 {
@@ -223,13 +224,13 @@
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", "Failed to save overtime record.", "danger");
+                ToastService.Show("Failed to save overtime record.", ToastType.Danger);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error saving overtime record: {ex.Message}");
-            await JS.InvokeVoidAsync("showToast", "An error occurred while saving the record.", "danger");
+            ToastService.Show("An error occurred while saving the record.", ToastType.Danger);
         }
         finally
         {
@@ -243,7 +244,7 @@
     {
         if (selectedOvertimeRecords.Count == 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record for toil");
+            ToastService.Show("Please select at least one overtime record for toil", ToastType.Warning);
             return;
         }
         SpinnerService.Show();
@@ -264,8 +265,7 @@
             {
                 await ReloadWorkRecordAsync.InvokeAsync();
                 selectedOvertimeRecords.Clear();
-                await JS.InvokeVoidAsync("alert", "Marked as toil successfully!", "success");
-
+                ToastService.Show("Marked as toil successfully!", ToastType.Success);
             }
         }
         catch (Exception ex)
@@ -284,7 +284,7 @@
     {
         if (selectedOvertimeRecords.Count == 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record to authorize");
+            ToastService.Show("Please select at least one overtime record to authorize", ToastType.Warning);
             return;
         }
         SpinnerService.Show();
@@ -304,7 +304,7 @@
             if (success)
             {
               
-                await JS.InvokeVoidAsync("alert", "Marked as authorized successfully!", "success");
+                ToastService.Show("Marked as authorized successfully!", ToastType.Success);
                 await ReloadWorkRecordAsync.InvokeAsync();
                 selectedOvertimeRecords.Clear();
             }
@@ -325,7 +325,7 @@
     {
         if (selectedOvertimeRecords.Count == 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record to decline");
+            ToastService.Show("Please select at least one overtime record to decline", ToastType.Warning);
             return;
         }
         SpinnerService.Show();
@@ -345,7 +345,7 @@
             if (success)
             {
 
-                await JS.InvokeVoidAsync("alert", "Overtime declined successfully!", "success");
+                ToastService.Show("Overtime declined successfully!", ToastType.Success);
                 await ReloadWorkRecordAsync.InvokeAsync();
                 selectedOvertimeRecords.Clear();
             }
@@ -366,7 +366,7 @@
     {
         if (selectedOvertimeRecords.Count == 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please select at least one overtime record to mark unpaid");
+            ToastService.Show("Please select at least one overtime record to mark unpaid", ToastType.Warning);
             return;
         }
         SpinnerService.Show();
@@ -384,13 +384,10 @@
             };
             bool success = await WorkRecordNotesService.UnpaidOvertimeAsync(parameterList);
             if (success)
-            {
-        
+            {        
                 await ReloadWorkRecordAsync.InvokeAsync();
-                selectedOvertimeRecords.Clear();
-              
-                ToastService.Show("Marked overtime as unpaid successfully!", ToastType.Success);
-               
+                selectedOvertimeRecords.Clear();             
+                ToastService.Show("Marked overtime as unpaid successfully!", ToastType.Success);              
             }
         }
         catch (Exception ex)

@@ -190,6 +190,22 @@
     }
 </style>
 
+<style>
+    .btn-today {
+        border-color: #2b4d83;
+        color: black;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+        .btn-today:hover,
+        .btn-today:focus,
+        .btn-today:active {
+            background-color: #3560a5; 
+            border-color: #2b4d83;
+            color: white;
+        }
+</style>
+
 <div class="modal fade right" id="workRecordNotesModel" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-right" style="width:85vw">
         <div class="modal-content h-100 border-0">
@@ -198,7 +214,7 @@
                 <DataAnnotationsValidator />
 
                 <!-- Header-->
-                <div class="modal-header border-0">
+              @*   <div class="modal-header border-0">
                     <h5> @((createEditWorkRecordsNotesModel.Id == 0) ? "Create Work Record" : "Edit Work Record") </h5>
                     <div class="d-flex align-items-center gap-2 ms-auto">
                         <button class="btn" @onclick="PreviousDay">
@@ -210,7 +226,33 @@
                     </button>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" style="margin-right: -20px; "></button>
                     </div>
+                </div> *@
+                <div class="modal-header border-0 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">
+                        @((createEditWorkRecordsNotesModel.Id == 0) ? "Create Work Record" : "Edit Work Record")
+                    </h5>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Previous Button -->
+                        <button class="btn btn-outline-secondary" @onclick="PreviousDay" title="Previous Day">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+
+                        <!-- Today Button -->
+                        <button class="btn btn-today" @onclick="Today" title="Today">
+                            Today
+                        </button>
+
+                        <!-- Next Button -->
+                        <button class="btn btn-outline-secondary " @onclick="NextDay" title="Next Day">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+
+                        <!-- Close Button -->
+                        <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
                 </div>
+
 
                 <!-- Body-->
                 <div class="modal-body overflow-auto flex-grow-1" style="max-height: 90vh; margin-top: -15px;">
@@ -237,7 +279,7 @@
                                         }      
                                     </div>
 
-                                    <button class="wr-icon-btn" @onclick="CreateEditNotes">✏️</button>
+                                    <button class="wr-icon-btn" @onclick="CreateEditNotes" disabled="@locked" style="cursor:@(locked ? "not-allowed" : "pointer")">✏️</button>
                                 </div>
 
                                <div class="align-bottom col-md-12">
@@ -281,7 +323,7 @@
                             </div>
                             <CreateEditWorkRecordShiftTab employeeShift="createEditWorkRecordsNotesModel?.WorkDetails.EmployeeShifts"
                                                           EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
-                                                          ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
+                                                          ReloadWorkRecordAsync="ReloadWorkRecordAsync" locked="locked" />
                         </div>
 
                     </div>
@@ -320,7 +362,7 @@
                             <div class="tab-pane fade @(activeTab == "workRecordsTab" ? "show active" : "")" id="workRecordsTab">
                                 <CreateEditWorkRecordsTab workRecords="createEditWorkRecordsNotesModel?.WorkDetails.WorkRecords"
                                                           EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
-                                                          ReloadWorkRecordAsync="ReloadWorkRecordAsync" late="late" />
+                                                          ReloadWorkRecordAsync="ReloadWorkRecordAsync" late="late" locked="locked" />
                                 <div class="mt-3">
                                     <CreateEditRealClockingTab realClockings="createEditWorkRecordsNotesModel?.WorkDetails.RealClockings"
                                                                EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
@@ -330,23 +372,24 @@
                             <div class="tab-pane fade @(activeTab == "overtimeTab" ? "show active" : "")" id="overtimeTab">
                                 <CreateEditWorkRecordOvertimeTab overtime="createEditWorkRecordsNotesModel?.WorkDetails.Overtime"
                                                                  EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
-                                                                 ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
+                                                                 ReloadWorkRecordAsync="ReloadWorkRecordAsync" locked="locked" />
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "absenceTab" ? "show active" : "")" id="absenceTab"> 
                                 <CreateEditWorkRecordAbsenceTab absenteeRecord="createEditWorkRecordsNotesModel?.WorkDetails.Absence"
                                                                 EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
-                                                                ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
+                                                                ReloadWorkRecordAsync="ReloadWorkRecordAsync" locked="locked" />
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "exceptionTab" ? "show active" : "")" id="exceptionTab">
-                                <CreateEditWorkRecordExceptionsTab exceptions="createEditWorkRecordsNotesModel?.WorkDetails.Exceptions" />
+                                <CreateEditWorkRecordExceptionsTab exceptions="createEditWorkRecordsNotesModel?.WorkDetails.Exceptions"
+                                                                   ReloadWorkRecordAsync="ReloadWorkRecordAsync" locked="locked" />
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "exceptionalItemTab" ? "show active" : "")" id="exceptionalItemTab">
                                 <CreateEdirWorkRecordExceptionalItemsTab exceptionalItem="createEditWorkRecordsNotesModel?.WorkDetails.ExceptionalItems"
                                                                          EmployeeId="EmployeeId" shiftDate="shiftDate" employeeShiftId="employeeShiftId"
-                                                                         ReloadWorkRecordAsync="ReloadWorkRecordAsync" />
+                                                                         ReloadWorkRecordAsync="ReloadWorkRecordAsync" locked="locked" />
                             </div>
 
                             <div class="tab-pane fade @(activeTab == "accessMovementTab" ? "show active" : "")" id="accessMovementTab">
@@ -465,8 +508,10 @@
             createEditWorkRecordsNotesModel.WorkDetails.Notes = newWorkRecordDetails.Notes;
 
             verified = newWorkRecordDetails.Verified;
+            
+
             locked = newWorkRecordDetails.Locked;
-            //late = newWorkRecordDetails.Late;
+            late = newWorkRecordDetails.Late;
             
             employeeShiftId = newWorkRecordDetails.EmployeeShiftId;
             //shiftDate = newWorkRecordDetails.ShiftDate;

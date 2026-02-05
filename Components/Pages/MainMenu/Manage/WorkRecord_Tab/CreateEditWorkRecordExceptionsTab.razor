@@ -2,26 +2,26 @@
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> Exceptions </h5>
     <!-- Buttons -->
-   @*  <div class="btn-group" role="group">
-        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CtrateExceptionalItem">
-            <i class="fa fa-plus"></i>
+    <div class="btn-group" role="group" style="cursor:@(locked ? "not-allowed" : "pointer")">
+        <button class="btn  bg-brand-100" type="button" @onclick="RaiseExceptions" disabled="@locked">
+           Raise
         </button>
 
-        <button class="btn icon-btn btn-danger" type="button">
-            <i class="fa-solid fa-trash"></i>
+        <button class="btn  btn-danger" type="button" @onclick="ClearException" disabled="@locked">
+           Clear
         </button>
-    </div> *@
+    </div>
 </div>
 <!-- Table -->
 <div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:3%">
+                <th style="width:3%; cursor:@(locked ? " not-allowed" : "pointer" )">
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" /> @* *@
+                           @onchange="ToggleSelectAll" disabled="@locked" /> @* *@
 
                 </th>
                 <th style="width:15%;">Exception name</th>
@@ -45,11 +45,11 @@
                 @foreach (var record in exceptions)
                 {
                     <tr>
-                        <td>
+                        <td style="cursor:@(locked ? "not-allowed" : "pointer")">
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@selectedWorkRecords.Contains(record.Id)"
-                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
+                                   checked="@selectedExceptions.Contains(record.Id)"
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" disabled="@locked" />
                         </td>
                         <td>@(string.IsNullOrWhiteSpace(record.ExceptionName) ? "-" : record.ExceptionName)</td>
                         <td>@(string.IsNullOrWhiteSpace(record.Raised) ? "-" : record.Raised)</td>                      
@@ -67,23 +67,23 @@
     [Parameter] public int EmployeeId { get; set; }
     [Parameter] public DateTime shiftDate { get; set; }
     [Parameter] public int employeeShiftId { get; set; }
+    [Parameter] public bool locked { get; set; }
 
-   
 
     [Parameter] public List<Exceptions> exceptions { get; set; } = new();
 
-    private HashSet<int> selectedWorkRecords = new();
+    private HashSet<int> selectedExceptions = new();
 
     private bool IsAllSelected =>
         exceptions.Any() &&
-        exceptions.All(r => selectedWorkRecords.Contains(r.Id));
+        exceptions.All(r => selectedExceptions.Contains(r.Id));
 
     private void ToggleSelection(int id, bool isChecked)
     {
         if (isChecked)
-            selectedWorkRecords.Add(id);
+            selectedExceptions.Add(id);
         else
-            selectedWorkRecords.Remove(id);
+            selectedExceptions.Remove(id);
     }
 
     private void ToggleSelectAll(ChangeEventArgs e)
@@ -92,13 +92,82 @@
 
         if (isChecked)
         {
-            selectedWorkRecords = exceptions
+            selectedExceptions = exceptions
                 .Select(r => r.Id)
                 .ToHashSet();
         }
         else
         {
-            selectedWorkRecords.Clear();
+            selectedExceptions.Clear();
+        }
+    }
+
+    public async Task RaiseExceptions()
+    {
+        
+        if (selectedExceptions.Count == 0)
+        {
+            ToastService.Show("Please select atleast one exception to raise", ToastType.Warning);
+            return;
+        }
+        SpinnerService.Show();
+        int userId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        try
+        {
+          var selectedException = exceptions.Where(t => selectedExceptions.Contains(t.Id)).ToList();
+          var result = await WorkRecordNotesService.RaiseWorkRecordExceptions(selectedException.Select(x => x.Id).ToList(), userId);
+            if (result)
+            {
+                ToastService.Show("Selected exceptions raised successfully", ToastType.Success);
+                foreach (var ex in exceptions.Where(e => selectedExceptions.Contains(e.Id)))
+                {
+                    ex.Alert = true;
+                }
+                selectedExceptions.Clear();
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+            else
+            {
+                ToastService.Show("Failed to raise selected exceptions", ToastType.Danger);
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    public async Task ClearException()
+    {
+        SpinnerService.Show();
+        if (selectedExceptions.Count == 0)
+        {
+            ToastService.Show("Please select atleast one exception to cleat", ToastType.Warning);
+            return;
+        }
+        int userId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+        try
+        {
+            var selectedException = exceptions.Where(t => selectedExceptions.Contains(t.Id)).ToList();
+            var result = await WorkRecordNotesService.ClearWorkRecordExceptions(selectedException.Select(x => x.Id).ToList(), userId);
+            if (result)
+            {
+                ToastService.Show("Selected exceptions cleared successfully", ToastType.Success);
+                foreach (var ex in exceptions.Where(e => selectedExceptions.Contains(e.Id)))
+                {
+                    ex.Alert = false;
+                }
+                selectedExceptions.Clear();
+                await ReloadWorkRecordAsync.InvokeAsync();
+            }
+            else
+            {
+                ToastService.Show("Failed to clear selected exceptions", ToastType.Danger);
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
         }
     }
 

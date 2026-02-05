@@ -1,51 +1,32 @@
-﻿@* <div class=" modal-header border-0 mb-2" style="padding: 0">
-    <h5> Work Records </h5>   
-    <!-- Buttons -->
-    <div class="form-check form-switch d-flex align-items-center">
-        <input class="form-check-input me-2" type="checkbox" @bind="@late">
-        <label class="form-label body-medium mb-0">
-            Show as late
-        </label>
-    </div>
-    <div class="btn-group" role="group">
-       
-        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateWorkRecord">
-            <i class="fa fa-plus"></i>
-        </button>
+﻿@* <style>
+    button:disabled {
+        cursor: not-allowed !important;      
+    }
 
-        <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteSelectedRecords">
-            <i class="fa-solid fa-trash"></i>
-        </button>
-    </div>
-</div> *@
+</style> *@
 
-<div class="modal-header border-0 mb-2 d-flex align-items-center justify-content-between"
-     style="padding: 0">
-
+<div class="modal-header border-0 mb-2 d-flex align-items-center justify-content-between" style="padding: 0">
     <h5 class="mb-0">Work Records</h5>
-
-    <!-- RIGHT: Toggle + Buttons -->
+    <!-- Toggle Buttons -->
     <div class="d-flex align-items-center gap-3">
 
-        <div class="form-check form-switch d-flex align-items-center mb-0">
-            <input class="form-check-input me-2"
-                   type="checkbox"
-                   checked="@late"
-                   @onchange="OnLateChanged">
-
+        <div class="form-check form-switch d-flex align-items-center mb-0" style="cursor:@(locked ? "not-allowed" : "pointer")">
+            <input type="checkbox" class="form-check-input me-2"
+                   @bind="late"
+                   @bind:event="onchange"
+                   @bind:after="OnLateChanged"
+                   disabled="@locked">
             <label class="form-label body-medium mb-0 mt-1">
                 Show as late
             </label>
         </div>
 
-
-        <div class="btn-group" role="group">
-
-            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateWorkRecord">
+        <div class="btn-group" role="group" style="cursor:@(locked ? "not-allowed" : "pointer")">
+            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateWorkRecord" disabled="@locked">
                 <i class="fa fa-plus"></i>
             </button>
 
-            <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteSelectedRecords">
+            <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteSelectedRecords" disabled="@(locked)">
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>
@@ -53,17 +34,16 @@
     </div>
 </div>
 
-
 <!-- Table -->
 <div class="table-responsive custom-table-wrapper" style="max-height: 285px;">
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:5%">
+                <th style="width:5%; cursor:@(locked ? "not-allowed" : "pointer")">
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" />
+                           @onchange="ToggleSelectAll" disabled="@locked" />
 
                 </th>
                 <th style="width:10%;">Start</th>
@@ -88,35 +68,37 @@
             }
             else
             {
-            @foreach (var record in workRecords)
+                @foreach (var record in workRecords)
                 {
                     <tr @ondblclick="@(() => EditWorkRecord(record))">
-                        <td>
+                        <td style="cursor:@(locked ? "not-allowed" : "pointer")">
                             <input type="checkbox"
                                    class="form-check-input"
                                    checked="@selectedWorkRecords.Contains(record.Id)"
-                               @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
-                        </td> 
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" disabled="@locked" />
+                        </td>
                         <td>@record.StartTimeDisplay</td>
                         <td>@record.EndTimeDisplay</td>
                         <td>@record.DurationDisplay</td>
                         <td>@record.ActivityDisplay</td>
                         <td>@record.CostCentreDisplay</td>
-                    <td>@record.HourlyRateDisplay</td>
-                    <td>@record.TotalAmountDisplay</td>
+                        <td>@record.HourlyRateDisplay</td>
+                        <td>@record.TotalAmountDisplay</td>
                         <td>@(string.IsNullOrWhiteSpace(record.UsernameDisplay) ? "-" : record.UsernameDisplay)</td>
                     </tr>
                 }
-           }
-          
+            }
         </tbody>
     </table>
 </div>
 
 <CreateEditWorkRecordTabModel @ref=createEditWorkRecordTabModelRef isSubmitting="@isSubmitting" OnSubmit="SaveWorkRecordAsync" />
+<DeleteConfirmationPage IsVisible="@showDeletePopup" Message="@popupDeleteMessage" OnDelete="ConfirmDelete" OnCancel="CloseDeletePopup" />
+
 @code {
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
-    [Parameter] public bool late { get; set;}
+    [Parameter] public bool locked { get; set; }
+    [Parameter] public bool late { get; set; }
     [Parameter] public int EmployeeId { get; set; }
     [Parameter] public DateTime shiftDate { get; set; }
     [Parameter] public int employeeShiftId { get; set; }
@@ -156,7 +138,7 @@
         }
     }
 
-    private CreateEditWorkRecordTabModel createEditWorkRecordTabModelRef;
+    private CreateEditWorkRecordTabModel? createEditWorkRecordTabModelRef;
     public CreateEditWorkRecordViewModel createEditWorkRecordNoteModel { get; set; } = new();
     private List<WorkRecord> selectedWorkRecord = new();
 
@@ -173,7 +155,7 @@
 
         var createWorkRecordModel = new CreateEditWorkRecordViewModel
         {
-            Id = 0, 
+            Id = 0,
             StartTime = shiftDate,
             EndTime = shiftDate,
             EmployeeShiftId = employeeShiftId,
@@ -201,19 +183,18 @@
         createWorkRecordModel.CostCentreSelect.Insert(0,
             new SelectListItem { Value = "", Text = "Select" });
 
-        await createEditWorkRecordTabModelRef
+        await createEditWorkRecordTabModelRef!
             .ShowModal(createWorkRecordModel);
     }
 
     public async Task EditWorkRecord(WorkRecord workRecord)
     {
         if (workRecord == null) return;
-
+        if (locked) return;
         try
         {
             SpinnerService.Show();
 
-            // Get company activities/cost centres
             companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
             activities = await WorkRecordNotesService.GetActivitiesAsync(companyId);
             costCentres = await WorkRecordNotesService.GetCostCentresAsync(companyId);
@@ -244,7 +225,7 @@
             };
 
             // Open the modal
-            await createEditWorkRecordTabModelRef.ShowModal(createEditWorkRecordNoteModel);
+            await createEditWorkRecordTabModelRef!.ShowModal(createEditWorkRecordNoteModel);
         }
         finally
         {
@@ -287,8 +268,8 @@
             }
 
             if (workRecord.ActivityId == 0)
-            {
-                await JS.InvokeVoidAsync("alert", "You must select an activity.");
+            {               
+                ToastService.Show("You must select an activity.", ToastType.Warning);
                 return;
             }
 
@@ -298,7 +279,7 @@
 
                 if (!isActive)
                 {
-                    await JS.InvokeVoidAsync("alert", "The end time cannot be less than the start time!");
+                    ToastService.Show("The end time cannot be less than the start time!", ToastType.Warning);
                     isSubmitting = false;
                     return;
                 }
@@ -313,7 +294,7 @@
             if (savedWorkRecords != null)
             {
                 await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
-                await JS.InvokeVoidAsync("alert", "Work record saved successfully!");
+                ToastService.Show("Work record saved successfully!", ToastType.Success);
             }
 
             //Recalculate overtime
@@ -340,48 +321,60 @@
                     StateHasChanged();
                 }
 
-                if (ReloadWorkRecordAsync.HasDelegate)
-                {
-                    await ReloadWorkRecordAsync.InvokeAsync();
-                }
+                // if (ReloadWorkRecordAsync.HasDelegate)
+                // {
+                //     await ReloadWorkRecordAsync.InvokeAsync();
+                // }
             }
 
             else
             {
-                await JS.InvokeVoidAsync("showToast", "Failed to save work record.", "danger");
+                ToastService.Show("Failed to save work record.", ToastType.Danger);
             }
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", "An error occurred while saving.", "danger");
+            ToastService.Show("An error occurred while saving.", ToastType.Danger);
         }
         finally
         {
             isSubmitting = false;
+            await ReloadWorkRecordAsync.InvokeAsync();
         }
     }
 
-  
 
-    private async Task DeleteSelectedRecords()
+
+   
+    //DeleteLogic
+    bool showDeletePopup = false;
+    string popupDeleteMessage = "";
+
+    void CloseDeletePopup()
+    {
+        showDeletePopup = false;
+    }
+    public void DeleteSelectedRecords()
     {
         if (selectedWorkRecords.Count == 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please select at least one work record to delete");
+            ToastService.Show("Please select at least one work record to delete", ToastType.Warning);
             return;
         }
-        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+        popupDeleteMessage = $"Are you sure you want to delete {selectedWorkRecords.Count} workRecord(s)?";
+        showDeletePopup = true;
+    }
 
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {selectedWorkRecords.Count} workRecord(s)?");
-        if (!confirmed) return;
+    private async Task ConfirmDelete()
+    {
+        showDeletePopup = false;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
 
         SpinnerService.Show();
         try
         {
-            // selectedTags is HashSet<int> of selected IDs
-            var workrecordToDelete = workRecords
-                .Where(t => selectedWorkRecords.Contains(t.Id))
-                .ToList();
+            var workrecordToDelete = workRecords.Where(t => selectedWorkRecords.Contains(t.Id)).ToList();
 
             var success = await WorkRecordNotesService.DeleteWorkRecordAsync(workrecordToDelete);
 
@@ -389,8 +382,7 @@
             {
                 workRecords.RemoveAll(t => selectedWorkRecords.Contains(t.Id));
                 selectedWorkRecords.Clear();
-                await JS.InvokeVoidAsync("alert", "Selected workRecord deleted successfully");
-                //await ReloadWorkRecordAsync.InvokeAsync();
+                ToastService.Show("Selected work record deleted successfully", ToastType.Success);
             }
 
             //Recalculate overtime
@@ -405,18 +397,15 @@
 
             if (success)
             {
-                // await JS.InvokeVoidAsync("hideModal", "workRecordModal");
-                // await JS.InvokeVoidAsync("showToast", "Work record saved successfully!", "success");
-
-                var overtimeList = await WorkRecordNotesService.RecalculateOvertimeAsync( parameterList);
+                var overtimeList = await WorkRecordNotesService.RecalculateOvertimeAsync(parameterList);
 
                 if (overtimeList != null)
                 {
                     OvertimeRecords = overtimeList;
                     StateHasChanged();
                 }
-                await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
-                //await ReloadWorkRecordAsync.InvokeAsync();
+               // await JS.InvokeVoidAsync("hideModal", "workRecordViewModel");
+                await ReloadWorkRecordAsync.InvokeAsync();
             }
         }
         finally
@@ -426,49 +415,32 @@
         }
     }
 
-    //Show as late toggle handler
-     private async Task OnLateChanged(ChangeEventArgs e)
+    <!-- Late Logic -->
+    private async Task OnLateChanged()
     {
-        if (e.Value is bool newValue)
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        var parameterList = new ParameterList
         {
-            late = newValue;
-            await ApplyLateFilter(late);
-        }
-    }
-
-    private async Task ApplyLateFilter(bool value)
-    {
-        try
-        {
-            isSubmitting = true;
-
-            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
-
-            var parameterList = new ParameterList
+            UserId = userId,
+            EmployeeShift = new EmployeeShift
             {
-                UserId = userId,
-                EmployeeShift = new EmployeeShift
-                {
-                    Id = EmployeeId,
-                    Late = value,
-                    UpdatedByUserId = userId,
-                    UpdatedDate = DateTime.Now
-                }
-            };
+                Id = employeeShiftId,
+                Late = late,
+                UpdatedByUserId = userId,
+                UpdatedDate = DateTime.Now
+            }
+        };
 
-            var success = await WorkRecordNotesService.SaveWorkRecordShowAsLateAsync(parameterList);
+        isSubmitting = true;
+        var success = await WorkRecordNotesService.SaveWorkRecordShowAsLateAsync(parameterList);
+        isSubmitting = false;
 
-            // if (!success)
-            // {
-            //     // optional: revert toggle if save fails
-            //     late = !value;
-            //     ToastService.Show("Failed to update late status.", ToastType.Danger);
-            // }
-        }
-        finally
+        if (!success)
         {
-            isSubmitting = false;
-            await InvokeAsync(StateHasChanged);
+            late = !late;
         }
     }
+
+
 }

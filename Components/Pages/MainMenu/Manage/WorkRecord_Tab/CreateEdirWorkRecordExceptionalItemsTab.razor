@@ -4,13 +4,13 @@
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> ExceptionalItem </h5>
     <!-- Buttons -->
-    <div class="btn-group" role="group">
+    <div class="btn-group" role="group" style="cursor:@(locked ? "not-allowed" : "pointer")">
         <div class="btn-group" role="group">
-            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateExceptionalItem">
+            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateExceptionalItem" disabled="@locked">
                 <i class="fa fa-plus"></i>
             </button>
 
-            <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteExceptionalItem">
+            <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteExceptionalItem" disabled="@locked">
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>
@@ -21,11 +21,11 @@
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:3%">
+                <th style="width:3%; cursor:@(locked ? " not-allowed" : "pointer" )">
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" /> @* *@
+                           @onchange="ToggleSelectAll" disabled="@locked" /> 
 
                 </th>
                 <th style="width:28%;">Exceptional item</th>
@@ -51,11 +51,11 @@
                 @foreach (var record in exceptionalItem)
                 {
                     <tr>
-                        <td>
+                        <td style="cursor:@(locked ? "not-allowed" : "pointer")">
                             <input type="checkbox"
                                    class="form-check-input"
                                    checked="@selectedExceptionItems.Contains(record.Id)"
-                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" disabled="@locked" />
                         </td>
                         <td>@record.ExceptionalItemTypeDisplay</td>
                         <td>@record.CostCentreDisplay</td>
@@ -74,6 +74,7 @@
 <CreateEdirWorkRecordExceptionalItemsTabModel @ref=createEditWorkRecordExceptionalTabModelref isSubmitting="@isSubmitting" OnSubmit="OnExceptionalItemSaved" />
  <DeleteConfirmationPage IsVisible="@showDeletePopup" Message="@popupDeleteMessage" OnDelete="ConfirmDelete" OnCancel="CloseDeletePopup" /> 
 @code {
+    [Parameter] public bool locked { get; set; }
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
     [Parameter] public int EmployeeId { get; set; }
     [Parameter] public DateTime shiftDate { get; set; }

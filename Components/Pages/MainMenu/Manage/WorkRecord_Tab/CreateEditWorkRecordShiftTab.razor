@@ -2,18 +2,18 @@
 <div class=" modal-header border-0 mb-2" style="padding: 0">
     <h5> EmployeeShift </h5>
     <!-- Buttons -->
-    <div class="btn-group" role="group">
+    <div class="btn-group" role="group" style="cursor:@(locked ? "not-allowed" : "pointer")">
         @if (employeeShift == null || !employeeShift.Any())
         {
-            <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateDefaultShiftAsync">
-                @* <i class="fa fa-plus"></i> *@Create Default Shift
+            <button class="btn  bg-brand-100" type="button" @onclick="CreateDefaultShiftAsync" disabled="@locked">
+              Default Shift
         </button>
         }
-        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateEmployeeShift">
+        <button class="btn icon-btn bg-brand-100" type="button" @onclick="CreateEmployeeShift" disabled="@locked">
             <i class="fa fa-plus"></i>
         </button>
 
-        <button class="btn icon-btn btn-danger"  type="button" @onclick="DeleteSelectedRecords">
+        <button class="btn icon-btn btn-danger" type="button" @onclick="DeleteSelectedRecords" disabled="@locked">
             <i class="fa-solid fa-trash"></i>
         </button>
     </div>
@@ -23,11 +23,11 @@
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:3%">
+                <th style="width:3%; cursor:@(locked ? "not-allowed" : "pointer")">
                     <input type="checkbox"
                            class="form-check-input"
                            checked="@IsAllSelected"
-                           @onchange="ToggleSelectAll" /> @* *@
+                           @onchange="ToggleSelectAll" disabled="@locked" /> @* *@
 
                 </th>
                 <th style="width:97%;">Start</th>               
@@ -48,11 +48,11 @@
                 @foreach (var record in employeeShift)
                 {
                     <tr>
-                        <td>
+                        <td style="cursor:@(locked ? "not-allowed" : "pointer")">
                             <input type="checkbox"
                                    class="form-check-input"
                                    checked="@selectedEmployeeShifts.Contains(record.Id)"
-                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" />
+                                   @onchange="(e) => ToggleSelection(record.Id, (bool)e.Value!)" disabled="@locked" />
                         </td>
                        
                         <td>@record.ShiftCode</td>
@@ -68,7 +68,7 @@
 <DeleteConfirmationPage IsVisible="@showDeletePopup" Message="@popupDeleteMessage" OnDelete="ConfirmDelete" OnCancel="CloseDeletePopup" />
 
 @code {
-
+    [Parameter] public bool locked { get; set; }
     [Parameter] public EventCallback ReloadWorkRecordAsync { get; set; }
 
     private CreateEditWorkRecordShiftTabModel? createEditWorkRecordShiftTabModelRef;
