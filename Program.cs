@@ -11,6 +11,7 @@ using ClockNest.Services.Spinner_Service;
 using ClockNest.Services.TagsService;
 using ClockNest.Services.Toast_Service;
 using ClockNest.Services.User_Service;
+using ClockNest.Services.View.Timesheet_Service;
 using ClockNest.Services.WorkRecordNotes_Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http.Headers;
@@ -73,6 +74,7 @@ namespace ClockNest
             builder.Services.AddScoped<SelfServices>();
             builder.Services.AddScoped<TagsService>();
             builder.Services.AddScoped<WorkRecordNotesService>();
+            builder.Services.AddScoped<TimesheetService>();
            
 
             var app = builder.Build();

@@ -325,7 +325,7 @@
                 @if (isSidebarCollapse)
                 {
                     <div class="flyout-menu">
-                        <NavLink class="side-item sub" href="/tags"><span class="menu-text-collapsed">Timesheet</span></NavLink>
+                        <NavLink class="side-item sub" href="/timesheet"><span class="menu-text-collapsed">Timesheet</span></NavLink>
                         <NavLink class="side-item sub" href="/users"><span class="menu-text-collapsed">Calendar</span></NavLink>
                         <NavLink class="side-item sub" href="/dashboard"><span class="menu-text-collapsed">Attendance</span></NavLink>
                         <NavLink class="side-item sub" href="/liveactivity"><span class="menu-text-collapsed">Pegboard</span></NavLink>
@@ -336,7 +336,7 @@
             @if (activeMenu == "view" && !isSidebarCollapse)
             {
                 <div class="submenu">
-                    <NavLink class="side-item sub" href="/tags"><span class="menu-text">Timesheet</span></NavLink>
+                    <NavLink class="side-item sub" href="/timesheet"><span class="menu-text">Timesheet</span></NavLink>
                     <NavLink class="side-item sub" href="/users"><span class="menu-text">Calendar</span></NavLink>
                     <NavLink class="side-item sub" href="/dashboard"><span class="menu-text">Attendance</span></NavLink>
                     <NavLink class="side-item sub" href="/liveactivity"><span class="menu-text">Pegboard</span></NavLink>
@@ -873,7 +873,7 @@
     Dictionary<string, string[]> menuMap = new()
     {
         { "home", new[] { "/dashboard", "/liveactivity" } },
-      //  { "view", new[] { "/tags", "/users", "/dashboard", "/liveactivity", "/notimplemented"} },
+        { "view", new[] { "/timesheet",  "/dashboard", "/liveactivity", "/notimplemented"} },
          { "manage", new[] { "/workRecord" } },
         // { "hR", new[] { "" } },
         // { "access", new[] { "" } },

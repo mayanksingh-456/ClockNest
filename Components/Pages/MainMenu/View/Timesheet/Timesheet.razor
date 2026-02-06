@@ -1,0 +1,929 @@
+﻿@page "/timesheet"
+@using ClockNest.Common
+@using ClockNest.Enum
+
+<style>
+    .slide-up-panel {
+        position: fixed;
+        bottom: 20px;
+        left: 210px;
+        right: 20px;
+        background: #fff;
+        border-top: 1px solid #ddd;
+        box-shadow: 0 -6px 20px rgba(0,0,0,0.15);
+        animation: slideUp 0.35s ease-out;
+        z-index: 1050;
+        max-height: 60vh;
+        border-radius: 8px;
+    }
+
+    @@keyframes slideUp {
+        from
+
+    {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding-right: 1px;
+    }
+
+</style>
+
+<style>
+    .badge-clockin {
+        background-color: #5cb85c !important;
+        color: #fff !important;
+    }
+
+    .liveEmployeeStatusColour-late {
+        border-color: red !important;
+    }
+
+    .badge-late {
+        background-color: red !important;
+        color: #fff !important;
+    }
+
+    .liveEmployeeStatusColour-holiday {
+        border-color: yellow !important;
+    }
+
+    .badge-holiday {
+        background-color: yellow !important;
+        color: #000 !important;
+    }
+
+    .liveEmployeeStatusColour-bankholiday {
+        border-color: lightyellow !important;
+    }
+
+    .badge-bankholiday {
+        background-color: lightyellow !important;
+        color: #000 !important;
+    }
+
+    .liveEmployeeStatusColour-sickness {
+        border-color: cyan !important;
+    }
+
+    .badge-sickness {
+        background-color: cyan !important;
+        color: #000 !important;
+    }
+
+    .liveEmployeeStatusColour-absence {
+        border-color: magenta !important;
+    }
+
+    .badge-absence {
+        background-color: magenta !important;
+        color: #fff !important;
+    }
+
+    .liveEmployeeStatusColour-holidayrequested {
+        border-color: orange !important;
+    }
+
+    .badge-holidayrequested {
+        background-color: orange !important;
+        color: #000 !important;
+    }
+
+    .liveEmployeeStatusColour-holidaydeclined {
+        border-color: coral !important;
+    }
+
+    .badge-holidaydeclined {
+        background-color: coral !important;
+        color: #fff !important;
+    }
+
+    .liveEmployeeStatusColour-severity1 {
+        border-color: #d9534f !important;
+    }
+
+    .badge-severity1 {
+        background-color: #d9534f !important;
+        color: #fff !important;
+    }
+
+    .liveEmployeeStatusColour-severity2 {
+        border-color: #ec971f !important;
+    }
+
+    .badge-severity2 {
+        background-color: #ec971f !important;
+        color: #fff !important;
+    }
+
+    .liveEmployeeStatusColour-severity3 {
+        border-color: #ffc107 !important;
+    }
+
+    .badge-severity3 {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .liveEmployeeStatusColour-unauthorisedovertime {
+        border-color: darkgreen !important;
+    }
+
+    .badge-unauthorisedovertime {
+        background-color: darkgreen !important;
+        color: #fff !important;
+    }
+
+    .border-secondary {
+        border-color: #6c757d !important;
+    }
+
+    .badge-secondary {
+        background-color: #6c757d !important;
+        color: #fff !important;
+    }
+
+    .status-btn {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 500;
+        min-width: 80px;
+        text-align: center;
+    }
+</style>
+
+<style>
+    /* Timesheet row colors with border left and text color */
+
+    tr.bg-holiday td {
+        background-color: #D6E9C6;
+        border-left: 5px solid #AED581;
+        color: #33691E;
+    }
+
+    tr.bg-bankholiday td {
+        background-color: #FFF9C4;
+        border-left: 5px solid #FFF176;
+        color: #F9A825;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-sick td {
+        background-color: #B3E5FC;
+        border-left: 5px solid #4FC3F7;
+        color: #01579B;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-absence td {
+        background-color: #FFCDD2;
+        border-left: 5px solid #EF9A9A;
+        color: #B71C1C;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-holidayrequest td {
+        background-color: #FFE0B2;
+        border-left: 5px solid #FFB74D;
+        color: #E65100;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-holidaydeclined td {
+        background-color: #F8BBD0;
+        border-left: 5px solid #F48FB1;
+        color: #880E4F;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-rostershift td,
+    tr.bg-scheduledshift td {
+        background-color: #E3F2FD;
+        border-left: 5px solid #90CAF9;
+        color: #0D47A1;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-rest td {
+        background-color: #FFFFFF !important;
+        color: #424242;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-workshift td {
+        background-color: #C8E6C9;
+        border-left: 5px solid #81C784;
+        color: #2E7D32;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    tr.bg-lateness td,
+    tr.bg-accessdenied td {
+        background-color: #FFEBEE;
+        border-left: 5px solid #EF5350;
+        color: #C62828;
+    }
+
+    tr.bg-excludeshift td {
+        background-color: #F5F5F5;
+        border-left: 5px solid #BDBDBD;
+        color: #616161;
+    }
+
+    tr.bg-excludeactualshift td {
+        background-color: #EEEEEE;
+        border-left: 5px solid #9E9E9E;
+        color: #424242;
+    }
+
+    /* General text styles */
+  /*   .clsbold {
+        font-weight: 700 !important;
+        color: #0C111D !important;
+    }
+
+    .boldText {
+        font-weight: bold;
+        color: #333 !important;
+    }
+
+    table tbody tr td {
+        padding: 0.5rem 1rem;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 0.9rem;
+    }
+
+
+    table tbody tr:hover {
+        background-color: #f5f5f5;
+        cursor: default;
+    } */
+
+</style>
+<div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
+    <!-- Page title -->
+    <div class="page-title">Time sheet</div>
+
+    <!-- Search input  -->
+    <div class="flex-grow-1 mx-3 d-flex justify-content-center">
+        <div class="search-group">
+            <input class="form-control search-input body-medium" type="text" placeholder="Type to search..."
+                   @bind="searchText"
+                   @bind:event="oninput"
+                   @bind:after="ResetPage" />
+
+            @if (string.IsNullOrWhiteSpace(searchText))
+            {
+                <i class="fa fa-search search-icon"></i>
+            }
+            else
+            {
+                <i class="fa fa-times clear-icon " style="cursor:pointer" @onclick="ClearSearch"></i>
+            }
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group" role="group">
+        <button class="btn  bg-brand-100" type="button">
+            <i class="fa fa-plus "></i>&nbsp Add Employee
+        </button>
+        <button class="btn icon-btn clockNest-bg-secondary" title="Refresh" type="button" @onclick="RefreshGrid">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+
+<div class="row g-3 align-items-end mb-2" style="padding: -1px 10px;">
+    <div class="col-md-2 ">
+        <InputText type="date"
+                   class="form-control"
+                   @bind-Value="startDate"
+                   @bind-Value:after="OnStatusChange" />
+    </div>
+
+    <div class="col-md-3 ms-auto d-flex gap-3">
+        @* <div class="flex-fill">
+            <InputSelect @bind-Value="employeeFilterStatus"
+                         @bind-Value:after="OnStatusChange"
+                         class="form-select form-control-lg body-medium no-outline">
+
+                @foreach (var status in employeeFilterStatusList)
+                {
+                    <option value="@status.Value">@status.Name</option>
+                }
+
+            </InputSelect>
+        </div> *@
+
+
+        <div class="flex-fill">
+            <InputSelect @bind-Value="selectedTagId"
+                         @bind-Value:after="OnStatusChange"
+                         class="form-select form-control-lg body-medium no-outline">
+                @foreach (var titles in tagList)
+                {
+                    <option value="@titles.Id">@titles.Name</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- Checkbox Selected Bar -->
+@* <div class="top-bar">
+    @if (selectedEmployeeClockingStatus.Any())
+    {
+        <div class="col-12">
+            <div class="selectedBar">
+                <div class="selectedBar_container">
+                    <span class="selectedCount">@selectedEmployeeClockingStatus.Count</span>
+                    <span class="selectedText">Selected</span>
+                </div>
+                <div class="selectedBar_container">
+                    @if (selectedEmployeeClockingStatus.Count == 1)
+                    {
+                        <div class="selectedBar_deleteButton">
+                            <i class="fa-regular fa-pen-to-square" style="color: #FFD43B; padding:3px"></i>
+                            <span>Edit</span>
+                        </div>
+                    }
+
+                    <div class="selectedBar_deleteButton" >
+                        <img src="icons/Close.svg" class="selectedBar_closeIcon" />
+                        <span>Delete</span>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    }
+
+</div> *@
+
+<div class="table-responsive custom-table-wrapper">
+    <table class="table table-hover table-bordered align-middle  custom-table">
+        <thead>
+            <tr>
+                <th style="width:20%">Employee name</th>
+                <th style="width:15%;">Badge Id</th>
+                <th style="width:12%">Payroll No</th>
+                <th style="width:20%">Activity name</th>
+                <th style="width:20%">Cost centre name</th>
+                <th style="width:13%">Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (PagedEmployeeClockingStatus.Any())
+            {
+                @foreach (var employeeClocking in PagedEmployeeClockingStatus)
+                {
+                    <tr @onclick="() => OpenWeeklySummary(employeeClocking.EmployeeId ?? 0)"
+                        style="cursor:pointer;">
+                       
+                        <td>@employeeClocking.FullName</td>
+                        <td>@employeeClocking.BadgeId</td>
+                        <td>@(string.IsNullOrWhiteSpace(employeeClocking.PayrollNo) ? "-" : employeeClocking.PayrollNo)</td>
+                        <td>@(string.IsNullOrWhiteSpace(employeeClocking.ActivityName) ? "-" : employeeClocking.ActivityName)</td>
+                        <td>@(string.IsNullOrWhiteSpace(employeeClocking.CostCentreName) ? "-" : employeeClocking.CostCentreName)</td>
+                        @* <td>@(string.IsNullOrWhiteSpace(employeeClocking.StatusDisplay) ? "-" : employeeClocking.StatusDisplay)</td> *@
+                        <td>
+                            @if (string.IsNullOrWhiteSpace(employeeClocking.StatusDisplay))
+                            {
+                                <span>-</span>
+                            }
+                            else
+                            {
+                                <span class="status-btn badge @GetStatusBadgeClass(employeeClocking.StatusId)">
+                                    @employeeClocking.StatusDisplay
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No employee clocking found
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination + Page Size -->
+<!-- Table Footer Bar -->
+<div class="table-footer-bar">
+
+    <!-- Paze Size -->
+    <div class="footer-pagesize">
+        <span>Rows:</span>
+        <select class="form-select form-select-sm"
+                @bind="pageSize"
+                @bind:after="ResetPage"
+                style=" border-radius: 6px !important; border: 1px solid #CBD5E1 !important; padding: 5px !important; font-size: 13px;">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="0">All</option>
+        </select>
+    </div>
+
+    <!-- No of employes -->
+    <div class="footer-info">
+        Showing <strong>@PagedEmployeeClockingStatus.Count()</strong> of
+        <strong>@FilteredEmployeeClockingStatus.Count()</strong> employees
+    </div>
+
+    <!-- Previous Next Button -->
+    <nav>
+        <ul class="pagination mb-0 custom-pagination">
+
+            <!-- First -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(1)">
+                    &laquo;
+                </button>
+            </li>
+
+            <!-- Previous -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PreviousPage">
+                    &lsaquo;
+                </button>
+            </li>
+
+            <!-- Page Numbers -->
+            @foreach (var pageNumber in VisiblePages)
+            {
+                if (pageNumber == -1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item @(pageNumber == currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(pageNumber)">
+                            @pageNumber
+                        </button>
+                    </li>
+                }
+            }
+
+            <!-- Next -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">
+                    &rsaquo;
+                </button>
+            </li>
+
+            <!-- Last -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => GoToPage(totalPages)">
+                    &raquo;
+                </button>
+            </li>
+
+        </ul>
+    </nav>
+</div>
+
+<!-- Weekly summary table  -->
+@if (showEmployeeWeeklySummary)
+{
+    <div class="slide-up-panel">
+
+        <div class="panel-header">
+            <h6 class="mb-0">Weekly summary for @selectedEmployeeId</h6>
+
+            <div class="justify-content-end g-2 padding-0">
+            <div class="btn-group" role="group">
+                <button class="btn  btn-success" type="button">
+                  Clock In
+                </button>
+                    <button class="btn  btn-danger" title="Refresh" type="button">
+                   Clock Out
+                </button>
+                    <button class="btn  clockNest-bg-secondary" title="Refresh" type="button" >
+                       Approve all
+                    </button>
+            </div>
+            <button class="btn "
+                    @onclick="CloseWeeklySummary"> ✕
+            </button>
+            </div>
+        </div>
+        <div class="table-responsive custom-table-wrapper">
+            <table class="table table-hover table-bordered align-middle  custom-table">
+            <thead>
+                <tr>
+                    <th style="width:8%">Day</th>
+                    <th style="width:11%">Date</th>
+                    <th style="width:12%">Roster Shift</th>
+                    <th style ="width:11%">Actual Shift</th>
+                    <th style ="width:9%">Start Time</th>
+                    <th style ="width:9%">End Time</th>
+                    <th style ="width:5%">Hours</th>
+                    <th style ="width:6%">Contracted</th>
+                    <th style ="width:7%">Variance</th>
+                    <th style ="width:7%">Overtime</th>
+                    <th style ="width:9%">Status</th>
+                    <th style ="width:6%">Verified</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    @if (weeklySummary.Any())
+                    {
+                        @foreach (var item in weeklySummary)
+                        {
+                            var rowClasses = new List<string>();
+
+                            if (!string.IsNullOrWhiteSpace(item.RosterShiftCode) && item.RosterShiftCode != "-")
+                            {
+                                rowClasses.Add("boldText");
+                            }
+
+                            if (!string.IsNullOrEmpty(item.Day))
+                            {
+                                switch (item.AbsenceTypeId)
+                                {
+                                    case 1: rowClasses.Add("bg-holiday"); break;
+                                    case 2: rowClasses.Add("bg-sick"); break;
+                                    case 3: rowClasses.Add("bg-absence"); break;
+                                    case 4: rowClasses.Add("bg-holidayrequest"); break;
+                                    case 5: rowClasses.Add("bg-holidaydeclined"); break;
+                                    case 6: rowClasses.Add("bg-bankholiday"); break;
+
+                                    default:
+                                        if (item.IsLate == true)
+                                            rowClasses.Add("bg-lateness");
+                                        else if (item.EmployeeShiftId != null)
+                                            rowClasses.Add("bg-workshift");
+                                        else if (item.ContractedDisplay == "00:00" || item.ContractedDisplay == "0:00")
+                                            rowClasses.Add("bg-rest");
+                                        else if (
+                                        (!string.IsNullOrEmpty(item.RosterShiftCode) && item.RosterShiftCode != "-") ||
+                                        (!string.IsNullOrEmpty(item.ShiftCode) && item.ShiftCode != "-")
+                                        )
+                                            rowClasses.Add("bg-rostershift");
+                                        break;
+                                }
+                            }
+
+                            <tr class="@string.Join(" ", rowClasses)">
+                                <td>@item.Day</td>
+                                <td>@item.StartDateDisplay</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.RosterShiftCode) ? "-" : item.RosterShiftCode)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.ShiftCode) ? "-" : item.ShiftCode)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.StartTimeDisplay) ? "-" : item.StartTimeDisplay)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.EndTimeDisplay) ? "-" : item.EndTimeDisplay)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.HoursDisplay) ? "-" : item.HoursDisplay)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.ContractedDisplay) ? "-" : item.ContractedDisplay)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.VarianceDisplay) ? "-" : item.VarianceDisplay)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.OvertimeDisplay) ? "-" : item.OvertimeDisplay)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.Status) ? "-" : item.Status)</td>
+                                <td>
+                                    @if (string.IsNullOrEmpty(item.Day))
+                                    {
+                                        @* Empty cell *@
+                                    }
+                                    else if (item.IsVerified)
+                                    {
+                                        <i class="fa fa-check text-success"></i>
+                                    }
+                                    else if (item.StatusId == 1)
+                                    {
+                                        <span>
+                                            <i class="fa fa-exclamation-triangle employeeStatusIcon employeeStatusColour-severity1"></i>
+                                        </span>
+                                    }
+                                    else if (item.StatusId == 2)
+                                    {
+                                        <span>
+                                            <i class="fa fa-exclamation-triangle employeeStatusIcon employeeStatusColour-unauthorisedovertime"></i>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" checked="@item.IsVerified" /> 
+                        @* @onchange
+                                                = "e => OnVerifiedChanged(item, ((ChangeEventArgs)e).Value is bool b && b)" *@
+                                    }
+                                </td>
+                            </tr>
+                        }
+
+                    
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            No weekly summary found
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        </div>
+    </div>
+}
+
+
+@code {
+    private static readonly Dictionary<int, string> StatusBadgeMap = new()
+    {
+        { (int)LiveEmployeeStatus.WorkRecords, "badge-clockin" },
+        { (int)LiveEmployeeStatus.ClockedIn, "badge-clockin" },
+        { (int)LiveEmployeeStatus.WorkRecordsLate, "badge-late" },
+        { (int)LiveEmployeeStatus.Late, "badge-late" },
+        { (int)LiveEmployeeStatus.Holiday, "badge-holiday" },
+        { (int)LiveEmployeeStatus.HolidayClockedIn, "badge-holiday" },
+        { (int)LiveEmployeeStatus.Sickness, "badge-sickness" },
+        { (int)LiveEmployeeStatus.SicknessClockedIn, "badge-sickness" },
+        { (int)LiveEmployeeStatus.Absence, "badge-absence" },
+        { (int)LiveEmployeeStatus.AbsenceClockedIn, "badge-absence" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity1, "badge-severity1" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity2, "badge-severity2" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity3, "badge-severity3" },
+        { (int)LiveEmployeeStatus.UnauthorisedOvertime, "badge-unauthorisedovertime" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity1ClockedIn, "badge-severity1" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity2ClockedIn, "badge-severity2" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity3ClockedIn, "badge-severity3" },
+        { (int)LiveEmployeeStatus.Exception, "badge-severity3" },
+        { (int)LiveEmployeeStatus.HolidayPending, "badge-holidayrequested" },
+        { (int)LiveEmployeeStatus.HolidayDeclined, "badge-holidaydeclined" },
+        { (int)LiveEmployeeStatus.BankHoliday, "badge-bankholiday" },
+        { (int)LiveEmployeeStatus.BankHolidayClockedIn, "badge-bankholiday" },
+    };
+
+    private string GetStatusBadgeClass(int statusId)
+    {
+        return StatusBadgeMap.TryGetValue(statusId, out var css)
+            ? css
+            : "border-secondary";
+    }
+
+    private List<EmployeeClockingStatus> employeeClockingStatus = new();
+    private List<EmployeeClockingStatus> selectedWorkRecordNote = new List<EmployeeClockingStatus>();
+    private List<Tag> tagList = new();
+    private int companyId;
+    private int selectedTagId;
+    private int userId;
+    private int tagId;
+    private int selectedStatusId;
+
+    private string startDate = DateTime.Now.ToString("yyyy-MM-dd");
+
+    private EmployeeFilterStatus employeeFilterStatus { get; set; } = EmployeeFilterStatus.AllEmployees;
+    private List<EnumItem<EmployeeFilterStatus>> employeeFilterStatusList = new();
+
+    private string searchText = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private HashSet<int> selectedEmployeeClockingStatus = new();
+
+    private IEnumerable<EmployeeClockingStatus> FilteredEmployeeClockingStatus => employeeClockingStatus.Where(e =>
+     string.IsNullOrWhiteSpace(searchText) ||
+     (!string.IsNullOrEmpty(e.FullName) && e.FullName.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (!string.IsNullOrEmpty(e.CostCentreName) && e.CostCentreName.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (!string.IsNullOrEmpty(e.ActivityName) && e.ActivityName.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+      (!string.IsNullOrEmpty(e.StatusDisplay) && e.StatusDisplay.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+     (e.BadgeId != null &&
+            e.BadgeId.ToString().Contains(searchText)) ||
+     (e.PayrollNo != null &&
+            e.PayrollNo.ToString().Contains(searchText)));
+
+    private int totalPages => (int)Math.Ceiling(FilteredEmployeeClockingStatus.Count() / (double)pageSize);
+
+    private IEnumerable<EmployeeClockingStatus> PagedEmployeeClockingStatus =>
+    pageSize == 0
+    ? FilteredEmployeeClockingStatus
+    : FilteredEmployeeClockingStatus
+    .Skip((currentPage - 1) * pageSize)
+    .Take(pageSize);
+
+    private bool IsAllSelected
+    {
+        get => PagedEmployeeClockingStatus.Any() && PagedEmployeeClockingStatus.All(e => selectedEmployeeClockingStatus.Contains(e.StatusId));
+        set
+        {
+            if (value)
+            {
+                foreach (var tag in PagedEmployeeClockingStatus)
+                    selectedEmployeeClockingStatus.Add(tag.StatusId);
+            }
+            else
+            {
+                foreach (var tag in PagedEmployeeClockingStatus)
+                    selectedEmployeeClockingStatus.Remove(tag.StatusId);
+            }
+        }
+    }
+
+    void ClearSearch()
+    {
+        searchText = string.Empty;
+        ResetPage();
+    }
+
+    <!-- Checkbox Selection -->
+    private void ToggleRow(int id)
+    {
+        if (!selectedEmployeeClockingStatus.Add(id))
+            selectedEmployeeClockingStatus.Remove(id);
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = e.Value?.ToString() == "true";
+
+        foreach (var user in PagedEmployeeClockingStatus)
+        {
+            if (isChecked)
+                selectedEmployeeClockingStatus.Add(user.StatusId);
+            else
+                selectedEmployeeClockingStatus.Remove(user.StatusId);
+        }
+    }
+
+    <!-- Pagination-->
+    int maxVisiblePages = 5;
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+            currentPage++;
+    }
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+    private void ResetPage()
+    {
+        currentPage = 1;
+    }
+    List<int> VisiblePages
+    {
+        get
+        {
+            var pages = new List<int>();
+
+            if (totalPages <= maxVisiblePages)
+            {
+                for (int i = 1; i <= totalPages; i++)
+                    pages.Add(i);
+            }
+            else
+            {
+                int start = Math.Max(1, currentPage - 2);
+                int end = Math.Min(totalPages, currentPage + 2);
+
+                if (start > 1)
+                {
+                    pages.Add(1);
+                    pages.Add(-1); 
+                }
+
+                for (int i = start; i <= end; i++)
+                    pages.Add(i);
+
+                if (end < totalPages)
+                {
+                    pages.Add(-1); 
+                    pages.Add(totalPages);
+                }
+            }
+
+            return pages;
+        }
+    }
+
+    void GoToPage(int page)
+    {
+        if (page < 1 || page > totalPages)
+            return;
+
+        currentPage = page;
+    }
+
+    private async Task RefreshGrid()
+    {
+        SpinnerService.Show();
+        await Task.Delay(1000);
+        StateHasChanged();
+        try
+        {
+            searchText = "";
+            selectedEmployeeClockingStatus.Clear();
+            currentPage = 1;
+            pageSize = 10;
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinnerService.Show();
+        try
+        {         
+            companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
+            userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+
+    }
+
+    private async Task LoadDataAsync()
+    {
+        employeeFilterStatusList = EmployeeFilterStatusHelper.GetEnumList<EmployeeFilterStatus>();
+        tagList = await TagsService.GetAccessTagsAsync(false);
+        tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+        DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+
+
+        employeeClockingStatus = await TimesheetService.GetEmployeeClockingDetailsAsync(tagId, date, employeeFilterStatus);
+    }
+
+    private async Task OnStatusChange()
+    {
+        SpinnerService.Show();
+        try
+        {
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+   
+    //Employee weekly summary
+    private bool showEmployeeWeeklySummary = false;
+    private int selectedEmployeeId;
+    private List<WeeklySummary> weeklySummary = new List<WeeklySummary>();
+  
+
+    private async Task OpenWeeklySummary(int employeeId)
+    {
+        selectedEmployeeId = employeeId;
+        showEmployeeWeeklySummary = true;
+
+        SpinnerService.Show();
+        try
+        {
+            DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+            weeklySummary = await TimesheetService.GetLiveEmployeeWeeklySummaryAsync(employeeId, date, companyId);
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+
+    private void CloseWeeklySummary()
+    {
+        showEmployeeWeeklySummary = false;
+        weeklySummary.Clear();
+    }
+
+}
