@@ -276,6 +276,30 @@
     } */
 
 </style>
+
+<style>
+    .row select.form-select {
+        height: 35px;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    .row input.form-control {
+        height: 39px !important;
+    }
+    .btn-date{
+        height: 39px;
+        border-radius: 8px !important;
+        border: 1px solid #CBD5E1 !important;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+        .btn-date:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: #80c2b5 !important;
+    }
+</style>
 <div class="top-bar d-flex align-items-center justify-content-between py-2 px-3">
     <!-- Page title -->
     <div class="page-title">Time sheet</div>
@@ -310,30 +334,55 @@
     </div>
 </div>
 
-<div class="row g-3 align-items-end mb-2" style="padding: -1px 10px;">
-    <div class="col-md-2 ">
+<div class="row g-3 align-items-end mb-2">
+
+    <!-- Date stays on the left -->
+    <div class="col-md-2">
         <InputText type="date"
                    class="form-control"
                    @bind-Value="startDate"
                    @bind-Value:after="OnStatusChange" />
     </div>
 
-    <div class="col-md-3 ms-auto d-flex gap-3">
-        @* <div class="flex-fill">
+    <!-- Right side group (buttons + dropdowns) -->
+    <div class="col-md-10 d-flex justify-content-end align-items-end gap-3 ms-auto">
+
+        <!-- Previous / Today / Next -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-date" title="Previous Day">
+                <i class="fa-solid fa-angles-left"></i>
+            </button>
+            <button class="btn btn-date" title="Previous Day">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <button class="btn btn-date" title="Today">
+                Today
+            </button>
+
+            <button class="btn btn-date" title="Next Day">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+
+            <button class="btn btn-date" title="Next Day">
+                <i class="fa-solid fa-angles-right"></i> 
+            </button>
+        </div>
+
+        <!-- Status dropdown -->
+        <div style="min-width: 200px;">
             <InputSelect @bind-Value="employeeFilterStatus"
                          @bind-Value:after="OnStatusChange"
                          class="form-select form-control-lg body-medium no-outline">
-
                 @foreach (var status in employeeFilterStatusList)
                 {
                     <option value="@status.Value">@status.Name</option>
                 }
-
             </InputSelect>
-        </div> *@
+        </div>
 
-
-        <div class="flex-fill">
+        <!-- Tag dropdown -->
+        <div style="min-width: 200px;">
             <InputSelect @bind-Value="selectedTagId"
                          @bind-Value:after="OnStatusChange"
                          class="form-select form-control-lg body-medium no-outline">
@@ -343,43 +392,9 @@
                 }
             </InputSelect>
         </div>
+
     </div>
-
 </div>
-
-
-
-<!-- Checkbox Selected Bar -->
-@* <div class="top-bar">
-    @if (selectedEmployeeClockingStatus.Any())
-    {
-        <div class="col-12">
-            <div class="selectedBar">
-                <div class="selectedBar_container">
-                    <span class="selectedCount">@selectedEmployeeClockingStatus.Count</span>
-                    <span class="selectedText">Selected</span>
-                </div>
-                <div class="selectedBar_container">
-                    @if (selectedEmployeeClockingStatus.Count == 1)
-                    {
-                        <div class="selectedBar_deleteButton">
-                            <i class="fa-regular fa-pen-to-square" style="color: #FFD43B; padding:3px"></i>
-                            <span>Edit</span>
-                        </div>
-                    }
-
-                    <div class="selectedBar_deleteButton" >
-                        <img src="icons/Close.svg" class="selectedBar_closeIcon" />
-                        <span>Delete</span>
-                    </div>
-
-
-                </div>
-            </div>
-        </div>
-    }
-
-</div> *@
 
 <div class="table-responsive custom-table-wrapper">
     <table class="table table-hover table-bordered align-middle  custom-table">
@@ -407,7 +422,6 @@
                         <td>@(string.IsNullOrWhiteSpace(employeeClocking.PayrollNo) ? "-" : employeeClocking.PayrollNo)</td>
                         <td>@(string.IsNullOrWhiteSpace(employeeClocking.ActivityName) ? "-" : employeeClocking.ActivityName)</td>
                         <td>@(string.IsNullOrWhiteSpace(employeeClocking.CostCentreName) ? "-" : employeeClocking.CostCentreName)</td>
-                        @* <td>@(string.IsNullOrWhiteSpace(employeeClocking.StatusDisplay) ? "-" : employeeClocking.StatusDisplay)</td> *@
                         <td>
                             @if (string.IsNullOrWhiteSpace(employeeClocking.StatusDisplay))
                             {
@@ -658,39 +672,7 @@
 
 
 @code {
-    private static readonly Dictionary<int, string> StatusBadgeMap = new()
-    {
-        { (int)LiveEmployeeStatus.WorkRecords, "badge-clockin" },
-        { (int)LiveEmployeeStatus.ClockedIn, "badge-clockin" },
-        { (int)LiveEmployeeStatus.WorkRecordsLate, "badge-late" },
-        { (int)LiveEmployeeStatus.Late, "badge-late" },
-        { (int)LiveEmployeeStatus.Holiday, "badge-holiday" },
-        { (int)LiveEmployeeStatus.HolidayClockedIn, "badge-holiday" },
-        { (int)LiveEmployeeStatus.Sickness, "badge-sickness" },
-        { (int)LiveEmployeeStatus.SicknessClockedIn, "badge-sickness" },
-        { (int)LiveEmployeeStatus.Absence, "badge-absence" },
-        { (int)LiveEmployeeStatus.AbsenceClockedIn, "badge-absence" },
-        { (int)LiveEmployeeStatus.ExceptionSeverity1, "badge-severity1" },
-        { (int)LiveEmployeeStatus.ExceptionSeverity2, "badge-severity2" },
-        { (int)LiveEmployeeStatus.ExceptionSeverity3, "badge-severity3" },
-        { (int)LiveEmployeeStatus.UnauthorisedOvertime, "badge-unauthorisedovertime" },
-        { (int)LiveEmployeeStatus.ExceptionSeverity1ClockedIn, "badge-severity1" },
-        { (int)LiveEmployeeStatus.ExceptionSeverity2ClockedIn, "badge-severity2" },
-        { (int)LiveEmployeeStatus.ExceptionSeverity3ClockedIn, "badge-severity3" },
-        { (int)LiveEmployeeStatus.Exception, "badge-severity3" },
-        { (int)LiveEmployeeStatus.HolidayPending, "badge-holidayrequested" },
-        { (int)LiveEmployeeStatus.HolidayDeclined, "badge-holidaydeclined" },
-        { (int)LiveEmployeeStatus.BankHoliday, "badge-bankholiday" },
-        { (int)LiveEmployeeStatus.BankHolidayClockedIn, "badge-bankholiday" },
-    };
-
-    private string GetStatusBadgeClass(int statusId)
-    {
-        return StatusBadgeMap.TryGetValue(statusId, out var css)
-            ? css
-            : "border-secondary";
-    }
-
+   
     private List<EmployeeClockingStatus> employeeClockingStatus = new();
     private List<EmployeeClockingStatus> selectedWorkRecordNote = new List<EmployeeClockingStatus>();
     private List<Tag> tagList = new();
@@ -893,6 +875,40 @@
         {
             SpinnerService.Hide();
         }
+    }
+
+    //Employee clocking status color
+    private static readonly Dictionary<int, string> StatusBadgeMap = new()
+    {
+        { (int)LiveEmployeeStatus.WorkRecords, "badge-clockin" },
+        { (int)LiveEmployeeStatus.ClockedIn, "badge-clockin" },
+        { (int)LiveEmployeeStatus.WorkRecordsLate, "badge-late" },
+        { (int)LiveEmployeeStatus.Late, "badge-late" },
+        { (int)LiveEmployeeStatus.Holiday, "badge-holiday" },
+        { (int)LiveEmployeeStatus.HolidayClockedIn, "badge-holiday" },
+        { (int)LiveEmployeeStatus.Sickness, "badge-sickness" },
+        { (int)LiveEmployeeStatus.SicknessClockedIn, "badge-sickness" },
+        { (int)LiveEmployeeStatus.Absence, "badge-absence" },
+        { (int)LiveEmployeeStatus.AbsenceClockedIn, "badge-absence" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity1, "badge-severity1" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity2, "badge-severity2" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity3, "badge-severity3" },
+        { (int)LiveEmployeeStatus.UnauthorisedOvertime, "badge-unauthorisedovertime" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity1ClockedIn, "badge-severity1" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity2ClockedIn, "badge-severity2" },
+        { (int)LiveEmployeeStatus.ExceptionSeverity3ClockedIn, "badge-severity3" },
+        { (int)LiveEmployeeStatus.Exception, "badge-severity3" },
+        { (int)LiveEmployeeStatus.HolidayPending, "badge-holidayrequested" },
+        { (int)LiveEmployeeStatus.HolidayDeclined, "badge-holidaydeclined" },
+        { (int)LiveEmployeeStatus.BankHoliday, "badge-bankholiday" },
+        { (int)LiveEmployeeStatus.BankHolidayClockedIn, "badge-bankholiday" },
+    };
+
+    private string GetStatusBadgeClass(int statusId)
+    {
+        return StatusBadgeMap.TryGetValue(statusId, out var css)
+            ? css
+            : "border-secondary";
     }
 
    
