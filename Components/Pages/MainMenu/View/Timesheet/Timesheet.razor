@@ -349,22 +349,22 @@
 
         <!-- Previous / Today / Next -->
         <div class="d-flex gap-2">
-            <button class="btn btn-date" title="Previous Day">
+            <button class="btn btn-date" title="Previous Week" @onclick="PreviousWeek">
                 <i class="fa-solid fa-angles-left"></i>
             </button>
-            <button class="btn btn-date" title="Previous Day">
+            <button class="btn btn-date" title="Previous Day" @onclick="PreviousDay">
                 <i class="bi bi-chevron-left"></i>
             </button>
 
-            <button class="btn btn-date" title="Today">
+            <button class="btn btn-date" title="Today" @onclick="Today">
                 Today
             </button>
 
-            <button class="btn btn-date" title="Next Day">
+            <button class="btn btn-date" title="Next Day" @onclick="NextDay">
                 <i class="bi bi-chevron-right"></i>
             </button>
 
-            <button class="btn btn-date" title="Next Day">
+            <button class="btn btn-date" title="Next Week" @onclick="NextWeek">
                 <i class="fa-solid fa-angles-right"></i> 
             </button>
         </div>
@@ -400,7 +400,7 @@
     <table class="table table-hover table-bordered align-middle  custom-table">
         <thead>
             <tr>
-                <th style="width:20%">Employee name</th>
+                <th style="width:20%; align-items:center">Employee name</th>
                 <th style="width:15%;">Badge Id</th>
                 <th style="width:12%">Payroll No</th>
                 <th style="width:20%">Activity name</th>
@@ -414,10 +414,33 @@
             {
                 @foreach (var employeeClocking in PagedEmployeeClockingStatus)
                 {
-                    <tr @onclick="() => OpenWeeklySummary(employeeClocking.EmployeeId ?? 0)"
+                    <tr @onclick="() => OpenWeeklySummary(
+                                employeeClocking.EmployeeId ?? 0,
+                                 employeeClocking.FullName)"
                         style="cursor:pointer;">
                        
-                        <td>@employeeClocking.FullName</td>
+                      @*   <td>@employeeClocking.FullName</td> *@
+                        <td>
+                            <div class="d-flex align-items-center gap-1">
+                        @if (!string.IsNullOrEmpty(employeeClocking.PhotoBase64))
+                                {
+                                    <img src="@employeeClocking.PhotoBase64"
+                                         alt="Employee Photo"
+                                         class="rounded-circle"
+                                         style="width:25px !important; height:26px !important; object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <img src="/avtar.png"
+                                         alt="No Photo"
+                                         class="rounded-circle"
+                                         style="width:25px !important; height:26px !important; object-fit:cover;" />
+                                }
+
+                                <span>@employeeClocking.FullName</span>
+                            </div>
+                        </td>
+
                         <td>@employeeClocking.BadgeId</td>
                         <td>@(string.IsNullOrWhiteSpace(employeeClocking.PayrollNo) ? "-" : employeeClocking.PayrollNo)</td>
                         <td>@(string.IsNullOrWhiteSpace(employeeClocking.ActivityName) ? "-" : employeeClocking.ActivityName)</td>
@@ -534,16 +557,20 @@
     <div class="slide-up-panel">
 
         <div class="panel-header">
-            <h6 class="mb-0">Weekly summary for @selectedEmployeeId</h6>
+            <h6 class="mb-0">Weekly summary for @selectedEmployeeName</h6>
 
             <div class="justify-content-end g-2 padding-0">
+    
             <div class="btn-group" role="group">
-                <button class="btn  btn-success" type="button">
+                    @if (isLiveClock)
+                    {
+                    <button class="btn  btn-success" type="button" @onclick="OnClickClockedIn">
                   Clock In
                 </button>
-                    <button class="btn  btn-danger" title="Refresh" type="button">
+                    <button class="btn  btn-danger" title="Refresh" type="button" @onclick="OnClickClockedOut">
                    Clock Out
                 </button>
+                }
                     <button class="btn  clockNest-bg-secondary" title="Refresh" type="button" >
                        Approve all
                     </button>
@@ -607,7 +634,7 @@
                                         (!string.IsNullOrEmpty(item.ShiftCode) && item.ShiftCode != "-")
                                         )
                                             rowClasses.Add("bg-rostershift");
-                                        break;
+                                    break;
                                 }
                             }
 
@@ -646,16 +673,12 @@
                                     }
                                     else
                                     {
-                                        <input type="checkbox" checked="@item.IsVerified" /> 
-                        @* @onchange
-                                                = "e => OnVerifiedChanged(item, ((ChangeEventArgs)e).Value is bool b && b)" *@
+                                        <input type="checkbox" checked="@item.IsVerified" @onchange="e => OnVerifiedChanged(item.ShiftDate, ((ChangeEventArgs)e).Value)" />                     
                                     }
                                 </td>
                             </tr>
                         }
-
-                    
-                }
+                   }
                 else
                 {
                     <tr>
@@ -681,6 +704,7 @@
     private int userId;
     private int tagId;
     private int selectedStatusId;
+    private bool isLiveClock;
 
     private string startDate = DateTime.Now.ToString("yyyy-MM-dd");
 
@@ -844,6 +868,10 @@
         {         
             companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
             userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            var claims = await UserContextService.GetUserClaimsAsync(AuthenticationStateProvider);
+           
+
+            isLiveClock = claims.AdditionalRoles.Contains("LiveClock");
             await LoadDataAsync();
         }
         finally
@@ -860,8 +888,11 @@
         tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
         DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
 
-
         employeeClockingStatus = await TimesheetService.GetEmployeeClockingDetailsAsync(tagId, date, employeeFilterStatus);
+        // foreach (var emp in employeeClockingStatus)
+        // {
+        //     emp.PhotoBase64 = Convert.ToBase64String(emp.Photo);
+        // }
     }
 
     private async Task OnStatusChange()
@@ -915,12 +946,13 @@
     //Employee weekly summary
     private bool showEmployeeWeeklySummary = false;
     private int selectedEmployeeId;
+    private string selectedEmployeeName = "";
     private List<WeeklySummary> weeklySummary = new List<WeeklySummary>();
   
-
-    private async Task OpenWeeklySummary(int employeeId)
+    private async Task OpenWeeklySummary(int employeeId, string employeeName)
     {
         selectedEmployeeId = employeeId;
+        selectedEmployeeName = employeeName;
         showEmployeeWeeklySummary = true;
 
         SpinnerService.Show();
@@ -935,11 +967,158 @@
         }
     }
 
-
     private void CloseWeeklySummary()
     {
         showEmployeeWeeklySummary = false;
         weeklySummary.Clear();
+    }
+
+    <!-- Previous next nad today button -->
+    private async Task PreviousWeek()
+    {
+        SpinnerService.Show();
+        try
+        {
+            DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+            date = date.AddDays(-7);
+            startDate = date.ToString("yyyy-MM-dd");
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task PreviousDay()
+    {
+        SpinnerService.Show();
+        try{
+        DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+        date = date.AddDays(-1);
+        startDate = date.ToString("yyyy-MM-dd");
+        await LoadDataAsync();
+    }
+    finally
+    {
+        SpinnerService.Hide();
+    }
+    }
+
+    private async Task NextDay()
+    {
+        SpinnerService.Show();
+        try
+        {
+            DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+            date = date.AddDays(1);
+            startDate = date.ToString("yyyy-MM-dd");
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task NextWeek()
+    {
+        SpinnerService.Show();
+        try
+        {
+            DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+            date = date.AddDays(7);
+            startDate = date.ToString("yyyy-MM-dd");
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task Today()
+    {
+        SpinnerService.Show();
+        try
+        {
+            DateTime date = string.IsNullOrEmpty(startDate) ? Helpers.Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+            date = DateTime.UtcNow.Date;
+            startDate = date.ToString("yyyy-MM-dd");
+            await LoadDataAsync();
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
+    <!--ClockedIn and clocked out -->
+    private int Clocked;
+    private async Task OnClickClockedIn()
+    {
+        try
+        {
+            SpinnerService.Show();
+            Clocked = 1;
+            bool isClockedIn = await TimesheetService.SubmitClocking(selectedEmployeeId, "clockIn", 0);
+        }
+        finally
+        {
+            ToastService.Show($"{selectedEmployeeName} clocked in.", ToastType.Success);
+            await OpenWeeklySummary(selectedEmployeeId, selectedEmployeeName);
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    private async Task OnClickClockedOut()
+    {
+        try
+        {
+            SpinnerService.Show();
+            Clocked = 1;
+            bool isClockedIn = await TimesheetService.SubmitClocking(selectedEmployeeId, "clockOut", 0);
+        }
+        finally
+        {
+            ToastService.Show($"{selectedEmployeeName} clocked out.", ToastType.Success);
+            await OpenWeeklySummary(selectedEmployeeId, selectedEmployeeName);
+            await LoadDataAsync();
+            SpinnerService.Hide();
+        }
+    }
+
+    <!-- Verified Changed -->
+    private async Task OnVerifiedChanged(DateTime? shiftDate, object checkedValue)
+    {
+        bool isChecked = checkedValue is bool b && b;
+
+        int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+
+        var verifiedModel = new Verified
+        {
+            EmployeeId = selectedEmployeeId,
+            ShiftDate = shiftDate ?? Helpers.Helper.GetDateTimeNow(),
+            CreatedByUserId = userId,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        try
+        {
+            await WorkRecordNotesService.SetWorkRecordVerifiedAsync(verifiedModel);
+            await OpenWeeklySummary(selectedEmployeeId, selectedEmployeeName);
+            ToastService.Show($"{selectedEmployeeName} Verified successfully.", ToastType.Success);
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to update Verified state: {ex.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
 }

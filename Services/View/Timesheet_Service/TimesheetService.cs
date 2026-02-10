@@ -5,6 +5,7 @@ using ClockNest.Models.Employee_Model;
 using ClockNest.Models.SelfService_Model;
 using ClockNest.Models.Timesheet_Model;
 using ClockNest.Models.User_Model;
+using ClockNest.Models.WorkRecordNotes_Model;
 using ClockNest.Services.CommonService;
 using ClockNest.ViewModels.Parameter_List;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -165,5 +166,56 @@ namespace ClockNest.Services.View.Timesheet_Service
             }
             return new List<WeeklySummary>();
         }
+
+        //Clockin
+        public async Task<bool> SubmitClocking(int employeeId, string clockingType, int changeId)
+        {
+            ClockingInfo clockingInfo = new ClockingInfo();
+            clockingInfo.ClockingDevice = enumClockingDevice.Manual;
+            clockingInfo.EmployeeId = employeeId;
+            switch (clockingType)
+            {
+                case "clockIn":
+                    clockingInfo.ClockingType = enumClockingType.ClockIn;
+                    break;
+                case "clockOut":
+                    clockingInfo.ClockingType = enumClockingType.ClockOut;
+                    break;
+                
+            }
+            clockingInfo.ChangeId = changeId;
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+            var response = await client.PostAsJsonAsync("chronicle/timeattendance/clockingbychangeId/post", clockingInfo);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //public async Task<bool> SetWorkRecordVerifiedAsync(int employeeId, DateTime date, int changeId)
+        //{
+        //    if (verified == null) throw new ArgumentException("Verified payload cannot be null.", nameof(verified));
+
+        //    var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+        //    var response = await client.PostAsJsonAsync("chronicle/timeattendance/workrecordverified/post", verified);
+
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        return await response.Content.ReadFromJsonAsync<bool>();
+        //    }
+        //    else
+        //    {
+        //        var errorContent = await response.Content.ReadAsStringAsync();
+        //        throw new HttpRequestException($"Failed to verify work record: {response.StatusCode} - {response.ReasonPhrase}\n{errorContent}");
+        //    }
+        //}
+
+
     }
 }

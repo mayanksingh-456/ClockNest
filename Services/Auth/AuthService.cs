@@ -191,6 +191,48 @@ namespace ClockNest.Services.Auth
 
                 //AdditionalRoles = user.Roles ?? new List<string>()
             };
+            foreach (var access in user.UserAccess)
+            {
+                var name = access.AccessType.Name + (access.ReadOnly == true ? "ReadOnly" : "");
+                claims.AdditionalRoles.Add(name);
+            }
+            foreach (var settingAccess in user.UserSettingAccess)
+            {
+                var name = settingAccess.SettingAccessType.Name + (settingAccess.ReadOnly == true ? "ReadOnly" : "");
+                claims.AdditionalRoles.Add(name);
+            }
+            foreach (var valueAccess in user.UserValueAccess)
+            {
+                claims.AdditionalRoles.Add(valueAccess.ValueAccessType.Name);
+            }
+            if (user.UserName.Contains("chronicle@"))
+            {
+                claims.AdditionalRoles.Add("ChronicleUser");
+            }
+            if (user.IsAutoSignUpUser.GetValueOrDefault(false) && user.IsAutoSignUpTrialPeriodExpired)
+            {
+                claims.AdditionalRoles.Add("AutoSignUpTrialExpired");
+            }
+            if (user.IsAutoSignUpUser.GetValueOrDefault(false))
+            {
+                if (user.CustomerDetails == null || string.IsNullOrEmpty(user.CustomerDetails.CustomerStripeId))
+                {
+                    claims.AdditionalRoles.Add("AutoSignUpTrialUser");
+                }
+                else
+                {
+                    claims.AdditionalRoles.Add("AutoSignUpSubscriptionUser");
+                }
+            }
+
+            var companyLicenceModules = await GetCompanyLicenceModules(companyId);
+            foreach (var licenceModule in companyLicenceModules)
+            {
+                var name = licenceModule.LicenceModuleType.Name + "Module";
+                claims.AdditionalRoles.Add(name);
+            }
+
+
 
             var headers = new Dictionary<string, string>
                 {
@@ -244,6 +286,24 @@ namespace ClockNest.Services.Auth
             }
 
             return Region.UK.ToString();
+        }
+
+        public async Task<List<CompanyLicenceModule>> GetCompanyLicenceModules(int companyId)
+        {
+            var client = _httpClientFactory.CreateClient("ClockNestClient");
+            HttpResponseMessage response = await client.PostAsJsonAsync("chronicle/account/companylicencemodules/get", companyId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var modules = await response.Content.ReadFromJsonAsync<List<CompanyLicenceModule>>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                return modules ?? new List<CompanyLicenceModule>();
+            }
+
+            return new List<CompanyLicenceModule>();
         }
 
         public async Task LogoutAsync()

@@ -150,7 +150,26 @@
                         </td> *@
                         <td>@workRecordNote.Id</td>
                         <td>@workRecordNote.EmployeeId</td>
-                        <td>@workRecordNote.EmployeeName</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1">
+                                @if (!string.IsNullOrEmpty(workRecordNote.PhotoBase64))
+                                {
+                                    <img src="@workRecordNote.PhotoBase64"
+                                         alt="Employee Photo"
+                                         class="rounded-circle"
+                                         style="width:25px !important; height:26px !important; object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <img src="/avtar.png"
+                                         alt="No Photo"
+                                         class="rounded-circle"
+                                         style="width:25px !important; height:26px !important; object-fit:cover;" />
+                                }
+
+                                <span>@workRecordNote.EmployeeName</span>
+                            </div>
+                        </td>
                         <td>@workRecordNote.CreatedDateDisplay</td>
                         <td>@workRecordNote.ShiftDateDisplay</td>
                         <td class="notes-cell">@workRecordNote.Notes</td>

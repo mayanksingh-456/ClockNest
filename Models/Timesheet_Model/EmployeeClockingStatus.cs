@@ -48,22 +48,20 @@
 
         public int StatusId { get; set; }
 
-        public byte?[] Photo { get; set; }
+        //public byte?[] Photo { get; set; }
+        //public byte?[] Photo { get; set; }
         public int RecordCount { get; set; }
 
         public string Notes { get; set; }
+        public byte[] Photo { get; set; }
         public string PhotoBase64
         {
             get
             {
-                if (Photo == null || !Photo.Any(b => b.HasValue))
+                if (Photo == null || Photo.Length == 0)
                     return null;
 
-                var bytes = Photo.Where(b => b.HasValue).Select(b => b.Value).ToArray();
-                if (bytes.Length == 0)
-                    return null;
-
-                return $"data:image/png;base64,{Convert.ToBase64String(bytes)}";
+                return $"data:image/png;base64,{Convert.ToBase64String(Photo)}";
             }
         }
     }

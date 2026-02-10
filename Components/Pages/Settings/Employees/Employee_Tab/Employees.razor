@@ -102,7 +102,25 @@
                         <td>@emp.Id</td>
                         <td>@emp.BadgeId</td>
                         <td>@emp.PayRollNo</td>
-                        <td>@emp.Forename</td>
+                        @* <td>@emp.Forename</td> *@
+                        <td>
+                            <div class="d-flex align-items-center gap-1">
+                                @if (!string.IsNullOrEmpty(emp.EmployeePhoto?.PhotoBase64))
+                                {
+                                    <img src="@emp.EmployeePhoto.PhotoBase64"
+                                         class="rounded-circle"
+                                         style="width:25px;height:26px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <img src="/avtar.png"
+                                         class="rounded-circle"
+                                         style="width:25px;height:26px;object-fit:cover;" />
+                                }
+
+                        <span>@emp.Forename</span>
+                            </div>
+                        </td>
                         <td>@emp.Surname</td>
                     </tr>
                 }
@@ -377,6 +395,13 @@
         companyId = await UserContextService.GetCompanyIdAsync(AuthenticationStateProvider);
         userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
         employees = await EmployeeService.GetEmployeeAsync(companyId);
+        // foreach (var emp in employees)
+        // {
+        //     if (emp.EmployeePhoto?.Photo != null && emp.EmployeePhoto.Photo.Length > 0)
+        //     {
+        //         emp.Photo = emp.EmployeePhoto.Photo;
+        //     }
+        // }
     }
 
     private async Task RefreshGrid()
