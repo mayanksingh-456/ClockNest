@@ -571,7 +571,7 @@
                    Clock Out
                 </button>
                 }
-                    <button class="btn  clockNest-bg-secondary" title="Refresh" type="button" >
+                    <button class="btn  clockNest-bg-secondary" title="Refresh" type="button" @onclick="OnApproveAll">
                        Approve all
                     </button>
             </div>
@@ -638,7 +638,7 @@
                                 }
                             }
 
-                            <tr class="@string.Join(" ", rowClasses)">
+                            <tr class="@string.Join(" ", rowClasses)" @ondblclick="@(() => OnRecordDoubleClick(item))">
                                 <td>@item.Day</td>
                                 <td>@item.StartDateDisplay</td>
                                 <td>@(string.IsNullOrWhiteSpace(item.RosterShiftCode) ? "-" : item.RosterShiftCode)</td>
@@ -693,6 +693,7 @@
     </div>
 }
 
+<CreateEditWorkRecordNotesModel @ref=workRecordNoteModelRef employees="employees" tagList="tagList" tagId="tagId" />
 
 @code {
    
@@ -944,6 +945,7 @@
 
    
     //Employee weekly summary
+
     private bool showEmployeeWeeklySummary = false;
     private int selectedEmployeeId;
     private string selectedEmployeeName = "";
@@ -1120,5 +1122,89 @@
             StateHasChanged();
         }
     }
+
+    <!--Approve all-->
+         private async Task OnApproveAll()
+    {
+        SpinnerService.Show();
+        try
+        {
+           
+            int userId = await UserContextService.GetUserIdAsync(AuthenticationStateProvider);
+            
+            foreach (var item in weeklySummary)
+            {
+                var verifiedModel = new Verified
+                {
+                    EmployeeId = item.EmployeeId ?? 0,
+                    ShiftDate = item.ShiftDate ?? Helpers.Helper.GetDateTimeNow(),
+                    CreatedByUserId = userId,
+                    CreatedDate = DateTime.UtcNow
+                };
+                if (!item.IsVerified)
+                {
+                    item.IsVerified = true;
+                    await WorkRecordNotesService.SetWorkRecordVerifiedAsync(verifiedModel);
+                }
+            }
+            await OpenWeeklySummary(selectedEmployeeId, selectedEmployeeName);
+            ToastService.Show($"{selectedEmployeeName}'s shifts approved successfully.", ToastType.Success);
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to approve all shifts: {ex.Message}");
+        }
+        finally
+        {
+            SpinnerService.Hide();
+            StateHasChanged();
+        }
+    }
+
+    <!-- Open Work recoed-->
+    private CreateEditWorkRecordNotesModel workRecordNoteModelRef = new();
+    private int employeeShiftId;
+    public List<Employee> employees = new();
+    private async Task OnRecordDoubleClick(WeeklySummary item)
+    {
+        if (item == null)
+            return;
+
+        // WeeklySummary → WorkRecordNoteDetail (mapping)
+        var workRecordNoteDetail = new WorkRecordNoteDetail
+        {
+            EmployeeId = item.EmployeeId ?? 0,
+            ShiftDate = item.ShiftDate!.Value,
+            Notes = item.Notes,         
+        };
+        await EditWorkRecordNote(workRecordNoteDetail);
+    }
+
+    private async Task EditWorkRecordNote(WorkRecordNoteDetail workRecordNoteDetail)
+    {
+        if (workRecordNoteDetail == null)
+            return;
+
+        selectedEmployeeId = workRecordNoteDetail.EmployeeId;
+
+        SpinnerService.Show();
+        try
+        {
+            employees = await WorkRecordNotesCommonService.GetEmployeesAsync(companyId, tagId, selectedEmployeeId);
+
+            var model = await WorkRecordNotesCommonService.EditWorkRecordModel( workRecordNoteDetail, companyId, employeeShiftId, userId, tagId, startDate, selectedEmployeeId);
+
+            if (model != null)
+            {
+                await workRecordNoteModelRef.ShowModal(model);
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
+
 
 }

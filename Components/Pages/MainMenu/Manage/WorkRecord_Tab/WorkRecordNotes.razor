@@ -1,5 +1,6 @@
 ﻿@page "/workRecord"
 
+
 <style>
     .notes-cell {
        
@@ -282,11 +283,8 @@
     private int selectedTagId;
     private int userId;
     private int tagId;
-    // private string startDate = DateTime.Now.AddDays(-30).ToString("dd-MM-yyyy");
-    // private string endDate = DateTime.Now.ToString("dd-MM-yyyy");
     private string startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
     private string endDate = DateTime.Now.ToString("yyyy-MM-dd");
-
 
     private string searchText = "";
     private int currentPage = 1;
@@ -486,46 +484,75 @@
     public bool hideCosts;
     private WorkRecordAllDetails workRecordAllDetails = new();
 
+    // private async Task EditWorkRecordNote(WorkRecordNoteDetail? workRecordNoteDetail = null)
+    // {
+    //     var editWorkRecordNote = workRecordNoteDetail ?? selectedWorkRecordNote.FirstOrDefault();
+    //     if (editWorkRecordNote == null) return;
+
+    //     SpinnerService.Show();
+    //     try
+    //     {
+    //         tagList = await TagsService.GetAccessTagsAsync(false);
+    //          tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+
+    //         company = await WorkRecordNotesService.GetCompanyAsync(companyId);
+    //         selectedEmployeeId = editWorkRecordNote.EmployeeId;
+    //         var parameterList = new ParameterList
+    //         {
+    //             TagId = tagId,
+    //             CompanyId = companyId,
+    //             EmployeeId = selectedEmployeeId
+    //         };
+    //         DateTime date = string.IsNullOrEmpty(startDate) ? Helper.GetDateTimeNow() : DateTime.Parse(startDate);
+    //         employees = await WorkRecordNotesService.GetEmployeeByTag2Async(parameterList);
+    //         workRecordAllDetails = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(editWorkRecordNote.EmployeeId, employeeShiftId, editWorkRecordNote.ShiftDate);
+    //         hideCosts = await WorkRecordNotesService.HideCosts(userId);
+
+    //         var workRecordNoteModel = new CreateEditWorkRecordNotesViewModel
+    //         {
+    //             Id = editWorkRecordNote.Id,
+    //             EmployeeId = editWorkRecordNote.EmployeeId,
+    //             ShiftDate = editWorkRecordNote.ShiftDate,
+    //             Notes = editWorkRecordNote.Notes,
+                     
+    //             WorkDetails = workRecordAllDetails,
+    //         };
+    //         await workRecordNoteModelRef.ShowModal(workRecordNoteModel);
+ 
+    //     }
+    //     finally
+    //     {
+    //         SpinnerService.Hide();
+    //     }
+    // }
+
     private async Task EditWorkRecordNote(WorkRecordNoteDetail? workRecordNoteDetail = null)
     {
         var editWorkRecordNote = workRecordNoteDetail ?? selectedWorkRecordNote.FirstOrDefault();
         if (editWorkRecordNote == null) return;
 
+        selectedEmployeeId = editWorkRecordNote.EmployeeId;
+
         SpinnerService.Show();
         try
         {
-            tagList = await TagsService.GetAccessTagsAsync(false);
-             tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+            // load employees
+            employees = await WorkRecordNotesCommonService.GetEmployeesAsync(companyId, tagId, selectedEmployeeId);
 
-            company = await WorkRecordNotesService.GetCompanyAsync(companyId);
-            selectedEmployeeId = editWorkRecordNote.EmployeeId;
-            var parameterList = new ParameterList
-            {
-                TagId = tagId,
-                CompanyId = companyId,
-                EmployeeId = selectedEmployeeId
-            };
-            DateTime date = string.IsNullOrEmpty(startDate) ? Helper.GetDateTimeNow() : DateTime.Parse(startDate);
-            employees = await WorkRecordNotesService.GetEmployeeByTag2Async(parameterList);
-            workRecordAllDetails = await WorkRecordNotesService.GetWorkRecordAllDetailsAsync(editWorkRecordNote.EmployeeId, employeeShiftId, editWorkRecordNote.ShiftDate);
-            hideCosts = await WorkRecordNotesService.HideCosts(userId);
+            // load model
+            var model = await WorkRecordNotesCommonService.EditWorkRecordModel(editWorkRecordNote, companyId, employeeShiftId, userId, tagId, startDate, selectedEmployeeId);
 
-            var workRecordNoteModel = new CreateEditWorkRecordNotesViewModel
+            if (model != null)
             {
-                Id = editWorkRecordNote.Id,
-                EmployeeId = editWorkRecordNote.EmployeeId,
-                ShiftDate = editWorkRecordNote.ShiftDate,
-                Notes = editWorkRecordNote.Notes,
-                     
-                WorkDetails = workRecordAllDetails,
-            };
-            await workRecordNoteModelRef.ShowModal(workRecordNoteModel);
- 
+                await workRecordNoteModelRef.ShowModal(model);
+            }
         }
         finally
         {
             SpinnerService.Hide();
         }
     }
+
+
 
 }

@@ -1,5 +1,6 @@
 ﻿@page "/selfservice"
 
+
 <!--Profile card and clockin clockout summary-->
 <style>
 
@@ -196,7 +197,7 @@
     .input-select select {
         border: 1px solid #ccc !important;
         padding: 8px 12px !important;
-        
+        border-radius: 999px !important;
         height: 35px !important;
         width: 100% !important;
         text-align: center !important;
@@ -745,7 +746,6 @@
             </div>
         </div>
 
-
         <!-- Today Summary -->
         <div class="clock-summary">
             <h4>
@@ -916,7 +916,7 @@
                         clsbold = "clsbold";
                     }
 
-                    <tr class="@string.Join(" ", rowClasses)">
+                    <tr class="@string.Join(" ", rowClasses)" @ondblclick="@(() => OnRecordDoubleClick(row))">
                         <td class="cldtext @clsbold">@((row.Day) ?? "-")</td>
                         <td class="cldtext @clsbold">@((row.StartDateDisplay) ?? "-")</td>
                         <td class="cldtext @clsbold">@((string.IsNullOrWhiteSpace(row.RosterShiftCode)) ? "-" : row.RosterShiftCode)</td>
@@ -1172,6 +1172,8 @@
 
 </div>
 
+<CreateEditWorkRecordNotesModel @ref=workRecordNoteModelRef employees="employees" tagList="tagList" tagId="tagId" />
+
 @code {
     private List<UserSelfServiceAccess> selfServiceAccess = new();
     private Employee employee;
@@ -1274,13 +1276,9 @@
         CostCentresList = await SelfServices.GetCostCentresAsync(companyId);
 
         employeeWorkflowProgress = await SelfServices.GetEmployeeWorkflowProgress(employeeId);
-        employeeWorkflowProgress.AssignmentsCompleted = Convert.ToInt32(employeeWorkflowProgress.AssignmentsCompleted);
+        employeeWorkflowProgress!.AssignmentsCompleted = Convert.ToInt32(employeeWorkflowProgress.AssignmentsCompleted);
         employeeWorkflowProgress.TotalAssignments = Convert.ToInt32(employeeWorkflowProgress.TotalAssignments);
-
-        // DateTime date = string.IsNullOrEmpty(startDate)
-        // ? Helper.GetDateTimeNow()
-        // : DateTime.Parse(startDate);
-        // weeklySummaries = await SelfServices.GetSelfServiceEmployeeWeeklySummary(employeeId, companyId, date, user);
+       
         weeklySummaries = await SelfServices.GetSelfServiceEmployeeWeeklySummary(employeeId, companyId, selectedDate, user);
 
 
@@ -1350,7 +1348,7 @@
         }
         finally
         {
-            await JS.InvokeVoidAsync("alert", $"{employee.FullName} clocked in.");
+            ToastService.Show($"{employee.FullName} clocked in.", ToastType.Success);
             await LoadDataAsync();
             SpinnerService.Hide();
         }
@@ -1365,7 +1363,7 @@
         }
         finally
         {
-            await JS.InvokeVoidAsync("alert", $"{employee.FullName} clocked out.");
+            ToastService.Show($"{employee.FullName} clocked out.", ToastType.Success);
             await LoadDataAsync();
             SpinnerService.Hide();
         }
@@ -1382,7 +1380,7 @@
         }
         finally
         {
-            await JS.InvokeVoidAsync("alert", $"{employee.FullName} started break.");
+            ToastService.Show($"{employee.FullName} started break.", ToastType.Success);
             await LoadDataAsync();
             SpinnerService.Hide();
         }
@@ -1397,7 +1395,7 @@
         }
         finally
         {
-            await JS.InvokeVoidAsync("alert", $"{employee.FullName} ended break.");
+            ToastService.Show($"{employee.FullName} ended break.", ToastType.Success);
             await LoadDataAsync();
             SpinnerService.Hide();
         }
@@ -1413,7 +1411,8 @@
         }
         finally
         {
-            await JS.InvokeVoidAsync("alert", $"{employee.FullName} activity updated.");
+            ToastService.Show($"{employee.FullName} activity updated.", ToastType.Success);
+
             await LoadDataAsync();
             SpinnerService.Hide();
         }
@@ -1427,7 +1426,8 @@
         }
         finally
         {
-            await JS.InvokeVoidAsync("alert", $"{employee.FullName} cost centre updated.");
+            ToastService.Show( $"{employee.FullName} cost centre updated.", ToastType.Success);
+
             await LoadDataAsync();
             SpinnerService.Hide();
         }
@@ -1454,7 +1454,8 @@
             }
             else if (result == false)
             {
-                await JS.InvokeVoidAsync("alert", " No data available for the selected year.");
+                ToastService.Show(" No data available for the selected year.", ToastType.Warning);
+
             }
         }
         else if (type == "PBIK")
@@ -1474,10 +1475,65 @@
             }
             else if (result == false)
             {
-                await JS.InvokeVoidAsync("alert", " No data available for the selected year.");
+                ToastService.Show( " No data available for the selected year.", ToastType.Warning);
+
             }
         }
 
     }
 
+    <!-- Open Work recoed-->
+    private CreateEditWorkRecordNotesModel workRecordNoteModelRef = new();
+    private int employeeShiftId;
+    //private int selectedEmployeeId;
+    private string shiftDate ;
+    public List<Employee> employees = new();
+    private List<Tag> tagList = new();
+    private int selectedTagId;
+    private int tagId;
+    private async Task OnRecordDoubleClick(WeeklySummary item)
+    {
+        if (item == null)
+            return;
+            StateHasChanged();
+        employeeId = item.EmployeeId ?? 0;
+        //selectedEmployeeId = item.EmployeeId ?? 0;
+        DateTime startDate = item.ShiftDate?.Date ?? DateTime.Today;
+         shiftDate = item.ShiftDate?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd");
+        // WeeklySummary → WorkRecordNoteDetail (mapping)
+        var workRecordNoteDetail = new WorkRecordNoteDetail
+        {
+            EmployeeId = employeeId,
+            ShiftDate = item.ShiftDate!.Value,
+            Notes = item.Notes,
+        };
+        await EditWorkRecordNote(workRecordNoteDetail);
+    }
+
+    private async Task EditWorkRecordNote(WorkRecordNoteDetail workRecordNoteDetail)
+    {
+        if (workRecordNoteDetail == null)
+            return;
+
+       // selectedEmployeeId = workRecordNoteDetail.EmployeeId;
+        tagList = await TagsService.GetAccessTagsAsync(false);
+        tagId = selectedTagId == 0 ? tagList.First().Id : selectedTagId;
+
+        SpinnerService.Show();
+        try
+        {
+            employees = await WorkRecordNotesCommonService.GetEmployeesAsync(companyId, tagId, employeeId);
+
+            var model = await WorkRecordNotesCommonService.EditWorkRecordModel(workRecordNoteDetail, companyId, employeeShiftId, userId, tagId, shiftDate, employeeId);
+
+            if (model != null)
+            {
+                await workRecordNoteModelRef.ShowModal(model);
+            }
+        }
+        finally
+        {
+            SpinnerService.Hide();
+        }
+    }
 }

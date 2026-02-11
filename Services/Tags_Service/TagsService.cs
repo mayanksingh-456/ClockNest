@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 
-namespace ClockNest.Services.TagsService
+namespace ClockNest.Services.Tags_Service
 {
     public class TagsService
     {

@@ -30,7 +30,7 @@
 @using ClockNest.Models.User_Model
 @using ClockNest.Services.SelfService_Service
 @using ClockNest.Models.SelfService_Model
-@using ClockNest.Services.TagsService
+@using ClockNest.Services.Tags_Service
 @using ClockNest.Models.Tag_Modal
 @using ClockNest.ViewModels.TagViewModel
 @using ClockNest.Models.WorkRecordNotes_Model
@@ -40,7 +40,8 @@
 @using ClockNest.Services.Toast_Service
 @using ClockNest.Models.Timesheet_Model
 @using ClockNest.Services.View.Timesheet_Service
-
+@using ClockNest.Services.CommonService.WorkRecord_CommonService
+@using ClockNest.Components.Pages.MainMenu.Manage.WorkRecord_Tab
 
 
 
@@ -61,3 +62,4 @@
 @inject WorkRecordNotesService WorkRecordNotesService
 @inject ToastService ToastService
 @inject TimesheetService TimesheetService
+@inject WorkRecordNotesCommonService WorkRecordNotesCommonService

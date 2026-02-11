@@ -4,11 +4,12 @@ using ClockNest.Handler;
 using ClockNest.Helpers;
 using ClockNest.Models.User_Model;
 using ClockNest.Services.Auth;
+using ClockNest.Services.CommonService.WorkRecord_CommonService;
 using ClockNest.Services.DeleteConfirmService;
 using ClockNest.Services.Employee_Service;
 using ClockNest.Services.SelfService_Service;
 using ClockNest.Services.Spinner_Service;
-using ClockNest.Services.TagsService;
+using ClockNest.Services.Tags_Service;
 using ClockNest.Services.Toast_Service;
 using ClockNest.Services.User_Service;
 using ClockNest.Services.View.Timesheet_Service;
@@ -75,7 +76,8 @@ namespace ClockNest
             builder.Services.AddScoped<TagsService>();
             builder.Services.AddScoped<WorkRecordNotesService>();
             builder.Services.AddScoped<TimesheetService>();
-           
+            builder.Services.AddScoped<WorkRecordNotesCommonService>();
+
 
             var app = builder.Build();
 
