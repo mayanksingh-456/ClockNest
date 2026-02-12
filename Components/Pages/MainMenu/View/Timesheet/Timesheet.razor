@@ -1,4 +1,5 @@
 ﻿@page "/timesheet"
+@attribute [Authorize(Roles = "Live,LiveReadOnly,SuperUser")]
 @using ClockNest.Common
 @using ClockNest.Enum
 

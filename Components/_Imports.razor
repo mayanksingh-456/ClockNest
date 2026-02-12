@@ -42,7 +42,9 @@
 @using ClockNest.Services.View.Timesheet_Service
 @using ClockNest.Services.CommonService.WorkRecord_CommonService
 @using ClockNest.Components.Pages.MainMenu.Manage.WorkRecord_Tab
-
+@using Microsoft.AspNetCore.Authorization
+@using ClockNest.Models.Dashboard_Model
+@using ClockNest.Services.Home.Dashboard
 
 
 
@@ -63,3 +65,4 @@
 @inject ToastService ToastService
 @inject TimesheetService TimesheetService
 @inject WorkRecordNotesCommonService WorkRecordNotesCommonService
+@inject DashboardService DashboardService

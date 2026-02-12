@@ -7,6 +7,7 @@ using ClockNest.Services.Auth;
 using ClockNest.Services.CommonService.WorkRecord_CommonService;
 using ClockNest.Services.DeleteConfirmService;
 using ClockNest.Services.Employee_Service;
+using ClockNest.Services.Home.Dashboard;
 using ClockNest.Services.SelfService_Service;
 using ClockNest.Services.Spinner_Service;
 using ClockNest.Services.Tags_Service;
@@ -77,6 +78,7 @@ namespace ClockNest
             builder.Services.AddScoped<WorkRecordNotesService>();
             builder.Services.AddScoped<TimesheetService>();
             builder.Services.AddScoped<WorkRecordNotesCommonService>();
+            builder.Services.AddScoped<DashboardService>();
 
 
             var app = builder.Build();
