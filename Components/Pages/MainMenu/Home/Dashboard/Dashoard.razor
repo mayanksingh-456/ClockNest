@@ -1,6 +1,4 @@
 ﻿@page "/dashboard"
-
-
 @attribute [Authorize]
 
 <div class="top-bar d-flex justify-content-between align-items-start py-2 px-3 flex-wrap">
@@ -41,214 +39,486 @@
 </div>
 
 
-    <style>
-        :root {
-            --primary: #f59e0b;
-            --text-dark: #111827;
-            --text-light: #6b7280;
-            --border: #e5e7eb;
-        }
+<style>
+    :root {
+        --primary: #232d9c;
+        --text-dark: #111827;
+        --text-light: #6b7280;
+        --border: #e5e7eb;
+    }
 
-        /* Header */
-        .header {
-            display: flex;
+    /* Header */
+    .header {
+        display: flex;
         background: #ffffff;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            margin-top: 15px;
-            border: 1px solid var(--border);
-        }
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        margin-top: 15px;
+        border: 1px solid var(--border);
+    }
 
-        .header-left h1 {
-            font-size: 19px;
-            font-weight: 600;
-        }
+    .header-left h1 {
+        font-size: 19px;
+        font-weight: 600;
+    }
 
-        .header-left span {
-            color: var(--primary);
-        }
+    .header-left span {
+        color: var(--primary);
+    }
 
-        .header-left p {
-            margin-top: 8px;
-            font-size: 12px;
-            padding:0;
+    .header-left p {
+        margin-top: 8px;
+        font-size: 12px;
+        padding: 0;
         margin-top: 0;
         margin-bottom: 0;
-            color: var(--text-light);
-        }
+        color: var(--text-light);
+    }
 
-        .profile-link {
+    .profile-link {
         font-size: 14px;
-            text-decoration: none;
-            color: var(--primary);
-            font-weight: 500;
-        }
+        text-decoration: none;
+        color: var(--primary);
+        font-weight: 500;
+    }
 
-        /* Cards Grid */
-        .cards {
+    /* Cards Grid */
+    .cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
         gap: 15px;
-        }
+    }
 
-        /* Card */
-        .card {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 15px;
+    /* Card */
+    .card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 15px;
         align-items: center;
         border: 1px solid var(--border);
-            transition: 0.2s ease;
+        transition: 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
         }
 
-            .card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            }
+    .card-title {
+        font-size: 14px;
+        color: var(--text-light);
+        /*  margin-bottom: 12px; */
+        display: flex;
+        justify-content: space-between;
+    }
 
-        .card-title {
-            font-size: 14px;
-            color: var(--text-light);
-           /*  margin-bottom: 12px; */
-            display: flex;
-            justify-content: space-between;
-        }
+    .card-value {
+        font-size: 32px;
+        font-weight: 600;
+    }
 
-        .card-value {
-            font-size: 32px;
-            font-weight: 600;
-        }
+    .details {
+        font-size: 13px;
+        color: var(--primary);
+        cursor: pointer;
+    }
 
-        .details {
-            font-size: 13px;
-            color: var(--primary);
-            cursor: pointer;
-        }
-
-        /* Responsive Tweaks */
-        @@media (max-width: 768px) {
-            .header
-
-        {
+    /* Responsive Tweaks */
+    @@media (max-width: 768px) {
+        .header {
             flex-direction: column;
             align-items: flex-start;
             gap: 16px;
         }
+    }
 
-        }
-
-        @@media (max-width: 480px) {
-            body
-
-        {
+    @@media (max-width: 480px) {
+        body {
             padding: 16px;
         }
-
-       
-        }
+    }
 
     .header-right {
         display: flex;
         align-items: center;
         gap: 15px;
     }
-    .header-right img{
+
+        .header-right img {
             width: 68px;
             height: 70px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid green;
+        }
+</style>
+
+<style>
+    .card-table {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        overflow: hidden;
     }
-   
-    </style>
+
+    /* Grey top header strip */
+    .card-header-custom {
+        background: #f3f4f6;
+        padding: 10px 16px;
+        font-size: 18px;
+        font-weight: 500;
+        color: #374151;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Table */
+    .custom-table {
+        margin-bottom: 0;
+    }
+
+        .custom-table thead {
+            background: transparent !important;
+        }
+
+        .custom-table th {
+            background: transparent !important;
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .custom-table td {
+            font-size: 14px;
+            color: #374151;
+            padding: 10px 0;
+        }
+
+    /* Remove bootstrap extra borders */
+    .table > :not(caption) > * > * {
+        border-bottom-width: 0;
+    }
+
+    .custom-table {
+        margin: 0 !important;
+    }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 8px 0 !important;
+        }
+
+</style>
 
 <div class="container-fluid px-0">
 
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1>Welcome back, <span>@employee?.FullName</span></h1>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>Welcome, <span>@employee?.FullName</span></h1>
             <p>Here is your attendance overview for <strong> @startDate - @endDate </strong> </p>
-            </div>
-           @*  <a href="#" class="profile-link">Go to Profile →</a> *@
+        </div>
+        @*  <a href="#" class="profile-link">Go to Profile →</a> *@
         <div class="header-right">
             <a href="#" class="profile-link">Go to Profile →</a>
             <img src="@(string.IsNullOrEmpty(employee?.PhotoBase64) ? "/avtar.png" : $"data:image/png;base64,{employee.PhotoBase64}")" class="profile-img" />
         </div>
-        </div>
+    </div>
 
-        <!-- Cards -->
-        <div class="cards">
+    <!-- Cards total -->
+    <div class="cards">
 
-            <div class="card">
-                <div class="card-title">
-                    <span>Onsite</span>
-                </div>
-                <div class="card-value">@getTotal!.EmployeesOnSite</div>
+        <div class="card">
+            <div class="card-title">
+                <span>Onsite</span>
+            </div>
+            <div class="card-value">@getTotal!.EmployeesOnSite</div>
             <div class="card-title">
                 <span class="details">View Details →</span>
             </div>
-            </div>
+        </div>
 
-            <div class="card">
-                <div class="card-title">
-                    <span>Lateness</span>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <span>Lateness</span>
+            </div>
             <div class="card-value">@getTotal.EmployeesLate</div>
             <div class="card-title">
                 <span class="details"> View Details →</span>
             </div>
-            </div>
+        </div>
 
-            <div class="card">
-                <div class="card-title">
-                    <span>HOL/ABS Req</span>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <span>HOL/ABS Req</span>
+            </div>
             <div class="card-value">@getTotal.HolidaysRequested</div>
             <div class="card-title">
                 <span class="details">View Details →</span>
             </div>
 
-            </div>
+        </div>
 
-            <div class="card">
-                <div class="card-title">
-                    <span>Change Req</span>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <span>Change Req</span>
+            </div>
             <div class="card-value">@getTotal.ChangeRequests</div>
             <div class="card-title">
                 <span class="details">View Details →</span>
             </div>
-            </div>
+        </div>
 
-            <div class="card">
-                <div class="card-title">
-                    <span>Exceptions</span>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <span>Exceptions</span>
+            </div>
             <div class="card-value">@getTotal.Exceptions</div>
             <div class="card-title">
                 <span class="details">View Details →</span>
             </div>
-            </div>
+        </div>
 
-            <div class="card">
-                <div class="card-title">
-                    <span>Pending OT</span>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <span>Pending OT</span>
+            </div>
             <div class="card-value">@getTotal.Overtime</div>
             <div class="card-title">
                 <span class="details">View details →</span>
             </div>
-            </div>
-
         </div>
 
     </div>
 
+    <!-- Chart and tables-->
+    <!-- row 1 -->
+    <div class="row mt-4 gx-3">
+        <div class="col-md-7 mb-3 ">
 
+            <!-- Hours worked vs Contracted-->
+            <div class="card-table p-0">
+
+                <!-- Card Header -->
+                <div class="card-header-custom">
+                    Hours worked vs Contracted
+                </div>
+
+                <div class="p-3">
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity/Cost Centre Table-->
+        <div class="col-md-5 mb-3">
+            <div class="card-table p-0">
+
+                <!-- Card Header -->
+                <div class="card-header-custom">
+                    Activities/Cost centres
+                </div>
+
+                <div class="p-3">
+
+                    <!-- Activity Table -->
+                    <table class="table custom-table mb-5 mb-1">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Activity</th>
+                                <th class="text-end">Total hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var activity in topActivities)
+                            {
+                                <tr>
+                                    <td class="text-start">@activity.ActivityName</td>
+                                    <td class="text-end">@activity.TotalHoursMinsDisplay</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- Cost Centre Table -->
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Cost centre</th>
+                                <th class="text-end">Total hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var costCentre in topCostCentres)
+                            {
+                                <tr>
+                                    <td class="text-start">@costCentre.CostCentreName</td>
+                                    <td class="text-end">@costCentre.TotalHoursMinsDisplay</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- row 2 -->
+    <div class="row mt-4 gx-3">
+        @*   <div class="col-md-4 mb-3 ">
+
+            <!--Holiday Sick Absence Chart-->
+            <div class="card-table p-0">
+
+                <!-- Card Header -->
+                <div class="card-header-custom">
+                    Holiday Sick Absence
+                </div>
+
+                <div class="p-3">
+                </div>
+            </div>
+        </div> *@
+
+        <div class="col-md-4 mb-3">
+            <div class="card-table p-0">
+                <div class="card-header-custom">Holiday Sick Absence</div>
+                <div class="p-5 d-flex justify-content-center">
+                    @*  <canvas id="holidayAbsenceChart" style="width: 400px; height: 400px;"></canvas> *@
+                    <canvas id="hoursWorkedChart" style="width: 150px; height: 150px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+            <div class="card-table p-0">
+                <div class="card-header-custom">Daily overtime reasons</div>
+                <div class="p-3 d-flex justify-content-center">
+                    @*    <canvas id="overtimeReasonsChart" ></canvas> *@
+                </div>
+            </div>
+        </div>
+
+        <!-- Top late employees Table-->
+        <div class="col-md-4 mb-3">
+            <div class="card-table p-0">
+
+                <!-- Card Header -->
+                <div class="card-header-custom">
+                    Top late employees
+                </div>
+
+                <div class="p-3">
+
+                    <!-- Activity Table -->
+                    <table class="table custom-table mb-5 mb-1">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Name</th>
+                                <th class="text-end">Occurance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var lateEmployee in topLateEmployees)
+                            {
+                                <tr>
+                                    <td class="text-start">@lateEmployee.EmployeeName</td>
+                                    <td class="text-end">@lateEmployee.TotalOccurances</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- row 3 -->
+    <div class="row mt-4 gx-3">
+        <!-- Exceptional Items Table-->
+        <div class="col-md-4 mb-3">
+            <div class="card-table p-0">
+
+                <div class="card-header-custom">
+                    Exceptional Items
+                </div>
+
+                <div class="p-3">
+
+                    <!-- Exceptional Items Table -->
+                    <table class="table custom-table mb-4 mb-1">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Exceptional Item</th>
+                                <th class="text-end">Total Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var exceptionalItem in topExceptionalItems)
+                            {
+
+                                <tr>
+                                    <td class="text-start">@exceptionalItem.ExceptionalItemName</td>
+                                    <td class="text-end">@exceptionalItem.TotalCount</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!--Top overtime employees Table-->
+        <div class="col-md-4 mb-3">
+            <div class="card-table p-0">
+
+                <div class="card-header-custom">
+                    Top overtime employees
+                </div>
+
+                <div class="p-3">
+
+                    <!-- Activity Table -->
+                    <table class="table custom-table mb-4 mb-1">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Name</th>
+                                <th class="text-end">Total hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var overtimeEmployee in topOvertimeEmployees)
+                            {
+
+                                <tr>
+                                    <td class="text-start">@overtimeEmployee.EmployeeName</td>
+                                    <td class="text-end">@overtimeEmployee.TotalHours</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
 @code {
 
     private List<Tag> tagList = new();
@@ -256,12 +526,19 @@
     private int selectedTagId;
     private int userId;
     private int tagId;
-    private string startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
+    private string startDate = DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd");
     private string endDate = DateTime.Now.ToString("yyyy-MM-dd");
 
     private DashboardTotals? getTotal { get; set; } = new DashboardTotals();
     private Employee? employee;
     private int employeeId;
+
+    private List<DashboardTopActivities> topActivities = new();
+    private List<DashboardTopCostCentres> topCostCentres = new();
+    private List<DashboardTopLateEmployees> topLateEmployees = new();
+    private List<DashboardTopJobAndFinish> topJobFinishes = new();
+    private List<DashboardTopExceptionalItems> topExceptionalItems = new();
+    private List<DashboardTopOvertime> topOvertimeEmployees = new();
 
     private async Task RefreshGrid()
     {
@@ -270,7 +547,7 @@
         StateHasChanged();
         try
         {
-            
+
             await LoadDataAsync();
         }
         finally
@@ -317,6 +594,20 @@
         }
 
         getTotal = await DashboardService.GetDashboardTotalsAsync(tagId, date, endDates, employeeId);
+
+        topActivities = await DashboardService.GetDashboardTopActivitiesAsync(tagId, date, endDates);
+        topCostCentres = await DashboardService.GetDashboardTopCostCentreAsync(tagId, date, endDates);
+        topLateEmployees = await DashboardService.GetDashboardTopLateEmployeesAsync(tagId, date, endDates);
+        //topJobFinishes = await DashboardService.GetDashboardTopJobAndFinishAsync(tagId, date, endDates);
+        topExceptionalItems = await DashboardService.GetDashboardTopExceptionalItemsAsync(tagId, date, endDates);
+        topOvertimeEmployees = await DashboardService.GetDashboardTopOvertimeAsync(tagId, date, endDates);
+
+        await LoadChartDataAsync(tagId, date, endDates, employeeId);
+
+        // _chartsLoaded = true;
+        StateHasChanged();
+
+
     }
 
     private async Task OnStatusChange()
@@ -331,4 +622,197 @@
             SpinnerService.Hide();
         }
     }
+
+    //private DashboardChartData holidayAbsenceChartData { get; set; } = new();
+    private DashboardChartData overtimeReasonsChartData { get; set; } = new();
+
+    private DashboardChartData hoursWorkedChartData { get; set; } = new();
+    private bool _hoursChartLoaded = false;
+    // private async Task LoadChartDataAsync(int tagId, DateTime startDate, DateTime endDate, int employeeId)
+    // {
+    //     hoursWorkedChartData = await DashboardService.GetDashboardHoursWorkedVsContracted(tagId, startDate, endDate);
+
+    //     if (hoursWorkedChartData?.Datasets?.Any() == true)
+    //     {
+    //         foreach (var ds in hoursWorkedChartData.Datasets)
+    //         {
+    //             if (string.IsNullOrEmpty(ds.Label))
+    //                 ds.Label = "Unknown";
+    //         }
+    //     }
+
+    //     _hoursChartLoaded = true;
+    //     StateHasChanged();
+    // }
+    private async Task LoadChartDataAsync(int tagId, DateTime startDate, DateTime endDate, int employeeId)
+    {
+        hoursWorkedChartData = await DashboardService
+            .GetDashboardHoursWorkedVsContracted(tagId, startDate, endDate);
+
+        if (hoursWorkedChartData?.Datasets?.Any() == true)
+        {
+            // Remove unwanted datasets
+            hoursWorkedChartData.Datasets = hoursWorkedChartData.Datasets
+                .Where(ds =>
+                    ds.Label == "Holiday" ||
+                    ds.Label == "Sickness" ||
+                    ds.Label == "Absence")
+                .ToList();
+
+            // Ensure no empty labels
+            foreach (var ds in hoursWorkedChartData.Datasets)
+            {
+                if (string.IsNullOrEmpty(ds.Label))
+                    ds.Label = "Unknown";
+            }
+        }
+
+        _hoursChartLoaded = true;
+        StateHasChanged();
+    }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (_hoursChartLoaded && hoursWorkedChartData?.Datasets?.Any() == true)
+    //     {
+    //         var holidayData = hoursWorkedChartData.Datasets
+    //             .FirstOrDefault(d => d.Label == "Holiday")?.Data ?? new List<decimal>();
+
+    //         var sicknessData = hoursWorkedChartData.Datasets
+    //             .FirstOrDefault(d => d.Label == "Sickness")?.Data ?? new List<decimal>();
+
+    //         var absenceData = hoursWorkedChartData.Datasets
+    //             .FirstOrDefault(d => d.Label == "Absence")?.Data ?? new List<decimal>();
+
+    //         var holidayCount = holidayData.Count(x => x > 0);
+    //         var sicknessCount = sicknessData.Count(x => x > 0);
+    //         var absenceCount = absenceData.Count(x => x > 0);
+
+    //         var data = new double[]
+    //         {
+    //         holidayCount,
+    //         sicknessCount,
+    //         absenceCount
+    //         };
+
+    //         var labels = new string[]
+    //         {
+    //         "Holiday",
+    //         "Sickness",
+    //         "Absence"
+    //         };
+
+    //         await JS.InvokeVoidAsync("renderHoursWorkedChart", data, labels);
+
+    //         _hoursChartLoaded = false;
+    //         Console.WriteLine($"Holiday: {holidayCount}");
+    //         Console.WriteLine($"Sickness: {sicknessCount}");
+    //         Console.WriteLine($"Absence: {absenceCount}");
+
+    //     }
+    // }
+
+    private List<HourData> ChartData;
+    public class HourData
+    {
+        public DateTime Date { get; set; }
+        public double HoursWorked { get; set; }
+        public double Holiday { get; set; }
+        public double Sickness { get; set; }
+        public double Absence { get; set; }
+        public double Contracted { get; set; }
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_hoursChartLoaded && hoursWorkedChartData?.Datasets?.Any() == true)
+        {
+            var holidayData = hoursWorkedChartData.Datasets
+                .FirstOrDefault(d => d.Label == "Holiday")?.Data ?? new List<decimal>();
+
+            var sicknessData = hoursWorkedChartData.Datasets
+                .FirstOrDefault(d => d.Label == "Sickness")?.Data ?? new List<decimal>();
+
+            var absenceData = hoursWorkedChartData.Datasets
+                .FirstOrDefault(d => d.Label == "Absence")?.Data ?? new List<decimal>();
+
+            int holidayCount = 0;
+            int sicknessCount = 0;
+            int absenceCount = 0;
+
+            for (int i = 0; i < hoursWorkedChartData.Dates.Count; i++)
+            {
+                if (holidayData.Count > i && holidayData[i] > 0)
+                    holidayCount++;
+
+                if (sicknessData.Count > i && sicknessData[i] > 0)
+                    sicknessCount++;
+
+                if (absenceData.Count > i && absenceData[i] > 0)
+                    absenceCount++;
+            }
+
+            var data = new double[]
+            {
+            holidayCount,
+            sicknessCount,
+            absenceCount
+            };
+
+            var labels = new string[]
+            {
+            "Holiday",
+            "Sickness",
+            "Absence"
+            };
+
+            await JS.InvokeVoidAsync("renderHoursWorkedChart", data, labels);
+
+            _hoursChartLoaded = false;
+        }
+    }
+
+
+    // private async Task LoadChartDataAsync(int tagId, DateTime startDate, DateTime endDate, int employeeId)
+    // {
+    //    overtimeReasonsChartData  = await DashboardService.GetDashboardHoursWorkedVsContracted(tagId, startDate, endDate);
+
+    //     holidayAbsenceChartData = await DashboardService.GetDashboardAbsenceAsync(tagId, startDate, endDate);
+
+    //     StateHasChanged();
+    // }
+    
+    // private bool _chartsLoaded = false;
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+
+    //     if (_chartsLoaded)
+    //     {
+    //         await RenderCharts();
+    //         _chartsLoaded = false;
+    //     }
+    // }
+
+    // private async Task RenderCharts()
+    // {
+    //     if (holidayAbsenceChartData?.Datasets?.Any() == true)
+    //     {
+    //         var data = holidayAbsenceChartData.Datasets.First().Data;
+    //         var labels = holidayAbsenceChartData.Labels;
+
+    //         await JS.InvokeVoidAsync("renderHolidayAbsenceChart", data, labels);
+    //     }
+
+
+        // if (overtimeReasonsChartData?.Datasets?.Any() == true)
+        // {
+        //     var data = overtimeReasonsChartData.Datasets.First().Data;
+        //     var labels = overtimeReasonsChartData.Labels;
+
+        //     await JS.InvokeVoidAsync("renderOvertimeReasonsChart", data, labels);
+        //}
+    //}
+
 }
