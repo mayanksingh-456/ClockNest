@@ -98,9 +98,9 @@ namespace ClockNest.Services.Auth
 
                 var redirectDetails = new Dictionary<string, string>();
 
-                bool isSuperUser = false;
-                bool isSelfService = false;
-                bool isDashboard = false;
+                //bool isSuperUser = false;
+                //bool isSelfService = false;
+                //bool isDashboard = false;
             }
 
             if (response.IsSuccessStatusCode)
@@ -111,7 +111,7 @@ namespace ClockNest.Services.Auth
                     PropertyNameCaseInsensitive = true
                 });
 
-                await IdentitySigninAsync(usersData);
+                await IdentitySigninAsync(usersData!);
                 return new LoginResult
                 {
                     Success = true,

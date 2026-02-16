@@ -62,6 +62,7 @@
     .profile-card h3 {
         margin: 0;
         font-size: 17px;
+        color: #232d9c;
     }
 
     .profile-card span {
@@ -70,8 +71,8 @@
     }
 
     .profile-card a {
-        font-size: 14px;
-        color: #ff6e04;
+        font-size: 13px;
+        color: #0a58ca;
         text-decoration: none;
     }
 
@@ -186,11 +187,12 @@
         font-weight: 600;
         font-size: 13px;
         cursor: pointer;
+        color: #6b7280;
     }
 
         .chip:hover {
-            color: black;
-            border-color: black;
+            color: #6B7285;
+            border-color: #6B7285;
             background: white;
         }
 
@@ -290,7 +292,7 @@
 
     .action-btn {
         /*  background: #546f9b; */
-        background: #031A7F;
+        background: #232d9c;
         color: white;
         padding: 5px 14px !important;
         border-radius: 8px !important;
@@ -315,6 +317,7 @@
         padding: 15px;
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        color: #6b7280;
     }
 
     .form-control {
@@ -703,7 +706,7 @@
                     <div class="profile-detail">
                         <h3><strong>@employee?.FullName</strong></h3>
                         <span>@employee?.JobTitle</span>
-                        <a href="/employee"><strong>Go to Profile</strong></a>
+                        <a href="/employee">Go to Profile</a>
                     </div>
                 </div>
                 <div class="clockin-clockout-button">
@@ -1176,13 +1179,13 @@
 
 @code {
     private List<UserSelfServiceAccess> selfServiceAccess = new();
-    private Employee employee;
-    private List<Activity> ActivityList;
-    private List<CostCentre> CostCentresList;
+    private Employee employee = new();
+    private List<Activity> ActivityList = new();
+    private List<CostCentre> CostCentresList = new();
     private int activityListId;
     private int selectedCostCentreId;
 
-    private List<DashboardChartData> chartData;
+    private List<DashboardChartData> chartData = new();
     private decimal Holidaybooked;
     private decimal Holidaytotal;
     private int Holidaypercentage;
@@ -1197,7 +1200,6 @@
     private EmployeeWorkflowProgress? employeeWorkflowProgress;
 
     private DateTime selectedDate;
-    //private string startDate = DateTime.Now.ToString("dd/MM/yyyy");
     private List<WeeklySummary> weeklySummaries = new();
     private List<AbsenteeRecord> employeeHolidays = new();
     private List<EmployeeAnnouncement> employeeAnnouncements = new();
@@ -1236,7 +1238,6 @@
         try
         {
             SpinnerService.Show();
-            //selectedDate = DateTime.Today;
             selectedDate = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc);
 
             await LoadDataAsync();

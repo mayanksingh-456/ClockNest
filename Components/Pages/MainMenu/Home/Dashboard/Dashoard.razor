@@ -212,6 +212,28 @@
             padding: 8px 0 !important;
         }
 
+
+    .scroll-area::-webkit-scrollbar {
+        width: 6px;
+        height: 8px;
+    }
+
+    .scroll-area::-webkit-scrollbar-track {
+        background: #F1F3F5; 
+        border-radius: 6px;
+    }
+
+    .scroll-area::-webkit-scrollbar-thumb {
+        background-color: #9AA0A6;
+        border-radius: 5px;
+        width: 8px;
+    }
+
+    .scroll-area table thead th {
+        background-color: #fff; 
+        position: relative; 
+        z-index: 1; 
+    }
 </style>
 
 <div class="container-fluid px-0">
@@ -297,8 +319,8 @@
 
     <!-- Chart and tables-->
     <!-- row 1 -->
-    <div class="row mt-4 gx-3">
-        <div class="col-md-7 mb-3 ">
+    <div class="row mt-4 gx-3" >
+        <div class="col-md-8 mb-3 ">
 
             <!-- Hours worked vs Contracted-->
             <div class="card-table p-0">
@@ -308,21 +330,22 @@
                     Hours worked vs Contracted
                 </div>
 
-                <div class="p-3">
+                <div class="p-3" style="height:400px">
+                    <canvas id="hoursWorkedVsContractedChart"></canvas>
                 </div>
             </div>
         </div>
 
         <!-- Activity/Cost Centre Table-->
-        <div class="col-md-5 mb-3">
-            <div class="card-table p-0">
+        <div class="col-md-4 mb-3">
+            <div class="card-table p-0" >
 
                 <!-- Card Header -->
-                <div class="card-header-custom">
+                <div class="card-header-custom" >
                     Activities/Cost centres
                 </div>
 
-                <div class="p-3">
+                <div class="p-3 scroll-area" style="height:400px; overflow-y:auto">
 
                     <!-- Activity Table -->
                     <table class="table custom-table mb-5 mb-1">
@@ -371,28 +394,13 @@
     </div>
 
     <!-- row 2 -->
-    <div class="row mt-4 gx-3">
-        @*   <div class="col-md-4 mb-3 ">
-
-            <!--Holiday Sick Absence Chart-->
-            <div class="card-table p-0">
-
-                <!-- Card Header -->
-                <div class="card-header-custom">
-                    Holiday Sick Absence
-                </div>
-
-                <div class="p-3">
-                </div>
-            </div>
-        </div> *@
-
+    <div class="row mt-3 gx-3">
         <div class="col-md-4 mb-3">
             <div class="card-table p-0">
                 <div class="card-header-custom">Holiday Sick Absence</div>
-                <div class="p-5 d-flex justify-content-center">
-                    @*  <canvas id="holidayAbsenceChart" style="width: 400px; height: 400px;"></canvas> *@
-                    <canvas id="hoursWorkedChart" style="width: 150px; height: 150px;"></canvas>
+                <div class="p-2 d-flex justify-content-center" style="height:300px;">
+                    
+                    <canvas id="hoursWorkedChart"></canvas>
                 </div>
             </div>
         </div>
@@ -401,8 +409,8 @@
         <div class="col-md-4 mb-3">
             <div class="card-table p-0">
                 <div class="card-header-custom">Daily overtime reasons</div>
-                <div class="p-3 d-flex justify-content-center">
-                    @*    <canvas id="overtimeReasonsChart" ></canvas> *@
+                <div class="p-2 d-flex justify-content-center" style="height:300px;">
+                    <canvas id="overtimeReasonsChart" style="width: 150px; height: 150px;"></canvas>
                 </div>
             </div>
         </div>
@@ -416,7 +424,7 @@
                     Top late employees
                 </div>
 
-                <div class="p-3">
+                <div class="p-3 scroll-area" style="height:300px; overflow-y:auto">
 
                     <!-- Activity Table -->
                     <table class="table custom-table mb-5 mb-1">
@@ -445,7 +453,7 @@
     </div>
 
     <!-- row 3 -->
-    <div class="row mt-4 gx-3">
+    <div class="row mt-3 gx-3">
         <!-- Exceptional Items Table-->
         <div class="col-md-4 mb-3">
             <div class="card-table p-0">
@@ -454,7 +462,7 @@
                     Exceptional Items
                 </div>
 
-                <div class="p-3">
+                <div class="p-3 scroll-area" style="height:250px; overflow-y:auto">
 
                     <!-- Exceptional Items Table -->
                     <table class="table custom-table mb-4 mb-1">
@@ -490,9 +498,9 @@
                     Top overtime employees
                 </div>
 
-                <div class="p-3">
+                <div class="p-3 scroll-area" style="height:250px; overflow-y:auto">
 
-                    <!-- Activity Table -->
+                    <!-- Overtime Table -->
                     <table class="table custom-table mb-4 mb-1">
                         <thead>
                             <tr>
@@ -539,6 +547,10 @@
     private List<DashboardTopJobAndFinish> topJobFinishes = new();
     private List<DashboardTopExceptionalItems> topExceptionalItems = new();
     private List<DashboardTopOvertime> topOvertimeEmployees = new();
+
+    private DashboardChartData? overtimeReasonsChartData { get; set; } = new();
+    private DashboardChartData? hoursWorkedChartData { get; set; } = new();
+    private DashboardChartData? hoursWorkedVsContractedChartData { get; set; } = new();
 
     private async Task RefreshGrid()
     {
@@ -602,10 +614,29 @@
         topExceptionalItems = await DashboardService.GetDashboardTopExceptionalItemsAsync(tagId, date, endDates);
         topOvertimeEmployees = await DashboardService.GetDashboardTopOvertimeAsync(tagId, date, endDates);
 
-        await LoadChartDataAsync(tagId, date, endDates, employeeId);
+        hoursWorkedChartData = await DashboardService.GetDashboardAbsenceAsync(tagId, date, endDates);
+        if (hoursWorkedChartData?.Datasets?.Any() == true)
+        {
+            var data = hoursWorkedChartData.Datasets.First().Data;
+            var labels = hoursWorkedChartData.Labels;
+            await JS.InvokeVoidAsync("renderHoursWorkedChart", data, labels);
+        }
 
-        // _chartsLoaded = true;
-        StateHasChanged();
+        overtimeReasonsChartData = await DashboardService.GetDashboardOvertimeAsync(tagId, date, endDates);
+        if (overtimeReasonsChartData?.Datasets?.Any() == true)
+        {
+            var data = overtimeReasonsChartData.Datasets.First().Data;
+            var labels = overtimeReasonsChartData.Labels;
+            await JS.InvokeVoidAsync("renderOvertimeReasonsChart", data, labels);
+        }
+
+        hoursWorkedVsContractedChartData = await DashboardService.GetDashboardHoursWorkedVsContracted(tagId, date, endDates);
+
+        if (ChartData != null && ChartData.Any())
+        {
+            await JS.InvokeVoidAsync("renderHoursWorkedVsContractedChart", ChartData
+            );
+        }
 
 
     }
@@ -623,96 +654,6 @@
         }
     }
 
-    //private DashboardChartData holidayAbsenceChartData { get; set; } = new();
-    private DashboardChartData overtimeReasonsChartData { get; set; } = new();
-
-    private DashboardChartData hoursWorkedChartData { get; set; } = new();
-    private bool _hoursChartLoaded = false;
-    // private async Task LoadChartDataAsync(int tagId, DateTime startDate, DateTime endDate, int employeeId)
-    // {
-    //     hoursWorkedChartData = await DashboardService.GetDashboardHoursWorkedVsContracted(tagId, startDate, endDate);
-
-    //     if (hoursWorkedChartData?.Datasets?.Any() == true)
-    //     {
-    //         foreach (var ds in hoursWorkedChartData.Datasets)
-    //         {
-    //             if (string.IsNullOrEmpty(ds.Label))
-    //                 ds.Label = "Unknown";
-    //         }
-    //     }
-
-    //     _hoursChartLoaded = true;
-    //     StateHasChanged();
-    // }
-    private async Task LoadChartDataAsync(int tagId, DateTime startDate, DateTime endDate, int employeeId)
-    {
-        hoursWorkedChartData = await DashboardService
-            .GetDashboardHoursWorkedVsContracted(tagId, startDate, endDate);
-
-        if (hoursWorkedChartData?.Datasets?.Any() == true)
-        {
-            // Remove unwanted datasets
-            hoursWorkedChartData.Datasets = hoursWorkedChartData.Datasets
-                .Where(ds =>
-                    ds.Label == "Holiday" ||
-                    ds.Label == "Sickness" ||
-                    ds.Label == "Absence")
-                .ToList();
-
-            // Ensure no empty labels
-            foreach (var ds in hoursWorkedChartData.Datasets)
-            {
-                if (string.IsNullOrEmpty(ds.Label))
-                    ds.Label = "Unknown";
-            }
-        }
-
-        _hoursChartLoaded = true;
-        StateHasChanged();
-    }
-
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-    //     if (_hoursChartLoaded && hoursWorkedChartData?.Datasets?.Any() == true)
-    //     {
-    //         var holidayData = hoursWorkedChartData.Datasets
-    //             .FirstOrDefault(d => d.Label == "Holiday")?.Data ?? new List<decimal>();
-
-    //         var sicknessData = hoursWorkedChartData.Datasets
-    //             .FirstOrDefault(d => d.Label == "Sickness")?.Data ?? new List<decimal>();
-
-    //         var absenceData = hoursWorkedChartData.Datasets
-    //             .FirstOrDefault(d => d.Label == "Absence")?.Data ?? new List<decimal>();
-
-    //         var holidayCount = holidayData.Count(x => x > 0);
-    //         var sicknessCount = sicknessData.Count(x => x > 0);
-    //         var absenceCount = absenceData.Count(x => x > 0);
-
-    //         var data = new double[]
-    //         {
-    //         holidayCount,
-    //         sicknessCount,
-    //         absenceCount
-    //         };
-
-    //         var labels = new string[]
-    //         {
-    //         "Holiday",
-    //         "Sickness",
-    //         "Absence"
-    //         };
-
-    //         await JS.InvokeVoidAsync("renderHoursWorkedChart", data, labels);
-
-    //         _hoursChartLoaded = false;
-    //         Console.WriteLine($"Holiday: {holidayCount}");
-    //         Console.WriteLine($"Sickness: {sicknessCount}");
-    //         Console.WriteLine($"Absence: {absenceCount}");
-
-    //     }
-    // }
-
-    private List<HourData> ChartData;
     public class HourData
     {
         public DateTime Date { get; set; }
@@ -723,96 +664,37 @@
         public double Contracted { get; set; }
     }
 
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private List<HourData> ChartData
     {
-        if (_hoursChartLoaded && hoursWorkedChartData?.Datasets?.Any() == true)
+        get
         {
-            var holidayData = hoursWorkedChartData.Datasets
-                .FirstOrDefault(d => d.Label == "Holiday")?.Data ?? new List<decimal>();
-
-            var sicknessData = hoursWorkedChartData.Datasets
-                .FirstOrDefault(d => d.Label == "Sickness")?.Data ?? new List<decimal>();
-
-            var absenceData = hoursWorkedChartData.Datasets
-                .FirstOrDefault(d => d.Label == "Absence")?.Data ?? new List<decimal>();
-
-            int holidayCount = 0;
-            int sicknessCount = 0;
-            int absenceCount = 0;
-
-            for (int i = 0; i < hoursWorkedChartData.Dates.Count; i++)
+            var result = new List<HourData>();
+            if (hoursWorkedVsContractedChartData?.Dates == null || hoursWorkedVsContractedChartData?.Datasets == null || !hoursWorkedVsContractedChartData.Datasets.Any())
             {
-                if (holidayData.Count > i && holidayData[i] > 0)
-                    holidayCount++;
-
-                if (sicknessData.Count > i && sicknessData[i] > 0)
-                    sicknessCount++;
-
-                if (absenceData.Count > i && absenceData[i] > 0)
-                    absenceCount++;
+                return null!;
             }
 
-            var data = new double[]
+            var hoursWorkedData = hoursWorkedVsContractedChartData.Datasets.FirstOrDefault(d => d.Label == "Hours Worked")?.Data ?? new List<decimal>();
+            var holidayData = hoursWorkedVsContractedChartData.Datasets.FirstOrDefault(d => d.Label == "Holiday")?.Data ?? new List<decimal>();
+            var sicknessData = hoursWorkedVsContractedChartData.Datasets.FirstOrDefault(d => d.Label == "Sickness")?.Data ?? new List<decimal>();
+            var absenceData = hoursWorkedVsContractedChartData.Datasets.FirstOrDefault(d => d.Label == "Absence")?.Data ?? new List<decimal>();
+            var contractedData = hoursWorkedVsContractedChartData.Datasets.FirstOrDefault(d => d.Label == "Contracted")?.Data ?? new List<decimal>();
+
+            for (int i = 0; i < hoursWorkedVsContractedChartData.Dates.Count; i++)
             {
-            holidayCount,
-            sicknessCount,
-            absenceCount
-            };
-
-            var labels = new string[]
-            {
-            "Holiday",
-            "Sickness",
-            "Absence"
-            };
-
-            await JS.InvokeVoidAsync("renderHoursWorkedChart", data, labels);
-
-            _hoursChartLoaded = false;
+                var hourData = new HourData
+                {
+                    Date = hoursWorkedVsContractedChartData.Dates[i],
+                    HoursWorked = hoursWorkedData.Count > i ? (double)hoursWorkedData[i] : 0,
+                    Holiday = holidayData.Count > i ? (double)holidayData[i] : 0,
+                    Sickness = sicknessData.Count > i ? (double)sicknessData[i] : 0,
+                    Absence = absenceData.Count > i ? (double)absenceData[i] : 0,
+                    Contracted = contractedData.Count > i ? (double)contractedData[i] : 0
+                };
+                result.Add(hourData);
+            }
+            return result.OrderBy(r => r.Date).ToList();
         }
     }
-
-
-    // private async Task LoadChartDataAsync(int tagId, DateTime startDate, DateTime endDate, int employeeId)
-    // {
-    //    overtimeReasonsChartData  = await DashboardService.GetDashboardHoursWorkedVsContracted(tagId, startDate, endDate);
-
-    //     holidayAbsenceChartData = await DashboardService.GetDashboardAbsenceAsync(tagId, startDate, endDate);
-
-    //     StateHasChanged();
-    // }
-    
-    // private bool _chartsLoaded = false;
-
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-
-    //     if (_chartsLoaded)
-    //     {
-    //         await RenderCharts();
-    //         _chartsLoaded = false;
-    //     }
-    // }
-
-    // private async Task RenderCharts()
-    // {
-    //     if (holidayAbsenceChartData?.Datasets?.Any() == true)
-    //     {
-    //         var data = holidayAbsenceChartData.Datasets.First().Data;
-    //         var labels = holidayAbsenceChartData.Labels;
-
-    //         await JS.InvokeVoidAsync("renderHolidayAbsenceChart", data, labels);
-    //     }
-
-
-        // if (overtimeReasonsChartData?.Datasets?.Any() == true)
-        // {
-        //     var data = overtimeReasonsChartData.Datasets.First().Data;
-        //     var labels = overtimeReasonsChartData.Labels;
-
-        //     await JS.InvokeVoidAsync("renderOvertimeReasonsChart", data, labels);
-        //}
-    //}
 
 }

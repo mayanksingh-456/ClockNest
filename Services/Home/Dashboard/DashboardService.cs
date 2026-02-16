@@ -207,6 +207,29 @@ namespace ClockNest.Services.Home.Dashboard
             return null;
         }
 
+        public async Task<DashboardChartData?> GetDashboardOvertimeAsync(int tagId, DateTime? startDate, DateTime? endDate)
+        {
+            startDate ??= DateTime.Now.AddMonths(-1);
+            endDate ??= DateTime.Now;
+
+            var filterDetails = new ParameterList
+            {
+                TagId = tagId,
+                StartDate = startDate.Value,
+                EndDate = endDate.Value
+            };
+            var client = _httpClientFactory.CreateClient("ClockNestClient").AddDefaultHeader(_userContext);
+
+            var response = await client.PostAsJsonAsync("chronicle/home/dashboardtopovertimereasons/get", filterDetails);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<DashboardChartData>();
+            }
+
+            return null;
+        }
+
         public async Task<DashboardChartData?> GetDashboardHoursWorkedVsContracted(int tagId, DateTime? startDate, DateTime? endDate)
         {
             var filterDetails = new ParameterList

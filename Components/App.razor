@@ -43,6 +43,7 @@
         }
     </script>
 
+    <!--hide Modal-->
     <script>
             window.hideModal = (id) => {
             const el = document.getElementById(id);
@@ -53,7 +54,7 @@
 
     <!--Download document script-->
     <script>
-                  function downloadFile(base64, fileName, contentType) {
+            function downloadFile(base64, fileName, contentType) {
             const link = document.createElement('a');
             link.href = `data:${contentType};base64,${base64}`;
             link.download = fileName;
@@ -61,60 +62,21 @@
         }
     </script>
 
-    <!--Holiday Sick Absence Chart-->
-    @*   <script>
-                window.renderHoursWorkedChart = (data, labels) => {
-            const ctx = document.getElementById('hoursWorkedChart').getContext('2d');
-            if (window.holidaySickAbsenceChartInstance) {
-                window.holidaySickAbsenceChartInstance.destroy();
-            }
-
-            window.holidaySickAbsenceChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: ['magenta', 'yellow', 'cyan'],
-                        borderWidth: 0,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const total = data.reduce((a,b) => a + b, 0);
-                                    const label = ctx.label || '';
-                                    const value = ctx.raw || 0;
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        };
-    </script> *@
-
+    <!--Holiday Sick Absence Chart--> 
     <script>
-                window.hoursWorkedChartInstance = null;
+        window.DashboardChartInstance = null;
 
-        window.renderHoursWorkedChart = (data, labels) => {
-            const ctx = document.getElementById('hoursWorkedChart')?.getContext('2d');
-            if (!ctx) return;
+        window.renderHoursWorkedChart = (data) => {
+            const total = data.reduce((sum, val) => sum + val, 0);
+            const ctx = document.getElementById("hoursWorkedChart").getContext("2d");
 
-            if (window.hoursWorkedChartInstance) {
-                window.hoursWorkedChartInstance.destroy();
+            if (window.DashboardChartInstance) {
+                window.DashboardChartInstance.destroy();
             }
 
-            const total = data.reduce((sum, val) => sum + val, 0);
+            const labels = ["Absence", "Holiday", "Sickness"];
 
-            window.hoursWorkedChartInstance = new Chart(ctx, {
+            window.DashboardChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
@@ -126,20 +88,37 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1,
                     cutout: '70%',
                     plugins: {
-                        legend: { position: 'bottom' },
-
-                                tooltip: {
-            callbacks: {
-                label: (ctx) => {
-                    const label = ctx.label || '';
-                    const value = ctx.raw || 0;
-                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                    return `${label}: ${value} (${percentage}%)`;
-                }
-            }
-        }
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'sans-serif', 
+                                    size: 12
+                                },
+                                color: '#333',
+                                boxWidth: 20
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                title: () => [],
+                                label: (ctx) => {
+                                    const label = ctx.label || '';
+                                    const value = ctx.raw || 0;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: 5
                     }
                 }
             });
@@ -148,31 +127,56 @@
 
     <!--Daily overtime -->
     <script>
+        window.overtimeChartInstance = null;
+
         window.renderOvertimeReasonsChart = (data, labels) => {
-            const ctx = document.getElementById('overtimeReasonsChart').getContext('2d');
-            if (window.dailyOvertimeReasonsChartInstance) {
-                window.dailyOvertimeReasonsChartInstance.destroy();
+            const total = data.reduce((sum, val) => sum + val, 0);
+            const ctx = document.getElementById("overtimeReasonsChart").getContext("2d");
+
+            if (window.overtimeChartInstance) {
+                window.overtimeChartInstance.destroy();
             }
 
-            window.dailyOvertimeReasonsChartInstance = new Chart(ctx, {
+            const chartData = total === 0 ? [1] : data;
+            const chartColors = total === 0
+                ? ['#EDEEF0']
+                : ['#007BFF', 'darkgreen'];
+
+            const finalLabels = total === 0 ? ['No Data'] : (labels && labels.length ? labels : ['Label 1', 'Label 2']);
+
+            window.overtimeChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
+                    labels: finalLabels,
                     datasets: [{
-                        data: data,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-                        borderWidth: 0,
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1,
                     cutout: '70%',
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'sans-serif', 
+                                    size: 12
+                                },
+                                color: '#333',
+                                boxWidth: 20
+                            }
+                        },
                         tooltip: {
+                            enabled: total !== 0,
                             callbacks: {
+                                title: () => [],
                                 label: (ctx) => {
-                                    const total = data.reduce((a,b) => a + b, 0);
                                     const label = ctx.label || '';
                                     const value = ctx.raw || 0;
                                     const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
@@ -180,12 +184,91 @@
                                 }
                             }
                         }
+                    },
+                    layout: {
+                        padding: 5
                     }
                 }
             });
         };
-
     </script>
+
+    <!-- Wored vs contracted-->
+    <script>
+        window.hoursVsContractedInstance = null;
+
+        window.renderHoursWorkedVsContractedChart = (chartData) => {
+
+            const ctx = document.getElementById("hoursWorkedVsContractedChart").getContext("2d");
+
+            if (window.hoursVsContractedInstance) {
+                window.hoursVsContractedInstance.destroy();
+            }
+
+            const labels = chartData.map(x => {
+                const d = new Date(x.date);
+                return d.toLocaleDateString();
+            });
+
+            window.hoursVsContractedInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Hours Worked",
+                            data: chartData.map(x => x.hoursWorked),
+                            fill: true,
+                            tension: 0.4,
+                            backgroundColor: "rgba(0,100,0,0.9)",
+                            borderColor: "rgba(0,100,0,1)"
+                        },
+                        {
+                            label: "Holiday",
+                            data: chartData.map(x => x.holiday),
+                            fill: true,
+                            tension: 0.4,
+                            backgroundColor: "rgba(255,0,128,0.5)"
+                        },
+                        {
+                            label: "Sickness",
+                            data: chartData.map(x => x.sickness),
+                            fill: true,
+                            tension: 0.4,
+                            backgroundColor: "rgba(0,255,255,0.5)"
+                        },
+                        {
+                            label: "Absence",
+                            data: chartData.map(x => x.absence),
+                            fill: true,
+                            tension: 0.4,
+                            backgroundColor: "rgba(255,215,0,0.5)"
+                        },
+                        {
+                            label: "Contracted",
+                            data: chartData.map(x => x.contracted),
+                            fill: true,
+                            tension: 0.4,
+                            backgroundColor: "rgba(144,238,144,0.4)"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    }
+                }
+            });
+        };
+    </script>
+
 </body>
 
 
